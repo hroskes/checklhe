@@ -50,21 +50,10 @@ for file in sys.argv[1:]:
             except ValueError:
                 continue
 
-    nZZ4l = nZZ4e + nZZ4mu + nZZ4tau + nZZ2e2mu + nZZ2e2tau + nZZ2mu2tau
     tab = "   "
     if inevent:
         print "No </event> at end!"
-    print nevents, "events"
-    print tab, n4l, "4l events (%s%%)" % (100.0 * n4l / nevents)
-    print tab, tab, nZZ4l, "ZZ4l events (%s%%)" % (100.0 * nZZ4l / nevents)
-    print tab, tab, tab, nZZ4e, "4e events (%s%%)" % (100.0 * nZZ4e / nevents)
-    print tab, tab, tab, nZZ4mu, "4mu events (%s%%)" % (100.0 * nZZ4mu / nevents)
-    print tab, tab, tab, nZZ4tau, "4tau events (%s%%)" % (100.0 * nZZ4tau / nevents)
-    print tab, tab, tab, nZZ2e2mu, "2e2mu events (%s%%)" % (100.0 * nZZ2e2mu / nevents)
-    print tab, tab, tab, nZZ2e2tau, "2e2tau events (%s%%)" % (100.0 * nZZ2e2tau / nevents)
-    print tab, tab, tab, nZZ2mu2tau, "2mu2tau events (%s%%)" % (100.0 * nZZ2mu2tau / nevents)
-    print tab, nZZ2l2nu, "ZZ2l2nu events (%s%%)" % (100.0 * nZZ2l2nu / nevents)
-    print tab, nZZ2l2q, "ZZ2l2q events (%s%%)" % (100.0 * nZZ2l2q / nevents)
-    print tab, nZZ4q, "ZZ4q events (%s%%)" % (100.0 * nZZ4q / nevents)
-    print tab, nZZ4nu, "ZZ4nu events (%s%%)" % (100.0 * nZZ4nu / nevents)
-    print tab, nZZ2q2nu, "ZZ2q2nu events (%s%%)" % (100.0 * nZZ2q2nu / nevents)
+    print globalvariables.nevents, "events"
+    print tab, globalvariables.n4l, "4l events (%s%%)" % (100.0 * globalvariables.n4l / globalvariables.nevents)
+    for family in globalvariables.decayfamilies:
+        print family.printcount()

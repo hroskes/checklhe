@@ -116,7 +116,7 @@ class DecayType(ParticleCounter):
         super(DecayType, self).__init__(decayparticles)
         
 class DecayFamily(set):
-    def __init__(self, decaytypes, charge = None, baryonnumber = None, leptonnumber = (None, None, None)):
+    def __init__(self, decaytypes, charge = None, baryonnumber = None, leptonnumber = (None, None, None), name = "", subcategories = None):
         finallist = []
         secondarylist = []
 
@@ -135,7 +135,21 @@ class DecayFamily(set):
 
         super(DecayFamily, self).__init__(finallist)
 
+        self.name = name
+        self.subcategories = []
+        if subcategories is not None:
+            self.subcategories = subcategories
+
     def __contains__(self, other):
         return super(DecayFamily, self).__contains__(ParticleCounter(other))
     def __hash__(self):
         return hash(tuple(d for d in self))
+
+    def printcount(self):
+        count = globalvariables.decaycounter[self]
+        total = globalvariables.nevents
+        result = "    %s %s events (%s%%)" % (count, self.name, 100.0*count/total)
+        for subcategory in self.subcategories:
+            for line in subcategory.printcount().split("\n"):
+                result += "\n    " + line
+        return result
