@@ -109,7 +109,13 @@ class ParticleCounter(Counter):
         except TypeError:
             super(ParticleCounter, self).__init__([particletype.ParticleType(particles)])     #if particles is a single particle
     def count(self, whattocount):
-        return len([p for p in self if p in whattocount])
+        return len([p for p in self.elements() if p in whattocount])
+    def charge(self):
+        return sum([p.charge() for p in self.elements()])
+    def baryonnumber(self):
+        return sum([p.baryonnumber() for p in self.elements()])
+    def leptonnumber(self, generation):
+        return sum([p.leptonnumber(generation) for p in self.elements()])
 
 class DecayType(ParticleCounter):
     def __init__(self, particle):
@@ -125,14 +131,23 @@ class DecayType(ParticleCounter):
         super(DecayType, self).__init__(decayparticles)
         
 class DecayFamily(list):
-    def __init__(self, decaytypes):
+    def __init__(self, decaytypes, charge = None, baryonnumber = None, leptonnumber = (None, None, None)):
         l = []
         try:
             for d in decaytypes:
-                l.append(ParticleCounter(d))
+                d = ParticleCounter(d)
+                if charge is None or charge == d.charge():
+                    if baryonnumber is None or d.baryonnumber() == baryonnumber:
+                        if all(leptonnumber[i] is None or d.leptonnumber(i+1) == leptonnumber[i] for i in range(3)):
+                            l.append(d)
         except TypeError:
             for d in decaytypes:
-                l += [ParticleCounter(tple) for tple in itertools.product(*[particlecategory.ParticleCategory(p) for p in d])]
+                for tple in itertools.product(*[particlecategory.ParticleCategory(p) for p in d]):
+                    c = ParticleCounter(tple)
+                    if charge is None or charge == c.charge():
+                        if baryonnumber is None or c.baryonnumber() == baryonnumber:
+                            if all(leptonnumber[i] is None or c.leptonnumber(i+1) == leptonnumber[i] for i in range(3)):
+                                l.append(c)
         super(DecayFamily, self).__init__([d for d in l])
 
     def __contains__(self, other):

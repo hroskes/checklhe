@@ -48,8 +48,8 @@ class ParticleType:
         return ParticleType(-self.id())
 
     def charge(self):
-        if id < 0:
-            return -charge(-id)
+        if self.id() < 0:
+            return -(-self).charge()
         if self in globalvariables.downtypequarks:
             return Fraction(-1, 3)
         if self in globalvariables.uptypequarks:
@@ -63,6 +63,21 @@ class ParticleType:
         if self in globalvariables.W:
             return 1
         raise ValueError("Invalid particle id " + str(self.id()))
+
+    def baryonnumber(self):
+        if self.id() < 0:
+            return -(-self).baryonnumber()
+        if self in globalvariables.quarks:
+            return Fraction(1,3)
+        return 0
+    def leptonnumber(self, generation):
+        if self.id() < 0:
+            return -(-self).leptonnumber(generation)
+        if (generation == 1 and self.id() in [11, 12]
+         or generation == 2 and self.id() in [13, 14]
+         or generation == 3 and self.id() in [15, 16]):
+            return 1
+        return 0
 
     def __hash__(self):
         return self.id()

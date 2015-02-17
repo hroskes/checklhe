@@ -54,10 +54,10 @@ def init():
         decay2e2tau = particle.DecayFamily([[11, 15, -11, -15]])
         decay2mu2tau = particle.DecayFamily([[13, 15, -13, -15]])
         decay4l = decay4e + decay4mu + decay4tau + decay2e2mu + decay2e2tau + decay2mu2tau
-        decay2l2q = particle.DecayFamily([[quarks, quarks, leptons, leptons]])
-        decay2l2nu = particle.DecayFamily([[neutrinos, neutrinos, leptons, leptons]])
-        decay2q2nu = particle.DecayFamily([[quarks, quarks, neutrinos, neutrinos]])
-        decay4q = particle.DecayFamily([[quarks, quarks, quarks, quarks]])
-        decay4nu = particle.DecayFamily([[neutrinos, neutrinos, neutrinos, neutrinos]])
+        decay2l2q = particle.DecayFamily([[quarks, quarks, leptons, leptons]], charge = 0, leptonnumber = (0, 0, 0), baryonnumber = 0)
+        decay2l2nu = particle.DecayFamily([[neutrinos, neutrinos, leptons, leptons]], charge = 0, leptonnumber = (0, 0, 0), baryonnumber = 0)
+        decay2q2nu = particle.DecayFamily([[quarks, quarks, neutrinos, neutrinos]], charge = 0, leptonnumber = (0, 0, 0), baryonnumber = 0)
+        decay4q = particle.DecayFamily([[quarks, quarks, quarks, quarks]], charge = 0, leptonnumber = (0, 0, 0), baryonnumber = 0)
+        decay4nu = particle.DecayFamily([[neutrinos, neutrinos, neutrinos, neutrinos]], charge = 0, leptonnumber = (0, 0, 0), baryonnumber = 0)
 
         finishedinit = True
