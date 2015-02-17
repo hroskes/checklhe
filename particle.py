@@ -96,6 +96,8 @@ class ParticleCounter(Counter):
         return sum([p.leptonnumber(generation) for p in self.elements()])
     def __hash__(self):
         return hash(tuple(sorted(hash(p) for p in self.elements())))
+    def __str__(self):
+        return " ".join(str(p) for p in self.elements())
 
 class DecayType(ParticleCounter):
     def __init__(self, particle):

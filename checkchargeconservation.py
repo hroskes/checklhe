@@ -36,7 +36,7 @@ for file in sys.argv[1:]:
                 if not inevent:
                     print "Extra </event>!", linenumber
                 ev = event.Event(particle.particlelist, linenumber)
-                if ev.check() != "":
+                if ev.check():
                     raise IOError(ev.check())
 
                 inevent = False

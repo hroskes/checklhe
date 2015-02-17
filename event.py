@@ -14,11 +14,14 @@ class Event:
         if self.count(globalvariables.leptons) >= 4:
             globalvariables.n4l += 1
 
+        self.checkfunctions = [self.checkmass, self.checkmomentum, self.checkcharge, self.checkhiggsdecay]
+
     def count(self, whattocount):
         return self.particlecounter.count(whattocount)
 
     def check(self):
-        return "\n".join([self.checkmass(), self.checkmomentum(), self.checkcharge(), self.checkhiggsdecay()])
+        checks = [chk() for chk in self.checkfunctions]
+        return "\n".join([chk for chk in checks if chk])
         
     def checkmass(self):
         result = ""
@@ -41,15 +44,15 @@ class Event:
         return result
 
     def checkcharge(self):
-        result = ""
+        results = []
         for p in self.decaylist:
             momcharge = p.charge()
             kidscharge = sum([kid.charge() for kid in p.kids()])
             if momcharge != kidscharge:
-                result += ("no charge conservation! " + str(self.linenumber) + "\n" +
-                           "mom charge  = " + str(momcharge) + "("  + str(p) + ")\n" +
-                           "kids charge = " + str(kidscharge) + "(" + ", ".join([str(kid) for kid in p.kids()]) + ")")
-        return result
+                results.append("no charge conservation! " + str(self.linenumber) + "\n" +
+                               "mom charge  = " + str(momcharge) + "("  + str(p) + ")\n" +
+                               "kids charge = " + str(kidscharge) + "(" + ", ".join([str(kid) for kid in p.kids()]) + ")")
+        return "\n".join(results)
 
     def higgsdecaytype(self):
         decaylist = []
