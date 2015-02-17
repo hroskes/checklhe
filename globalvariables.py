@@ -40,9 +40,7 @@ particlemass = {1: 0,
                 24: 80.385,
                 25: None}     #Overwritten from the LHE header
 
-decaycounter = collections.Counter()
-nevents = 0
-n4l = 0
+eventcounter = collections.Counter()
 
 electrons = None
 muons = None
@@ -70,6 +68,8 @@ decay4q = None
 
 decayfamilies4l = None
 decayfamilies = None
+any4l = None
+anyevent = None
 
 startedinit = False
 finishedinit = False
@@ -77,6 +77,7 @@ finishedinit = False
 def init():
     global electrons, muons, taus, leptons, neutrinos, uptypequarks, downtypequarks, quarks, neutralbosons, W
     global decay4e, decay2e2mu, decay4mu, decay2e2tau, decay2mu2tau, decay4tau, decay4l, decay2l2nu, decay2l2q, decay4nu, decay2q2nu, decay4q
+    global any4l, anyevent
     global decayfamilies4l, decayfamilies
     global startedinit, finishedinit
 
@@ -112,5 +113,8 @@ def init():
         decay4nu = particle.DecayFamily([[neutrinos, neutrinos, neutrinos, neutrinos]], charge = 0, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "ZZ4nu")
 
         decayfamilies = [decay4l, decay2l2q, decay2l2nu, decay4q, decay4nu, decay2q2nu]
+
+        any4l = particle.EventCount("4l", [decay4l])
+        anyevent = particle.EventCount("total", [any4l, decay2l2q, decay2l2nu, decay2q2nu, decay4q, decay4nu])
 
         finishedinit = True

@@ -114,8 +114,27 @@ class DecayType(ParticleCounter):
                     decayparticles.remove(p)
                     decayparticles += p.kids()
         super(DecayType, self).__init__(decayparticles)
-        
-class DecayFamily(set):
+
+class EventCount(object):
+    def __init__(self, name = "", subcategories = None):
+        self.name = name
+        self.subcategories = []
+        if subcategories is not None:
+            self.subcategories = subcategories
+
+    def __hash__(self):
+        return hash(self.name)
+
+    def printcount(self):
+        count = globalvariables.eventcounter[self]
+        total = globalvariables.eventcounter[globalvariables.anyevent]
+        result = "%s %s events (%s%%)" % (count, self.name, 100.0*count/total)
+        for subcategory in self.subcategories:
+            for line in subcategory.printcount().split("\n"):
+                result += "\n    " + line
+        return result
+
+class DecayFamily(EventCount, set):
     def __init__(self, decaytypes, charge = None, baryonnumber = None, leptonnumber = (None, None, None), name = "", subcategories = None):
         finallist = []
         secondarylist = []
@@ -133,23 +152,11 @@ class DecayFamily(set):
                     if all(leptonnumber[i] is None or d.leptonnumber(i+1) == leptonnumber[i] for i in range(3)):
                         finallist.append(d)
 
-        super(DecayFamily, self).__init__(finallist)
-
-        self.name = name
-        self.subcategories = []
-        if subcategories is not None:
-            self.subcategories = subcategories
+        set.__init__(self, finallist)
+        EventCount.__init__(self, name, subcategories)
 
     def __contains__(self, other):
         return super(DecayFamily, self).__contains__(ParticleCounter(other))
     def __hash__(self):
         return hash(tuple(d for d in self))
 
-    def printcount(self):
-        count = globalvariables.decaycounter[self]
-        total = globalvariables.nevents
-        result = "    %s %s events (%s%%)" % (count, self.name, 100.0*count/total)
-        for subcategory in self.subcategories:
-            for line in subcategory.printcount().split("\n"):
-                result += "\n    " + line
-        return result

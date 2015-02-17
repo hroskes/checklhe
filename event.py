@@ -11,9 +11,9 @@ class Event:
         self.linenumber = linenumber
         self.decaylist = [p for p in self.particlelist if p.status() == 2]
 
-        globalvariables.nevents += 1
+        globalvariables.eventcounter[globalvariables.anyevent] += 1
         if config.count4levents and self.count(globalvariables.leptons) >= 4:
-            globalvariables.n4l += 1
+            globalvariables.eventcounter[globalvariables.any4l] += 1
 
         self.checkfunctions = [self.checkmass, self.checkmomentum, self.checkcharge, self.checkhiggsdecay]
 
@@ -79,10 +79,10 @@ class Event:
         higgsdecay = self.higgsdecaytype()
         for family in globalvariables.decayfamilies4l:
             if higgsdecay in family:
-                globalvariables.decaycounter[family] += 1
+                globalvariables.eventcounter[family] += 1
         for family in globalvariables.decayfamilies:
             if higgsdecay in family:
-                globalvariables.decaycounter[family] += 1
+                globalvariables.eventcounter[family] += 1
                 return ""
         return ("unknown decay type! " + str(self.linenumber) + "\n" +
                 "H -> " + str(higgsdecay))

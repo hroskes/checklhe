@@ -13,9 +13,7 @@ for file in sys.argv[1:]:
     with open(file) as f:
         inevent = False
         linenumber = 0
-        globalvariables.nevents = 0
-        globalvariables.n4l = 0
-        globalvariables.decaycounter = collections.Counter()
+        globalvariables.eventcounter = collections.Counter()
         globalvariables.foundhiggsmass = False
         for line in f:
             linenumber += 1
@@ -53,7 +51,4 @@ for file in sys.argv[1:]:
     tab = "   "
     if inevent:
         print "No </event> at end!"
-    print globalvariables.nevents, "events"
-    print tab, globalvariables.n4l, "4l events (%s%%)" % (100.0 * globalvariables.n4l / globalvariables.nevents)
-    for family in globalvariables.decayfamilies:
-        print family.printcount()
+    print globalvariables.anyevent.printcount()
