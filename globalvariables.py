@@ -53,7 +53,7 @@ def init():
         decay2e2mu = particle.DecayFamily([[11, 13, -11, -13]])
         decay2e2tau = particle.DecayFamily([[11, 15, -11, -15]])
         decay2mu2tau = particle.DecayFamily([[13, 15, -13, -15]])
-        decay4l = decay4e + decay4mu + decay4tau + decay2e2mu + decay2e2tau + decay2mu2tau
+        decay4l = decay4e.union(decay4mu).union(decay4tau).union(decay2e2mu).union(decay2e2tau).union(decay2mu2tau)
         decay2l2q = particle.DecayFamily([[quarks, quarks, leptons, leptons]], charge = 0, leptonnumber = (0, 0, 0), baryonnumber = 0)
         decay2l2nu = particle.DecayFamily([[neutrinos, neutrinos, leptons, leptons]], charge = 0, leptonnumber = (0, 0, 0), baryonnumber = 0)
         decay2q2nu = particle.DecayFamily([[quarks, quarks, neutrinos, neutrinos]], charge = 0, leptonnumber = (0, 0, 0), baryonnumber = 0)

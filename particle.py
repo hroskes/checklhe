@@ -116,6 +116,8 @@ class ParticleCounter(Counter):
         return sum([p.baryonnumber() for p in self.elements()])
     def leptonnumber(self, generation):
         return sum([p.leptonnumber(generation) for p in self.elements()])
+    def __hash__(self):
+        return hash(tuple(sorted(hash(p) for p in self.elements())))
 
 class DecayType(ParticleCounter):
     def __init__(self, particle):
@@ -130,7 +132,7 @@ class DecayType(ParticleCounter):
                     decayparticles += p.kids()
         super(DecayType, self).__init__(decayparticles)
         
-class DecayFamily(list):
+class DecayFamily(set):
     def __init__(self, decaytypes, charge = None, baryonnumber = None, leptonnumber = (None, None, None)):
         l = []
         try:
