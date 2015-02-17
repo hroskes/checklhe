@@ -1,6 +1,6 @@
 from fractions import Fraction
 
-class ParticleType:
+class ParticleType(object):
     def __init__(self, particleorid):
         self.__id = int(particleorid)
         if id < 0 and self in globalvariables.neutralbosons:
@@ -9,23 +9,6 @@ class ParticleType:
     def id(self):
         return self.__id
     def __str__(self):
-        particlename = {1: "d",
-                        2: "u",
-                        3: "s",
-                        4: "c",
-                        5: "b",
-                        6: "t",
-                        11: "e-",
-                        12: "nue",
-                        13: "mu-",
-                        14: "numu",
-                        15: "tau-",
-                        16: "nutau",
-                        21: "g",
-                        22: "gamma",
-                        23: "Z",
-                        24: "W+",
-                        25: "H"}
         if self.id() < 0:
             result = str(-self)
             if "-" in result:
@@ -40,7 +23,7 @@ class ParticleType:
                 raise ValueError("Invalid particle id! " + str(self.id()))
             return result
         try:
-            return particlename[self.id()]
+            return globalvariables.particlename[self.id()]
         except KeyError:
             raise ValueError("Invalid particle id! " + str(self.id()))
 
@@ -62,7 +45,12 @@ class ParticleType:
             return 0
         if self in globalvariables.W:
             return 1
-        raise ValueError("Invalid particle id " + str(self.id()))
+        raise ValueError("Invalid particle id: " + str(self.id()))
+
+    def physicalmass(self):
+        if self.id() < 0:
+            return (-self).physicalmass()
+        return globalvariables.particlemass[self.id()]
 
     def baryonnumber(self):
         if self.id() < 0:

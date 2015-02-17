@@ -12,13 +12,12 @@ def newevent():
     del particlelist[:]
     particlelist.append(None)
 
-class Particle:
+class Particle(particletype.ParticleType):
     def __init__(self, line):
         data = line.split()
         if len(data) < 13:
             raise ValueError("This line is not a valid particle line.  Not enough entries.")
-        self.__id = int(data[0])
-        self.__charge = charge[self.__id]
+        super(Particle, self).__init__(int(data[0]))
         self.__status = int(data[1])
         self.__momentum = Momentum(float(data[6]), float(data[7]), float(data[8]), float(data[9]))
         self.__lhemass = float(data[10])
@@ -29,44 +28,23 @@ class Particle:
             if particle in self.mothers():
                 particle.kids().append(self)
 
-    def __str__(self):
-       return particlename[self.__id]
+    def __eq__(self, other):
+       return self is other
 
-    def id(self):
-        return self.__id
-    def charge(self):
-        return self.__charge
     def status(self):
         return self.__status
     def mothers(self):
         return self.__mothers
     def kids(self):
         return self.__kids
-    def islepton(self):
-        return self.id() in leptons
-    def ise(self):
-        return self.id() in electrons
-    def ismu(self):
-        return self.id() in muons
-    def istau(self):
-        return self.id() in taus
-    def isquark(self):
-        return self.id() in quarks
-    def isneutrino(self):
-        return self.id() in neutrinos
-    def isZ(self):
-        return self.id() == 23
-    def isH(self):
-        return self.id() == 25
     def momentum(self):
         return self.__momentum
     def invmass(self):
         return self.__momentum.m()
+    def usemass(self):
+        return self.invmass()
     def lhemass(self):
         return self.__lhemass
-
-momentumtolerance = 1e-4
-masstolerance = 5e-2
 
 class Momentum:
     def __init__(self, px, py, pz, E):
@@ -95,7 +73,7 @@ class Momentum:
     def euclideanabs(self):
         return (self.px()**2 + self.py()**2 + self.pz()**2 + self.E()**2) ** 0.5
     def __eq__(self, other):
-        return (self-other).euclideanabs() < momentumtolerance
+        return (self-other).euclideanabs() < globalvariables.momentumtolerance
     def __ne__(self, other):
         return not (self == other)
 
@@ -105,7 +83,7 @@ class Momentum:
 class ParticleCounter(Counter):
     def __init__(self, particles):
         try:
-            super(ParticleCounter, self).__init__([particletype.ParticleType(p) for p in particles])
+            super(ParticleCounter, self).__init__([particletype.ParticleType(p) for p in particles if p is not None])
         except TypeError:
             super(ParticleCounter, self).__init__([particletype.ParticleType(particles)])     #if particles is a single particle
     def count(self, whattocount):
@@ -150,7 +128,9 @@ class DecayFamily(set):
                         if baryonnumber is None or c.baryonnumber() == baryonnumber:
                             if all(leptonnumber[i] is None or c.leptonnumber(i+1) == leptonnumber[i] for i in range(3)):
                                 l.append(c)
-        super(DecayFamily, self).__init__([d for d in l])
+        super(DecayFamily, self).__init__(l)
 
     def __contains__(self, other):
         return super(DecayFamily, self).__contains__(ParticleCounter(other))
+    def __hash__(self):
+        return hash(tuple(d for d in self))

@@ -1,27 +1,29 @@
 import particle
+import event
+import globalvariables
 import config
 import sys
+import collections
+import re
+
+globalvariables.init()
 
 for file in sys.argv[1:]:
     print file
     with open(file) as f:
         inevent = False
         linenumber = 0
-        n4l  = 0
-        nZZ4e = 0
-        nZZ4mu = 0
-        nZZ4tau = 0
-        nZZ2e2mu = 0
-        nZZ2e2tau = 0
-        nZZ2mu2tau = 0
-        nZZ2l2nu  = 0
-        nZZ2q2nu = 0
-        nZZ2l2q = 0
-        nZZ4nu = 0
-        nZZ4q = 0
-        nevents = 0
+        globalvariables.nevents = 0
+        globalvariables.n4l = 0
+        globalvariables.decaycounter = collections.Counter()
+        globalvariables.foundhiggsmass = False
         for line in f:
             linenumber += 1
+            if not inevent and globalvariables.particlemass[25] is None:
+                match = re.search(r"Resonance.*mass *=([ 1234567890.]*)", line)
+                if match:
+                    globalvariables.particlemass[25] = float(match.group(1))
+                    print "Read higgs mass from file: %s GeV" % globalvariables.particlemass[25]
             if "<event>" in line:
                 if inevent:
                     print "Extra <event>!", linenumber
@@ -29,59 +31,13 @@ for file in sys.argv[1:]:
                 particle.newevent()
                 counter = -1
                 nleptons = 0
-                nevents += 1
                 continue
             if "</event>" in line:
                 if not inevent:
                     print "Extra </event>!", linenumber
-                for p in particle.particlelist:
-                    if p is None:
-                        continue
-
-                if config.count4levents and len([p for p in particle.particlelist if p is not None and p.islepton()]) >= 4:
-                    n4l += 1
-                if config.countZZdecaytype and particle.higgs is not None:
-                    Zs = particle.higgs.kids()
-                    if all([Z.isZ() for Z in Zs]) and len(Zs) == 2:
-                        n2e = 0
-                        n2mu = 0
-                        n2tau = 0
-                        n2nu = 0
-                        n2q = 0
-                        for Z in Zs:
-                            if all(p.ise() for p in Z.kids()):
-                                n2e += 1
-                            if all(p.ismu() for p in Z.kids()):
-                                n2mu += 1
-                            if all(p.istau() for p in Z.kids()):
-                                n2tau += 1
-                            if all(p.isneutrino() for p in Z.kids()):
-                                n2nu += 1
-                            if all(p.isquark() for p in Z.kids()):
-                                n2q += 1
-                        n2l = n2e + n2mu + n2tau
-                        if n2e == 2:
-                            nZZ4e += 1
-                        if n2mu == 2:
-                            nZZ4mu += 1
-                        if n2tau == 2:
-                            nZZ4tau += 1
-                        if n2e == 1 and n2mu == 1:
-                            nZZ2e2mu += 1
-                        if n2e == 1 and n2tau == 1:
-                            nZZ2e2tau += 1
-                        if n2mu == 1 and n2tau == 1:
-                            nZZ2mu2tau += 1
-                        if n2l == 1 and n2q == 1:
-                            nZZ2l2q += 1
-                        if n2l == 1 and n2nu == 1:
-                            nZZ2l2nu += 1
-                        if n2q == 2:
-                            nZZ4q += 1
-                        if n2nu == 2:
-                            nZZ4nu += 1
-                        if n2q == 1 and n2nu == 1:
-                            nZZ2q2nu += 1
+                ev = event.Event(particle.particlelist, linenumber)
+                if ev.check() != "":
+                    raise IOError(ev.check())
 
                 inevent = False
                 continue

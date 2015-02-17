@@ -14,7 +14,8 @@ class ParticleCategory(set):
             if super(ParticleCategory, self).__contains__(particle):
                 return True
         except TypeError:
-            try:
-                return super(ParticleCategory, self).__contains__(particletype.ParticleType(particle))
-            except ValueError:
-                return False
+            pass
+        try:
+            return super(ParticleCategory, self).__contains__(particletype.ParticleType(particle))
+        except ValueError:
+            return False
