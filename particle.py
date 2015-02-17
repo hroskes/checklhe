@@ -117,23 +117,23 @@ class DecayType(ParticleCounter):
         
 class DecayFamily(set):
     def __init__(self, decaytypes, charge = None, baryonnumber = None, leptonnumber = (None, None, None)):
-        l = []
-        try:
-            for d in decaytypes:
-                d = ParticleCounter(d)
-                if charge is None or charge == d.charge():
-                    if baryonnumber is None or d.baryonnumber() == baryonnumber:
-                        if all(leptonnumber[i] is None or d.leptonnumber(i+1) == leptonnumber[i] for i in range(3)):
-                            l.append(d)
-        except TypeError:
-            for d in decaytypes:
+        finallist = []
+        secondarylist = []
+
+        for d in decaytypes:
+            try:
+                secondarylist.append(ParticleCounter(d))
+            except TypeError:
                 for tple in itertools.product(*[particlecategory.ParticleCategory(p) for p in d]):
-                    c = ParticleCounter(tple)
-                    if charge is None or charge == c.charge():
-                        if baryonnumber is None or c.baryonnumber() == baryonnumber:
-                            if all(leptonnumber[i] is None or c.leptonnumber(i+1) == leptonnumber[i] for i in range(3)):
-                                l.append(c)
-        super(DecayFamily, self).__init__(l)
+                    secondarylist.append(ParticleCounter(tple))
+
+        for d in secondarylist:
+            if charge is None or charge == d.charge():
+                if baryonnumber is None or d.baryonnumber() == baryonnumber:
+                    if all(leptonnumber[i] is None or d.leptonnumber(i+1) == leptonnumber[i] for i in range(3)):
+                        finallist.append(d)
+
+        super(DecayFamily, self).__init__(finallist)
 
     def __contains__(self, other):
         return super(DecayFamily, self).__contains__(ParticleCounter(other))
