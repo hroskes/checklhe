@@ -82,10 +82,13 @@ class Momentum:
 
 class ParticleCounter(Counter):
     def __init__(self, particles):
-        try:
-            super(ParticleCounter, self).__init__([particletype.ParticleType(p) for p in particles if p is not None])
-        except TypeError:
-            super(ParticleCounter, self).__init__([particletype.ParticleType(particles)])     #if particles is a single particle
+        try:                    #if particles is another ParticleCounter
+            super(ParticleCounter, self).__init__([particletype.ParticleType(p) for p in particles.elements() if p is not None])
+        except AttributeError:
+            try:                #if it's a list
+                super(ParticleCounter, self).__init__([particletype.ParticleType(p) for p in particles if p is not None])
+            except TypeError:   #if it's a single particle
+                super(ParticleCounter, self).__init__([particletype.ParticleType(particles)])
     def count(self, whattocount):
         return len([p for p in self.elements() if p in whattocount])
     def charge(self):

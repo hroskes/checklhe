@@ -24,24 +24,24 @@ class Event:
         return "\n".join([chk for chk in checks if chk])
         
     def checkmass(self):
-        result = ""
+        results = []
         for p in self.particlelist:
             if abs(p.usemass() - p.lhemass()) >= globalvariables.masstolerance:
-                result += ("Mass is wrong! " + str(self.self.linenumber) + "(" + str(p) + ")\n" +
-                           "invariant mass = " + str(p.usemass()) + "\n" +
-                           "lhe mass       = " + str(p.lhemass()))
-        return result
+                results.append("Mass is wrong! " + str(self.self.linenumber) + "(" + str(p) + ")\n" +
+                               "invariant mass = " + str(p.usemass()) + "\n" +
+                               "lhe mass       = " + str(p.lhemass()))
+        return "\n".join(results)
 
     def checkmomentum(self):
-        result = ""
+        results = []
         for p in self.decaylist:
             mommomentum = p.momentum()
             kidsmomentum = sum([kid.momentum() for kid in p.kids()], particle.Momentum(0, 0, 0, 0))
             if mommomentum != kidsmomentum:
-                result += ("no momentum conservation! " + str(self.linenumber) + "\n" +
-                           "mom momentum  = " + str(mommomentum) + "("  + str(p) + ")\n" +
-                           "kids momentum = " + str(kidsmomentum) + "(" + ", ".join([str(kid) for kid in p.kids()]) + ")")
-        return result
+                results.append("no momentum conservation! " + str(self.linenumber) + "\n" +
+                               "mom momentum  = " + str(mommomentum) + "("  + str(p) + ")\n" +
+                               "kids momentum = " + str(kidsmomentum) + "(" + ", ".join([str(kid) for kid in p.kids()]) + ")")
+        return "\n".join(results)
 
     def checkcharge(self):
         results = []
@@ -77,4 +77,3 @@ class Event:
                 return ""
         return ("unknown decay type! " + str(self.linenumber) + "\n" +
                 "H -> " + str(higgsdecay))
-
