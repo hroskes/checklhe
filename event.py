@@ -30,7 +30,7 @@ class Event:
         results = []
         for p in self.particlelist:
             if abs(p.usemass() - p.lhemass()) >= globalvariables.masstolerance:
-                results.append("Mass is wrong! " + str(self.self.linenumber) + "(" + str(p) + ")\n" +
+                results.append("Mass is wrong! " + str(self.linenumber) + "(" + str(p) + ")\n" +
                                "invariant mass = " + str(p.usemass()) + "\n" +
                                "lhe mass       = " + str(p.lhemass()))
         return "\n".join(results)
