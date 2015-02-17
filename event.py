@@ -2,6 +2,7 @@ import particle
 import particletype
 import particlecategory
 import globalvariables
+import config
 
 class Event:
     def __init__(self, particlelist, linenumber):
@@ -11,7 +12,7 @@ class Event:
         self.decaylist = [p for p in self.particlelist if p.status() == 2]
 
         globalvariables.nevents += 1
-        if self.count(globalvariables.leptons) >= 4:
+        if config.count4levents and self.count(globalvariables.leptons) >= 4:
             globalvariables.n4l += 1
 
         self.checkfunctions = [self.checkmass, self.checkmomentum, self.checkcharge, self.checkhiggsdecay]
@@ -24,6 +25,8 @@ class Event:
         return "\n".join([chk for chk in checks if chk])
         
     def checkmass(self):
+        if not config.checkmass:
+            return ""
         results = []
         for p in self.particlelist:
             if abs(p.usemass() - p.lhemass()) >= globalvariables.masstolerance:
@@ -33,6 +36,8 @@ class Event:
         return "\n".join(results)
 
     def checkmomentum(self):
+        if not config.checkmomentum:
+            return ""
         results = []
         for p in self.decaylist:
             mommomentum = p.momentum()
@@ -44,6 +49,8 @@ class Event:
         return "\n".join(results)
 
     def checkcharge(self):
+        if not config.checkcharge:
+            return ""
         results = []
         for p in self.decaylist:
             momcharge = p.charge()
@@ -67,6 +74,8 @@ class Event:
         return particle.DecayType(higgs)
 
     def checkhiggsdecay(self):
+        if not config.countZZdecaytype:
+            return ""
         higgsdecay = self.higgsdecaytype()
         for family in globalvariables.decayfamilies4l:
             if higgsdecay in family:
