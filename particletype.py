@@ -2,7 +2,6 @@ from fractions import Fraction
 
 class ParticleType:
     def __init__(self, particleorid):
-        globalvariables.init()
         self.__id = int(particleorid)
         if id < 0 and self in globalvariables.neutralbosons:
             self.__id = -self.__id
@@ -71,5 +70,7 @@ class ParticleType:
         return self.id() == other.id()
     def __ne__(self, other):
         return not self == other
+    def __int__(self):
+        return self.id()
 
 import globalvariables

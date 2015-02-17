@@ -1,16 +1,13 @@
 import particletype
 
-class ParticleCategory(frozenset):
+class ParticleCategory(set):
     def __init__(self, lst):
-        newlst = []
+        newlist = []        
         for p in lst:
             type = particletype.ParticleType(p)
-            newlst.append(particletype.ParticleType(p))
-            newlst.append(-type)
-        print len(newlst)
-        print len(frozenset(newlst))
-        super(ParticleCategory, self).__init__(newlst)
-        print len(self)
+            newlist.append(particletype.ParticleType(p))
+            newlist.append(-type)
+        super(ParticleCategory, self).__init__(newlist)
 
     def __contains__(self, particle):
         try:

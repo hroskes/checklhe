@@ -3,6 +3,7 @@ from math import copysign
 from collections import Counter
 import itertools
 import particletype
+import particlecategory
 import globalvariables
 
 particlelist = []
@@ -13,7 +14,6 @@ def newevent():
 
 class Particle:
     def __init__(self, line):
-        globalvariables.init()
         data = line.split()
         if len(data) < 13:
             raise ValueError("This line is not a valid particle line.  Not enough entries.")
@@ -126,13 +126,14 @@ class DecayType(ParticleCounter):
         
 class DecayFamily(list):
     def __init__(self, decaytypes):
-        globalvariables.init()
         l = []
-        for d in decaytypes:
-            try:
+        try:
+            for d in decaytypes:
                 l.append(ParticleCounter(d))
-            except ValueError:
-                l += itertools.product([ParticleCategory(p) for p in d])
-        super(DecayFamily, self).__init__([ParticleCounter(d) for d in decaytypes])
+        except TypeError:
+            for d in decaytypes:
+                l += [ParticleCounter(tple) for tple in itertools.product(*[particlecategory.ParticleCategory(p) for p in d])]
+        super(DecayFamily, self).__init__([d for d in l])
+
     def __contains__(self, other):
         return super(DecayFamily, self).__contains__(ParticleCounter(other))
