@@ -42,35 +42,6 @@ particlemass = {1: 0,
 
 eventcounter = collections.Counter()
 
-electrons = None
-muons = None
-taus = None
-leptons = None
-neutrinos = None
-uptypequarks = None
-downtypequarks = None
-quarks = None
-neutralbosons = None
-W = None
-
-decay4e = None
-decay2e2mu = None
-decay4mu = None
-decay2e2tau = None
-decay2mu2tau = None
-decay4tau = None
-decay4l = None
-decay2l2nu = None
-decay2l2q = None
-decay4nu = None
-decay2q2nu = None
-decay4q = None
-
-decayfamilies4l = None
-decayfamilies = None
-any4l = None
-anyevent = None
-
 startedinit = False
 finishedinit = False
 
