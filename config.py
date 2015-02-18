@@ -1,5 +1,5 @@
 checkmass = True
-checkmomentum = False
+checkmomentum = True
 checkcharge = True
 countZZdecaytype = True
 count4levents = True

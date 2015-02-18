@@ -3,7 +3,7 @@ import particle
 import collections
 
 momentumtolerance = 1e-4
-masstolerance = 5e-2
+masstolerance = 7e-2
 
 particlename = {1: "d",
                 2: "u",
