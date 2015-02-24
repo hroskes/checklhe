@@ -47,7 +47,7 @@ finishedinit = False
 
 def init():
     global electrons, muons, taus, leptons, neutrinos, uptypequarks, downtypequarks, quarks, neutralbosons, W
-    global decay4e, decay2e2mu, decay4mu, decay2e2tau, decay2mu2tau, decay4tau, decay4l, decay2l2nu, decay2l2q, decay4nu, decay2q2nu, decay4q
+    global decay4e, decay2e2mu, decay4mu, decay2e2tau, decay2mu2tau, decay4tau, decay4l, decay2l2nu, decay2l2q, decay4nu, decay2q2nu, decay4q, decaylnu2q
     global any4l, anyevent
     global decayfamilies4l, decayfamilies
     global startedinit, finishedinit
@@ -78,14 +78,15 @@ def init():
         decay4l = particle.DecayFamily([[leptons, leptons, leptons, leptons]], charge = 0, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "ZZ4l",
                                        subcategories = decayfamilies4l)
         decay2l2q = particle.DecayFamily([[quarks, quarks, leptons, leptons]], charge = 0, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "ZZ2l2q")
-        decay2l2nu = particle.DecayFamily([[neutrinos, neutrinos, leptons, leptons]], charge = 0, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "ZZ2l2nu")
+        decay2l2nu = particle.DecayFamily([[neutrinos, neutrinos, leptons, leptons]], charge = 0, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "ZZ(WW)2l2nu")
         decay2q2nu = particle.DecayFamily([[quarks, quarks, neutrinos, neutrinos]], charge = 0, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "ZZ2q2nu")
-        decay4q = particle.DecayFamily([[quarks, quarks, quarks, quarks]], charge = 0, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "ZZ4q")
+        decay4q = particle.DecayFamily([[quarks, quarks, quarks, quarks]], charge = 0, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "ZZ(WW)4q")
         decay4nu = particle.DecayFamily([[neutrinos, neutrinos, neutrinos, neutrinos]], charge = 0, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "ZZ4nu")
+        decaylnu2q = particle.DecayFamily([[leptons, neutrinos, quarks, quarks]], charge = 0, leptonnumber = (0,0,0), baryonnumber = 0, name = "WWlnu2q")
 
-        decayfamilies = [decay4l, decay2l2q, decay2l2nu, decay4q, decay4nu, decay2q2nu]
+        decayfamilies = [decay4l, decay2l2q, decay2l2nu, decay4q, decay4nu, decay2q2nu, decaylnu2q]
 
         any4l = particle.EventCount("4l", [decay4l])
-        anyevent = particle.EventCount("total", [any4l, decay2l2q, decay2l2nu, decay2q2nu, decay4q, decay4nu])
+        anyevent = particle.EventCount("total", [any4l, decay2l2q, decay2l2nu, decay2q2nu, decay4q, decay4nu, decaylnu2q])
 
         finishedinit = True
