@@ -77,10 +77,10 @@ class Event:
         if not config.countZZdecaytype:
             return ""
         higgsdecay = self.higgsdecaytype()
-        for family in globalvariables.decayfamilies4l:
+        for family in globalvariables.decaysubcategories:
             if higgsdecay in family:
                 globalvariables.eventcounter[family] += 1
-        for family in globalvariables.decayfamilies:
+        for family in globalvariables.decayfamiliestoplevel:
             if higgsdecay in family:
                 globalvariables.eventcounter[family] += 1
                 return ""
