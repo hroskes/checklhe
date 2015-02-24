@@ -128,11 +128,16 @@ class EventCount(object):
     def printcount(self):
         count = globalvariables.eventcounter[self]
         total = globalvariables.eventcounter[globalvariables.anyevent]
-        result = "%s %s events (%s%%)" % (count, self.name, 100.0*count/total)
+        if count > 0:
+            joiner = "\n    "
+            result = "%s %s events (%s%%)" % (count, self.name, 100.0*count/total)
+            result += joiner
+        else:
+            result = ""
+            joiner = "\n"
         for subcategory in self.subcategories:
-            for line in subcategory.printcount().split("\n"):
-                result += "\n    " + line
-        return result
+            result += joiner.join([line for line in subcategory.printcount().split("\n")])
+        return result.rstrip(" ")
 
 class DecayFamily(EventCount, set):
     def __init__(self, decaytypes, charge = None, baryonnumber = None, leptonnumber = (None, None, None), name = "", subcategories = None):
