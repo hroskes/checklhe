@@ -17,11 +17,6 @@ for file in sys.argv[1:]:
         globalvariables.foundhiggsmass = False
         for line in f:
             linenumber += 1
-            if not inevent and globalvariables.particlemass[25] is None:
-                match = re.search(r"Resonance.*mass *=([ 1234567890.]*)", line)
-                if match:
-                    globalvariables.particlemass[25] = float(match.group(1))
-                    print "Read higgs mass from file: %s GeV" % globalvariables.particlemass[25]
             if "<event>" in line:
                 if inevent:
                     print "Extra <event>!", linenumber
