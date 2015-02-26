@@ -30,6 +30,8 @@ class Particle(particletype.ParticleType):
 
     def __eq__(self, other):
        return self is other
+    def __ne__(self, other):
+       return not self == other
 
     def status(self):
         return self.__status
