@@ -101,6 +101,10 @@ class ParticleCounter(Counter):
         return hash(tuple(sorted(hash(p) for p in self.elements())))
     def __str__(self):
         return " ".join(str(p) for p in self.elements())
+    def __eq__(self, other):
+        return hash(self) == hash(other)
+    def __ne__(self, other):
+        return not self == other
 
 class DecayType(ParticleCounter):
     def __init__(self, particle):
@@ -139,6 +143,9 @@ class EventCount(object):
             result += joiner.join([line for line in subcategory.printcount().split("\n")])
         return result.rstrip(" ")
 
+    def increment(self):
+        globalvariables.eventcounter[self] += 1
+
 class DecayFamily(EventCount, set):
     def __init__(self, decaytypes, charge = None, baryonnumber = None, leptonnumber = (None, None, None), name = "", subcategories = None):
         finallist = []
@@ -160,8 +167,22 @@ class DecayFamily(EventCount, set):
         set.__init__(self, finallist)
         EventCount.__init__(self, name, subcategories)
 
+    def increment(self, decay):
+        incremented = []
+        if len(self) == 0 or decay in self:
+            super(DecayFamily, self).increment()
+            incremented.append(self)
+        for subcategory in self.subcategories:
+            subincremented = subcategory.increment(decay)
+            incremented += subincremented
+            #to check
+            if (self not in incremented) and subincremented:
+                raise RuntimeError("Subcategory '%s' of category '%s' is filled even though its parent is not!")
+        return incremented
+
     def __contains__(self, other):
         return super(DecayFamily, self).__contains__(ParticleCounter(other))
     def __hash__(self):
-        return hash(tuple(d for d in self))
-
+        return hash((self.name, tuple(d for d in self)))
+    def __str__(self):
+        return ";    ".join(str(decay) for decay in self)

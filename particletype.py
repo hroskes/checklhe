@@ -75,5 +75,7 @@ class ParticleType(object):
         return not self == other
     def __int__(self):
         return self.id()
+    def __bool__(self):
+        return True
 
 import globalvariables
