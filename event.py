@@ -19,7 +19,7 @@ class Event:
             globalvariables.any4l.increment()
 
         self.checkfunctions = [self.checkmass, self.checkmomentum, self.checkcharge, self.checkhiggsdecay]
-        if self.isVH():
+        if config.checkVHdecaytype and self.isVH():
             self.checkfunctions.append(self.checkVdecay)
 
     def count(self, whattocount):
@@ -79,7 +79,7 @@ class Event:
         return particle.DecayType(higgs)
 
     def checkhiggsdecay(self):
-        if not config.countZZdecaytype:
+        if not config.counthiggsdecaytype:
             return ""
         higgsdecay = self.higgsdecaytype()
         for family in globalvariables.decayfamiliestoplevel:
