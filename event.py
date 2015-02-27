@@ -19,7 +19,7 @@ class Event:
             globalvariables.any4l.increment()
 
         self.checkfunctions = [self.checkmass, self.checkmomentum, self.checkcharge, self.checkhiggsdecay]
-        if config.checkVHdecaytype and self.isVH():
+        if config.countVHdecaytype and self.isVH():
             self.checkfunctions.append(self.checkVdecay)
 
     def count(self, whattocount):

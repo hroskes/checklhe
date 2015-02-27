@@ -171,7 +171,15 @@ def init():
             print "initialized VH decay"
 
         #big categories
-        any4l = particle.EventCount("4l", [decay4l])
-        anyevent = particle.EventCount("total", [any4l, decay2l2q, decay2l2nu, decay2q2nu, decay4q, decay4nu, decaylnu2q, VH])
+        any4lsubcats = []
+        if config.counthiggsdecaytype:
+            any4lsubcats.append(decay4l)
+        any4l = particle.EventCount("4l", any4lsubcats)
+        anyeventsubcats = [any4l]
+        if config.counthiggsdecaytype:
+            anyeventsubcats += [decay2l2q, decay2l2nu, decay2q2nu, decay4q, decay4nu, decaylnu2q]
+        if config.countVHdecaytype:
+            anyeventsubcats += [VH]
+        anyevent = particle.EventCount("total", anyeventsubcats)
 
         finishedinit = True

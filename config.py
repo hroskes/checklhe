@@ -1,6 +1,6 @@
 checkmass = True
 checkmomentum = True
 checkcharge = True
-counthiggsdecaytype = True
-count4levents = True
+counthiggsdecaytype = False
+count4levents = False
 countVHdecaytype = True
