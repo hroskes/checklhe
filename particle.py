@@ -149,7 +149,7 @@ class EventCount(object):
         globalvariables.eventcounter[self] += 1
 
 class DecayFamily(EventCount, set):
-    def __init__(self, decaytypes, charge = None, baryonnumber = None, leptonnumber = (None, None, None), name = "", subcategories = None):
+    def __init__(self, decaytypes, charge = None, baryonnumber = None, leptonnumber = (None, None, None), name = "", subcategories = None, Csymmetric = True):
         finallist = []
         secondarylist = []
 
@@ -157,7 +157,7 @@ class DecayFamily(EventCount, set):
             try:
                 secondarylist.append(ParticleCounter(d))
             except TypeError:
-                for tple in itertools.product(*[particlecategory.ParticleCategory(p) for p in d]):
+                for tple in itertools.product(*[particlecategory.ParticleCategory(p, Csymmetric) for p in d]):
                     secondarylist.append(ParticleCounter(tple))
 
         for d in secondarylist:

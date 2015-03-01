@@ -100,10 +100,17 @@ def init():
             decayfamilies2l2nu = [decay2e2nu, decay2mu2nu, decay2tau2nu, decayemu2nu, decayetau2nu, decaymutau2nu]
 
             #lnuqq decays by flavor
-            decayenuqq = particle.DecayFamily([[electrons, neutrinos, quarks, quarks]], charge = 0, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "H --> ZZ --> enuqq")
-            decaymunuqq = particle.DecayFamily([[muons, neutrinos, quarks, quarks]], charge = 0, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "H --> ZZ --> munuqq")
-            decaytaunuqq = particle.DecayFamily([[taus, neutrinos, quarks, quarks]], charge = 0, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "H --> ZZ --> taunuqq")
-            decayfamilieslnuqq = [decayenuqq, decaymunuqq, decaytaunuqq]
+            if config.checklnu2qcharge:
+                decaylplusnuqq = particle.DecayFamily([[[-11], neutrinos, quarks, quarks], [[-13], neutrinos, quarks, quarks], [[-15], neutrinos, quarks, quarks]],
+                                                                                         charge = 0, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "H --> WW --> l+nu2q", Csymmetric = False)
+                decaylminusnuqq = particle.DecayFamily([[[+11], neutrinos, quarks, quarks], [[+13], neutrinos, quarks, quarks], [[+15], neutrinos, quarks, quarks]],
+                                                                                         charge = 0, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "H --> WW --> l-nu2q", Csymmetric = False)
+                decayfamilieslnuqq = [decaylplusnuqq, decaylminusnuqq]
+            else:
+                decayenuqq = particle.DecayFamily([[electrons, neutrinos, quarks, quarks]], charge = 0, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "H --> WW --> enuqq")
+                decaymunuqq = particle.DecayFamily([[muons, neutrinos, quarks, quarks]], charge = 0, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "H --> WW --> munuqq")
+                decaytaunuqq = particle.DecayFamily([[taus, neutrinos, quarks, quarks]], charge = 0, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "H --> WW --> taunuqq")
+                decayfamilieslnuqq = [decayenuqq, decaymunuqq, decaytaunuqq]
 
             #top level decay categories
             decay4l = particle.DecayFamily([[leptons, leptons, leptons, leptons]], charge = 0, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "H --> ZZ --> 4l",
