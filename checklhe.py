@@ -8,6 +8,12 @@ import re
 
 globalvariables.init()
 
+def raiseerror(msg):
+    if config.raiseerror:
+        raise IOError(msg)
+    else:
+        print msg
+
 for file in sys.argv[1:]:
     print file
     with open(file) as f:
@@ -19,7 +25,7 @@ for file in sys.argv[1:]:
             linenumber += 1
             if "<event>" in line:
                 if inevent:
-                    print "Extra <event>!", linenumber
+                    raiseerror("Extra <event>! " + str(linenumber))
                 inevent = True
                 particle.newevent()
                 counter = -1
@@ -27,10 +33,11 @@ for file in sys.argv[1:]:
                 continue
             if "</event>" in line:
                 if not inevent:
-                    print "Extra </event>!", linenumber
+                    raiseerror("Extra </event>! " + str(linenumber))
                 ev = event.Event(particle.particlelist, linenumber)
-                if ev.check():
-                    raise IOError(ev.check())
+                check = ev.check()
+                if check:
+                    raiseerror(check)
 
                 inevent = False
                 continue
