@@ -2,16 +2,12 @@ import particletype
 
 class ParticleCategory(set):
     def __init__(self, lst, Csymmetric = True):
-        if not Csymmetric:
-            print lst
         newlist = []
         for p in lst:
             type = particletype.ParticleType(p)
             newlist.append(type)
             if Csymmetric:
                 newlist.append(-type)
-        if not Csymmetric:
-            print newlist
         super(ParticleCategory, self).__init__(newlist)
 
     def __contains__(self, particle):
