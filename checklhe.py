@@ -27,6 +27,7 @@ for file in sys.argv[1:]:
                 if inevent:
                     raiseerror("Extra <event>! " + str(linenumber))
                 inevent = True
+                eventline = linenumber
                 particle.newevent()
                 counter = -1
                 nleptons = 0
@@ -34,7 +35,7 @@ for file in sys.argv[1:]:
             if "</event>" in line:
                 if not inevent:
                     raiseerror("Extra </event>! " + str(linenumber))
-                ev = event.Event(particle.particlelist, linenumber)
+                ev = event.Event(particle.particlelist, eventline)
                 check = ev.check()
                 if check:
                     raiseerror(check)
