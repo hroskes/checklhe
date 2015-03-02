@@ -34,7 +34,7 @@ class Event:
             return ""
         results = []
         for p in self.particlelist:
-            if abs(p.usemass() - p.lhemass()) >= globalvariables.masstolerance:
+            if abs(p.usemass() - p.lhemass()) >= config.masstolerance:
                 results.append("Mass is wrong! " + str(self.linenumber) + "(" + str(p) + ")\n" +
                                "invariant mass = " + str(p.usemass()) + "\n" +
                                "lhe mass       = " + str(p.lhemass()))

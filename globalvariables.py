@@ -3,9 +3,6 @@ import particle
 import config
 import collections
 
-momentumtolerance = 1e-4
-masstolerance = 7e-2
-
 particlename = {1: "d",
                 2: "u",
                 3: "s",

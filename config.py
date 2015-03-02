@@ -8,3 +8,6 @@ checklnu2qcharge = False      #for H->WW->lnu2q, checks the charge on the lepton
 
 raiseerror = False            #if this is true, raises an IOError when something is wrong
                               #otherwise just prints it
+
+momentumtolerance = 1e-4
+masstolerance = 7e-2

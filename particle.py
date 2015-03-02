@@ -5,6 +5,7 @@ import itertools
 import particletype
 import particlecategory
 import globalvariables
+import config
 
 particlelist = []
 
@@ -75,7 +76,7 @@ class Momentum:
     def euclideanabs(self):
         return (self.px()**2 + self.py()**2 + self.pz()**2 + self.E()**2) ** 0.5
     def __eq__(self, other):
-        return (self-other).euclideanabs() < globalvariables.momentumtolerance
+        return (self-other).euclideanabs() < config.momentumtolerance
     def __ne__(self, other):
         return not (self == other)
 
