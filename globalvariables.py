@@ -3,41 +3,6 @@ import particle
 import config
 import collections
 
-particlename = {1: "d",
-                2: "u",
-                3: "s",
-                4: "c",
-                5: "b",
-                6: "t",
-                11: "e-",
-                12: "nue",
-                13: "mu-",
-                14: "numu",
-                15: "tau-",
-                16: "nutau",
-                21: "g",
-                22: "gamma",
-                23: "Z",
-                24: "W+",
-                25: "H"}
-particlemass = {1: 0,
-                2: 0,
-                3: 0,
-                4: 0,
-                5: 4.2,
-                6: 173,
-                11: 5.11e-4,
-                12: 0,
-                13: 0.10566,
-                14: 0,
-                15: 1.7768,
-                16: 0,
-                21: 0,
-                22: 0,
-                23: 91.1876,
-                24: 80.385,
-                25: None}     #Overwritten from the LHE header
-
 eventcounter = collections.Counter()
 
 startedinit = False
@@ -186,4 +151,5 @@ def init():
             anyeventsubcats += [VH]
         anyevent = particle.EventCount("total", anyeventsubcats)
 
+        config.init()
         finishedinit = True

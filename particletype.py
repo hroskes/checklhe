@@ -1,4 +1,5 @@
 from fractions import Fraction
+import particledata
 
 class ParticleType(object):
     def __init__(self, particleorid):
@@ -23,7 +24,7 @@ class ParticleType(object):
                 raise ValueError("Invalid particle id! " + str(self.id()))
             return result
         try:
-            return globalvariables.particlename[self.id()]
+            return particledata.particlename[self.id()]
         except KeyError:
             raise ValueError("Invalid particle id! " + str(self.id()))
 
@@ -47,10 +48,14 @@ class ParticleType(object):
             return 1
         raise ValueError("Invalid particle id: " + str(self.id()))
 
-    def physicalmass(self):
+    def PDGmass(self):
         if self.id() < 0:
-            return (-self).physicalmass()
-        return globalvariables.particlemass[self.id()]
+            return (-self).PDGmass()
+        return particledata.PDGmass[self.id()]
+    def PDGmasserror(self):
+        if self.id() < 0:
+            return (-self).PDGmasserror()
+        return particledata.PDGmasserror[self.id()]
 
     def baryonnumber(self):
         if self.id() < 0:

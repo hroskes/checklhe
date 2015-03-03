@@ -44,8 +44,6 @@ class Particle(particletype.ParticleType):
         return self.__momentum
     def invmass(self):
         return self.__momentum.m()
-    def usemass(self):
-        return self.invmass()
     def lhemass(self):
         return self.__lhemass
 

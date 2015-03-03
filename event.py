@@ -18,7 +18,17 @@ class Event:
         if config.count4levents and self.count(globalvariables.leptons) >= 4:
             globalvariables.any4l.increment()
 
-        self.checkfunctions = [self.checkmass, self.checkmomentum, self.checkcharge, self.checkhiggsdecay]
+        self.checkfunctions = []
+        if config.checkinvmass:
+            self.checkfunctions.append(self.checkinvmass)
+        if config.checkPDGmass:
+            self.checkfunctions.append(self.checkPDGmass)
+        if config.checkmomentum:
+            self.checkfunctions.append(self.checkmomentum)
+        if config.checkcharge:
+            self.checkfunctions.append(self.checkcharge)
+        if config.counthiggsdecaytype:
+            self.checkfunctions.append(self.checkhiggsdecay)
         if config.countVHdecaytype and self.isVH():
             self.checkfunctions.append(self.checkVdecay)
 
@@ -29,20 +39,26 @@ class Event:
         checks = [chk() for chk in self.checkfunctions]
         return "\n".join([chk for chk in checks if chk])
         
-    def checkmass(self):
-        if not config.checkmass:
-            return ""
+    def checkinvmass(self):
         results = []
         for p in self.particlelist:
-            if abs(p.usemass() - p.lhemass()) >= config.masstolerance:
-                results.append("Mass is wrong! " + str(self.linenumber) + "(" + str(p) + ")\n" +
-                               "invariant mass = " + str(p.usemass()) + "\n" +
-                               "lhe mass       = " + str(p.lhemass()))
+            if abs(p.invmass() - p.lhemass()) >= config.invmasstolerance:
+                results.append("Mass is inconsistent! " + str(self.linenumber) + "(" + str(p) + ")\n" +
+                               "invariant mass = " + str(p.invmass()) + "\n" +
+                               "LHE mass       = " + str(p.lhemass()))
+        return "\n".join(results)
+
+    def checkPDGmass(self):
+        results = []
+        for p in self.particlelist:
+            if p in config.checkPDGmasslist:
+                if abs(p.lhemass() - p.PDGmass()) >= config.PDGmasstolerance * p.PDGmass():
+                    results.append("Mass is wrong! " + str(self.linenumber) + "(" + str(p) + ")\n" +
+                                   "PDG mass = " + str(p.PDGmass()) + "\n" +
+                                   "LHE mass = " + str(p.lhemass()))
         return "\n".join(results)
 
     def checkmomentum(self):
-        if not config.checkmomentum:
-            return ""
         results = []
         for p in self.decaylist:
             mommomentum = p.momentum()
@@ -54,8 +70,6 @@ class Event:
         return "\n".join(results)
 
     def checkcharge(self):
-        if not config.checkcharge:
-            return ""
         results = []
         for p in self.decaylist:
             momcharge = p.charge()
@@ -79,8 +93,6 @@ class Event:
         return particle.DecayType(higgs)
 
     def checkhiggsdecay(self):
-        if not config.counthiggsdecaytype:
-            return ""
         higgsdecay = self.higgsdecaytype()
         for family in globalvariables.decayfamiliestoplevel:
             if family.increment(higgsdecay):
