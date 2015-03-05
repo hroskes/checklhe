@@ -8,7 +8,7 @@ counthiggsdecaytype = True    #prints the breakup of Higgs decay types
 count4levents = True          #counts the total number of events with 4 leptons
 countVHdecaytype = True       #prints the breakup of VH decay types
 checklnu2qcharge = False      #for H->WW->lnu2q, checks the charge on the leptons
-checkZZassignment = True
+checkZZassignment = True      #check that, in symmetric decays, the Zs are assigned so that one has mass as close as possible to m_Z
 
 raiseerror = False            #if this is true, raises an IOError when something is wrong
                               #otherwise just prints it

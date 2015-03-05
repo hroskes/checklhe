@@ -23,3 +23,6 @@ class ParticleCategory(set):
 
     def __str__(self):
         return " ".join(str(p) for p in self)
+
+    def ids(self):
+        return [p.id() for p in self]

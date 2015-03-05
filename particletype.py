@@ -4,7 +4,7 @@ import particledata
 class ParticleType(object):
     def __init__(self, particleorid):
         self.__id = int(particleorid)
-        if particleorid < 0 and self in globalvariables.neutralbosons:
+        if particleorid < 0 and -particleorid in globalvariables.neutralbosons.ids():
             self.__id = -self.__id
 
     def id(self):

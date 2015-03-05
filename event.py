@@ -3,6 +3,7 @@ import particletype
 import particlecategory
 import globalvariables
 import config
+import momentum
 
 class Event:
     def __init__(self, particlelist, linenumber):
@@ -179,7 +180,7 @@ class Event:
 
         altZ1momentum = Z1kid1.momentum() + altZ1kid2.momentum()
         altZ2momentum = Z1kid2.momentum() + altZ1kid1.momentum()
-        altmass = min(altZ1momentum.m(), altZ2momentum.m(), key = lambda mass: abs(mass - Z1.PDGmass()))
+        altmass = min(altZ1momentum.M(), altZ2momentum.M(), key = lambda mass: abs(mass - Z1.PDGmass()))
         if abs(altmass - Z1.PDGmass()) < abs(Z1.invmass() - Z1.PDGmass()):
             return ("Alternate Z has closer mass to m_Z than listed Z! " + str(self.linenumber) + "\n" +
                     "listed Z mass    = " + str(Z1.invmass()) + "\n" +

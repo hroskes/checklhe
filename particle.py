@@ -1,6 +1,6 @@
 from fractions import Fraction
-from math import copysign
 from collections import Counter
+import momentum
 import itertools
 import particletype
 import particlecategory
@@ -11,6 +11,7 @@ particlelist = []
 
 def newevent():
     del particlelist[:]
+    momentum.newevent()
     particlelist.append(None)
 
 class Particle(particletype.ParticleType):
@@ -20,7 +21,7 @@ class Particle(particletype.ParticleType):
             raise ValueError("This line is not a valid particle line.  Not enough entries.")
         super(Particle, self).__init__(int(data[0]))
         self.__status = int(data[1])
-        self.__momentum = Momentum(float(data[6]), float(data[7]), float(data[8]), float(data[9]))
+        self.__momentum = momentum.Momentum(float(data[6]), float(data[7]), float(data[8]), float(data[9]))
         self.__lhemass = float(data[10])
         particlelist.append(self)
         self.__mothers = [particlelist[int(data[2])], particlelist[int(data[3])]]
@@ -43,43 +44,9 @@ class Particle(particletype.ParticleType):
     def momentum(self):
         return self.__momentum
     def invmass(self):
-        return self.__momentum.m()
+        return self.__momentum.M()
     def lhemass(self):
         return self.__lhemass
-
-class Momentum:
-    def __init__(self, px, py, pz, E):
-        self.__px = px
-        self.__py = py
-        self.__pz = pz
-        self.__E = E
-        self.__m2 = E**2-px**2-py**2-pz**2
-        self.__m = copysign(abs(self.__m2) ** 0.5, self.__m2)
-
-    def px(self):
-        return self.__px
-    def py(self):
-        return self.__py
-    def pz(self):
-        return self.__pz
-    def E(self):
-        return self.__E
-    def m(self):
-        return self.__m
-    def __add__(self, other):
-        return Momentum(self.px()+other.px(), self.py()+other.py(), self.pz()+other.pz(), self.E()+other.E())
-    def __sub__(self, other):
-        return Momentum(self.px()-other.px(), self.py()-other.py(), self.pz()-other.pz(), self.E()-other.E())
-
-    def euclideanabs(self):
-        return (self.px()**2 + self.py()**2 + self.pz()**2 + self.E()**2) ** 0.5
-    def __eq__(self, other):
-        return (self-other).euclideanabs() < config.momentumtolerance
-    def __ne__(self, other):
-        return not (self == other)
-
-    def __str__(self):
-        return "(%s, %s, %s, %s)" % (self.px(), self.py(), self.pz(), self.E())
 
 class ParticleCounter(Counter):
     def __init__(self, particles):
