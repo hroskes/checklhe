@@ -13,9 +13,15 @@ checkZZassignment = True      #check that, in symmetric decays, the Zs are assig
 raiseerror = False            #if this is true, raises an IOError when something is wrong
                               #otherwise just prints it
 
+makedecayanglestree = True    #For ZZ->4l events, makes a tree of costheta1, costheta2, and Phi
+tree = any([makedecayanglestree])
+
+
 momentumtolerance = 1e-4
 invmasstolerance = 7e-2
 PDGmasstolerance = 0.01       #relative
+
+
 
 startedinit = False
 finishedinit = False

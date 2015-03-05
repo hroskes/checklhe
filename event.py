@@ -4,6 +4,7 @@ import particlecategory
 import globalvariables
 import config
 import momentum
+from math import copysign, acos
 
 class Event:
     def __init__(self, particlelist, linenumber):
@@ -34,13 +35,24 @@ class Event:
         if config.checkZZassignment:
             self.checkfunctions.append(self.checkZZassignment)
 
+        self.processfunctions = []
+        if config.makedecayanglestree:
+            self.processfunctions.append(self.getdecayangles)
+        if config.tree:
+            self.anythingtofill = False
+            self.processfunctions.append(self.filltree)
+
     def count(self, whattocount):
         return self.particlecounter.count(whattocount)
+
+    def process(self):
+        for prcs in self.processfunctions:
+            prcs()
 
     def check(self):
         checks = [chk() for chk in self.checkfunctions]
         return "\n".join([chk for chk in checks if chk])
-        
+
     def checkinvmass(self):
         results = []
         for p in self.particlelist:
@@ -142,8 +154,12 @@ class Event:
 
 #conversion
 
+    def filltree(self):
+        if self.anythingtofill:
+            globalvariables.tree.Fill()
+
     def isZZ(self):
-        return self.higgs() in globalvariables.HZZ
+        return len(self.higgs().kids()) == 2 and all(kid in globalvariables.Z for kid in self.higgs().kids())
 
     def Z(self, which):
         if not self.isZZ():
@@ -185,3 +201,34 @@ class Event:
             return ("Alternate Z has closer mass to m_Z than listed Z! " + str(self.linenumber) + "\n" +
                     "listed Z mass    = " + str(Z1.invmass()) + "\n" +
                     "alternate Z mass = " + str(altmass) + "\n")
+
+    def getdecayangles(self):
+        globalvariables.costheta1[0] = -999
+        globalvariables.costheta2[0] = -999
+        globalvariables.Phi[0] = -999
+
+        lab = momentum.Frame()
+
+        Zs = {1: self.Z(1), 2: self.Z(2)}
+        if Zs[1] is None or Zs[2] is None:
+            return
+        leptons = {}
+        for Z in (1, 2):
+            for sign in (1, -1):
+                leptons[(Z, sign)] = [p for p in Zs[Z].kids() if p.id()*sign > 0][0]
+        #sign is -charge
+        for i in leptons:
+            if leptons[i] not in globalvariables.leptons:
+                return
+        momentum.boosttocom(Zs[1].momentum())
+        globalvariables.costheta1[0] = -leptons[(1, 1)].momentum().Vect().Unit().Dot(Zs[2].momentum().Vect().Unit())
+        momentum.boosttocom(Zs[2].momentum())
+        globalvariables.costheta2[0] = -leptons[(2, 1)].momentum().Vect().Unit().Dot(Zs[1].momentum().Vect().Unit())
+
+        momentum.boosttocom(self.higgs().momentum())
+        normal1 = leptons[1, 1].momentum().Vect().Cross(leptons[1, -1].momentum().Vect()).Unit()
+        normal2 = leptons[2, 1].momentum().Vect().Cross(leptons[2, -1].momentum().Vect()).Unit()
+        globalvariables.Phi[0] = copysign(acos(-normal1.Dot(normal2)),Zs[1].momentum().Vect().Dot(normal1.Cross(normal2)))
+
+        lab.goto()
+        self.anythingtofill = True

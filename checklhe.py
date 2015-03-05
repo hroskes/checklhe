@@ -2,8 +2,10 @@ import particle
 import event
 import globalvariables
 import config
+import ROOT
 import sys
 import collections
+import array
 import re
 
 globalvariables.init()
@@ -21,6 +23,16 @@ for file in sys.argv[1:]:
         linenumber = 0
         globalvariables.eventcounter = collections.Counter()
         globalvariables.foundhiggsmass = False
+        if config.tree:
+            globalvariables.rootfile = ROOT.TFile(file.replace(".lhe","",1) + '.root', 'recreate')
+            globalvariables.tree = ROOT.TTree("tree", "tree")
+        if config.makedecayanglestree:
+            globalvariables.costheta1 = array.array('d', [0])
+            globalvariables.costheta2 = array.array('d', [0])
+            globalvariables.Phi       = array.array('d', [0])
+            globalvariables.tree.Branch("costheta1", globalvariables.costheta1, "costheta1/D")
+            globalvariables.tree.Branch("costheta2", globalvariables.costheta2, "costheta2/D")
+            globalvariables.tree.Branch("Phi",       globalvariables.Phi,       "Phi/D")
         for line in f:
             linenumber += 1
             if "<event>" in line:
@@ -36,6 +48,7 @@ for file in sys.argv[1:]:
                 if not inevent:
                     raiseerror("Extra </event>! " + str(linenumber))
                 ev = event.Event(particle.particlelist, eventline)
+                ev.process()
                 check = ev.check()
                 if check:
                     raiseerror(check)
@@ -50,6 +63,10 @@ for file in sys.argv[1:]:
                 p = particle.Particle(line)
             except ValueError:
                 continue
+
+        if config.tree:
+            globalvariables.tree.Write()
+            globalvariables.rootfile.Close()
 
     tab = "   "
     if inevent:
