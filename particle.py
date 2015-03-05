@@ -108,16 +108,22 @@ class ParticleCounter(Counter):
         return not self == other
 
 class DecayType(ParticleCounter):
-    def __init__(self, particle):
-        decayparticles = particle.kids()
+    def __init__(self, particle, level = None):
+        try:
+            decayparticles = particle.particles   #see if it's itself a decaytype
+        except AttributeError:
+            decayparticles = [particle]
         done = False
-        while not done:
+        i = 0
+        while not done and (level is None or i < level):
+            i += 1
             done = True
             for p in decayparticles[:]:
                 if p.status() == 2:
                     done = False
                     decayparticles.remove(p)
                     decayparticles += p.kids()
+        self.particles = decayparticles
         super(DecayType, self).__init__(decayparticles)
 
 class EventCount(object):
@@ -178,11 +184,20 @@ class DecayFamily(EventCount, set):
             incremented += subincremented
             #to check
             if (self not in incremented) and subincremented:
-                raise RuntimeError("Subcategory '%s' of category '%s' is filled even though its parent is not!")
+                raise RuntimeError("Subcategory '%s' of category '%s' is filled even though its parent is not!" % (subincremented[0].name, self.name))
         return incremented
 
     def __contains__(self, other):
-        return super(DecayFamily, self).__contains__(ParticleCounter(other))
+        if super(DecayFamily, self).__contains__(ParticleCounter(other)):
+            return True
+        try:
+            newother = DecayType(other, 1)
+        except AttributeError:
+            return False
+        if newother != other:
+            return self.__contains__(newother)
+        else:
+            return False
     def __hash__(self):
         return hash((self.name, tuple(d for d in self)))
     def __str__(self):

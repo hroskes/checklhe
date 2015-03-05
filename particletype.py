@@ -4,7 +4,7 @@ import particledata
 class ParticleType(object):
     def __init__(self, particleorid):
         self.__id = int(particleorid)
-        if id < 0 and self in globalvariables.neutralbosons:
+        if particleorid < 0 and self in globalvariables.neutralbosons:
             self.__id = -self.__id
 
     def id(self):
@@ -75,7 +75,10 @@ class ParticleType(object):
     def __hash__(self):
         return self.id()
     def __eq__(self, other):
-        return self.id() == other.id()
+        try:
+            return self.id() == other.id()
+        except AttributeError:
+            return False
     def __ne__(self, other):
         return not self == other
     def __int__(self):

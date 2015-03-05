@@ -11,7 +11,6 @@ class Event:
         self.linenumber = linenumber
 
         self.decaylist = [p for p in self.particlelist if p.status() == 2]
-        self.higgs = [p for p in self.particlelist if str(p) == "H"]
         self.incoming = [p for p in self.particlelist if p.status() == -1]
 
         globalvariables.anyevent.increment()
@@ -80,22 +79,20 @@ class Event:
                                "kids charge = " + str(kidscharge) + "(" + ", ".join([str(kid) for kid in p.kids()]) + ")")
         return "\n".join(results)
 
-    def higgsdecaytype(self):
-        decaylist = []
-
+    def higgs(self):
         higgs = [p for p in self.particlelist if str(p) == "H"]
         if len(higgs) == 0:
             raise IOError("No higgs in event! " + str(self.linenumber))
         if len(higgs) > 1:
             raise IOError("Multiple higgs in event! " + str(self.linenumber))
-        higgs = higgs[0]
+        return higgs[0]
 
-        return particle.DecayType(higgs)
+    def higgsdecaytype(self, level = None):
+        return particle.DecayType(self.higgs(), level)
 
     def checkhiggsdecay(self):
-        higgsdecay = self.higgsdecaytype()
         for family in globalvariables.decayfamiliestoplevel:
-            if family.increment(higgsdecay):
+            if family.increment(self.higgs()):
                 return ""
         return ("unknown decay type! " + str(self.linenumber) + "\n" +
                 "H -> " + str(higgsdecay))
