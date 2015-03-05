@@ -30,6 +30,8 @@ class Event:
             self.checkfunctions.append(self.checkhiggsdecay)
         if config.countVHdecaytype and self.isVH():
             self.checkfunctions.append(self.checkVdecay)
+        if config.checkZZassignment:
+            self.checkfunctions.append(self.checkZZassignment)
 
     def count(self, whattocount):
         return self.particlecounter.count(whattocount)
@@ -61,7 +63,7 @@ class Event:
         results = []
         for p in self.decaylist:
             mommomentum = p.momentum()
-            kidsmomentum = sum([kid.momentum() for kid in p.kids()], particle.Momentum(0, 0, 0, 0))
+            kidsmomentum = sum([kid.momentum() for kid in p.kids()], momentum.Momentum(0, 0, 0, 0))
             if mommomentum != kidsmomentum:
                 results.append("no momentum conservation! " + str(self.linenumber) + "\n" +
                                "mom momentum  = " + str(mommomentum) + "("  + str(p) + ")\n" +
@@ -86,6 +88,9 @@ class Event:
         if len(higgs) > 1:
             raise IOError("Multiple higgs in event! " + str(self.linenumber))
         return higgs[0]
+
+    def higgsdecay(self, level = None):
+        return particle.DecayType(self.higgs(), level).particles()
 
     def higgsdecaytype(self, level = None):
         return particle.DecayType(self.higgs(), level)
@@ -133,3 +138,49 @@ class Event:
 
         globalvariables.VH.increment()
         return ""
+
+#conversion
+
+    def isZZ(self):
+        return self.higgs() in globalvariables.HZZ
+
+    def Z(self, which):
+        if not self.isZZ():
+            return None
+        Zs = self.higgs().kids()
+        assert(all(Z in globalvariables.Z for Z in Zs))
+        Zs.sort(key = lambda Z: abs(Z.invmass() - Z.PDGmass()))
+        return Zs[which - 1]
+
+    def checkZZassignment(self):
+        if (self.higgs() not in globalvariables.decayZZ4l
+        and self.higgs() not in globalvariables.decayZZ4q
+        and self.higgs() not in globalvariables.decayZZ4nu):
+            return ""
+        assert(len(self.higgs().kids()) == 2)
+        Z1 = self.Z(1)
+        Z2 = self.Z(2)
+        assert(Z1 is not None and Z2 is not None)
+        assert(len(Z1.kids()) == len(Z2.kids()) == 2)
+        if particle.ParticleCounter(Z1.kids()) != particle.ParticleCounter(Z2.kids()):
+            return ""
+        Z1kid1 = Z1.kids()[0]
+        altZ1kid1 = [kid for kid in Z2.kids() if particletype.ParticleType(kid) == particletype.ParticleType(Z1kid1)]
+        Z1kid2 = Z1.kids()[1]
+        altZ1kid2 = [kid for kid in Z2.kids() if particletype.ParticleType(kid) == particletype.ParticleType(Z1kid2)]
+        if len(altZ1kid1) == len(altZ1kid2) == 0:
+            return ""
+        elif len(altZ1kid1) == len(altZ1kid2) == 1:
+            pass
+        else:
+            assert(0)
+        altZ1kid1 = altZ1kid1[0]
+        altZ1kid2 = altZ1kid2[0]
+
+        altZ1momentum = Z1kid1.momentum() + altZ1kid2.momentum()
+        altZ2momentum = Z1kid2.momentum() + altZ1kid1.momentum()
+        altmass = min(altZ1momentum.m(), altZ2momentum.m(), key = lambda mass: abs(mass - Z1.PDGmass()))
+        if abs(altmass - Z1.PDGmass()) < abs(Z1.invmass() - Z1.PDGmass()):
+            return ("Alternate Z has closer mass to m_Z than listed Z! " + str(self.linenumber) + "\n" +
+                    "listed Z mass    = " + str(Z1.invmass()) + "\n" +
+                    "alternate Z mass = " + str(altmass) + "\n")
