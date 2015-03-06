@@ -38,6 +38,8 @@ class Event:
         self.processfunctions = []
         if config.makedecayanglestree:
             self.processfunctions.append(self.getdecayangles)
+        if config.makeZZmassestree:
+            self.processfunctions.append(self.getZZmasses)
         if config.tree:
             self.anythingtofill = False
             self.processfunctions.append(self.filltree)
@@ -231,4 +233,24 @@ class Event:
         globalvariables.Phi[0] = copysign(acos(-normal1.Dot(normal2)),Zs[1].momentum().Vect().Dot(normal1.Cross(normal2)))
 
         lab.goto()
+        self.anythingtofill = True
+
+    def getZZmasses(self):
+        globalvariables.mZ1[0] = -999
+        globalvariables.mZ2[0] = -999
+        globalvariables.mH[0] = -999
+        Zs = {1: self.Z(1), 2: self.Z(2)}
+        if Zs[1] is None or Zs[2] is None:
+            return
+        leptons = {}
+        for Z in (1, 2):
+            for sign in (1, -1):
+                leptons[(Z, sign)] = [p for p in Zs[Z].kids() if p.id()*sign > 0][0]
+        #sign is -charge
+        for i in leptons:
+            if leptons[i] not in globalvariables.leptons:
+                return
+        globalvariables.mZ1[0] = Zs[1].invmass()
+        globalvariables.mZ2[0] = Zs[2].invmass()
+        globalvariables.mH[0] = self.higgs().invmass()
         self.anythingtofill = True

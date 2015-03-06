@@ -14,7 +14,8 @@ raiseerror = False            #if this is true, raises an IOError when something
                               #otherwise just prints it
 
 makedecayanglestree = True    #For ZZ->4l events, makes a tree of costheta1, costheta2, and Phi
-tree = any([makedecayanglestree])
+makeZZmassestree    = True    #For ZZ->4l events, makes a tree of the Z1, Z2, Higgs masses
+tree = any([makedecayanglestree, makeZZmassestree])
 
 
 momentumtolerance = 1e-4

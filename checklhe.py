@@ -33,6 +33,13 @@ for file in sys.argv[1:]:
             globalvariables.tree.Branch("costheta1", globalvariables.costheta1, "costheta1/D")
             globalvariables.tree.Branch("costheta2", globalvariables.costheta2, "costheta2/D")
             globalvariables.tree.Branch("Phi",       globalvariables.Phi,       "Phi/D")
+        if config.makeZZmassestree:
+            globalvariables.mZ1 = array.array('d', [0])
+            globalvariables.mZ2 = array.array('d', [0])
+            globalvariables.mH  = array.array('d', [0])
+            globalvariables.tree.Branch("mZ1", globalvariables.mZ1, "mZ1/D")
+            globalvariables.tree.Branch("mZ2", globalvariables.mZ2, "mZ2/D")
+            globalvariables.tree.Branch("mH",  globalvariables.mH,  "mH/D")
         for line in f:
             linenumber += 1
             if "<event>" in line:
