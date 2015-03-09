@@ -1,9 +1,15 @@
+import sys
+
+#https://root.cern.ch/phpBB3/viewtopic.php?t=3198
+tempargv = sys.argv
+sys.argv = ['-b']
+import ROOT
+sys.argv = tempargv
+
 import particle
 import event
 import globalvariables
 import config
-import ROOT
-import sys
 import collections
 import array
 import re
