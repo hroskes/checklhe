@@ -111,11 +111,13 @@ class Event:
         return particle.DecayType(self.higgs(), level)
 
     def checkhiggsdecay(self):
+        if self.higgs().status() != 2:
+            return ""
         for family in globalvariables.decayfamiliestoplevel:
             if family.increment(self.higgs()):
                 return ""
         return ("unknown decay type! " + str(self.linenumber) + "\n" +
-                "H -> " + str(higgsdecay))
+                "H -> " + str(self.higgsdecay()))
 
     def ishiggs(self):
         return len([p for p in self.particlelist if str(p) == "H"]) == 1
