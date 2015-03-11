@@ -1,13 +1,14 @@
 from fractions import Fraction
 from collections import Counter
 import momentum
+import usefulstuff
 import itertools
 import particletype
 import particlecategory
 import globalvariables
 import config
 
-particlelist = []
+particlelist = usefulstuff.printablelist([])
 
 def newevent():
     del particlelist[:]
@@ -25,7 +26,7 @@ class Particle(particletype.ParticleType):
         self.__lhemass = float(data[10])
         particlelist.append(self)
         self.__mothers = [particlelist[int(data[2])], particlelist[int(data[3])]]
-        self.__kids = []
+        self.__kids = usefulstuff.printablelist([])
         for particle in particlelist[1:]:
             if particle in self.mothers():
                 particle.kids().append(self)

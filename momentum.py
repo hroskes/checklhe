@@ -1,8 +1,9 @@
+import usefulstuff
 import config
 import ROOT
 from math import copysign, acos
 
-momenta = []
+momenta = usefulstuff.printablelist([])
 
 def newevent():
     del momenta[:]
