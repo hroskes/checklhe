@@ -6,6 +6,8 @@ checkmomentum = True          #checks momentum conservation in particle decays
 checkcharge = True            #checks charge conservation in particle decays
 counthiggsdecaytype = True    #prints the breakup of Higgs decay types
 count4levents = True          #counts the total number of events with 4 leptons
+count2l2levents = True        #counts the total number of events with l+l- l+l-, where the first flavor and the second flavor
+                              #  could be the same or different
 countVHdecaytype = True       #prints the breakup of VH decay types
 checklnu2qcharge = False      #for H->WW->lnu2q, checks the charge on the leptons
 checkZZassignment = True      #check that, in symmetric decays, the Zs are assigned so that one has mass as close as possible to m_Z

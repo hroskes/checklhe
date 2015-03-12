@@ -16,8 +16,6 @@ class Event:
         self.incoming = [p for p in self.particlelist if p.status() == -1]
 
         globalvariables.anyevent.increment()
-        if config.count4levents and self.count(globalvariables.leptons) >= 4:
-            globalvariables.any4l.increment()
 
         self.checkfunctions = []
         if config.checkinvmass:
@@ -40,6 +38,10 @@ class Event:
             self.processfunctions.append(self.getdecayangles)
         if config.makeZZmassestree:
             self.processfunctions.append(self.getZZmasses)
+        if config.count4levents:
+            self.processfunctions.append(self.count4l)
+        if config.count2l2levents:
+            self.processfunctions.append(self.count2l2l)
         if config.tree:
             self.anythingtofill = False
             self.processfunctions.append(self.filltree)
@@ -95,6 +97,22 @@ class Event:
                                "mom charge  = " + str(momcharge) + "("  + str(p) + ")\n" +
                                "kids charge = " + str(kidscharge) + "(" + ", ".join([str(kid) for kid in p.kids()]) + ")")
         return "\n".join(results)
+
+    def count4l(self):
+        if self.count(globalvariables.leptons) >= 4:
+            globalvariables.any4l.increment()
+
+    def count2l2l(self):
+        leptons = [p for p in self.particlelist if p in globalvariables.leptons]
+        flavors = [globalvariables.electrons, globalvariables.muons, globalvariables.taus]
+        hasl = {f: {1: False, -1: False} for f in flavors}
+        for p in leptons:
+            for f in flavors:
+                if p in f:
+                    hasl[f][p.charge()] = True
+        haslplm = [hasl[f][1] and hasl[f][-1] for f in flavors]
+        if sum(haslplm) >= 2:
+            globalvariables.any2l2l.increment()
 
     def higgs(self):
         higgs = [p for p in self.particlelist if str(p) == "H"]

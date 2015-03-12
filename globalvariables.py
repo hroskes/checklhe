@@ -14,7 +14,7 @@ def init():
     global decayZZ4l, decayZZ2l2nu, decayZZ2l2q, decayZZ4nu, decayZZ2q2nu, decayZZ4q
     global decayWW2l2nu, decayWW4q, decayWWlnu2q
     global HZZ, HWW, ZH, WH, VH
-    global any4l, anyevent
+    global any2l2l, any4l, anyevent
     global decayfamiliesZZ4l, decayfamiliesZZ2l2nu, decayfamiliesWW2l2nu, decayfamiliesZZ2l2q, decayfamiliesWWlnu2q
     global decayfamiliestoplevel
     global startedinit, finishedinit
@@ -150,10 +150,11 @@ def init():
             print "initialized VH decay"
 
         #big categories
-        any4lsubcats = []
+        any2l2lsubcats = []
         if config.counthiggsdecaytype:
-            any4lsubcats.append(decayZZ4l)
-        any4l = particle.EventCount("4l", any4lsubcats)
+            any2l2lsubcats.append(decayZZ4l)
+        any2l2l = particle.EventCount("2l2l", any2l2lsubcats)
+        any4l = particle.EventCount("4l", [any2l2l])
         anyeventsubcats = [any4l]
         if config.counthiggsdecaytype:
             anyeventsubcats += [HZZ, HWW]
