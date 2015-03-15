@@ -30,8 +30,8 @@ class Event:
             self.checkfunctions.append(self.checkhiggsdecay)
         if config.countVHdecaytype and self.isVH():
             self.checkfunctions.append(self.checkVdecay)
-        if config.checkZZassignment:
-            self.checkfunctions.append(self.checkZZassignment)
+        if config.checkZZorWWassignment:
+            self.checkfunctions.append(self.checkZZorWWassignment)
 
         self.processfunctions = []
         if config.makedecayanglestree:
@@ -132,7 +132,8 @@ class Event:
         if self.higgs().status() != 2:
             return ""
         for family in globalvariables.decayfamiliestoplevel:
-            if family.increment(self.higgs()):
+            if self.higgs() in family:
+                family.increment(self.higgs())
                 return ""
         return ("unknown decay type! " + str(self.linenumber) + "\n" +
                 "H -> " + str(self.higgsdecay()))
@@ -191,38 +192,54 @@ class Event:
         Zs.sort(key = lambda Z: abs(Z.invmass() - Z.PDGmass()))
         return Zs[which - 1]
 
-    def checkZZassignment(self):
+    def isWW(self):
+        return len(self.higgs().kids()) == 2 and all(kid in globalvariables.W for kid in self.higgs().kids())
+
+    def W(self, which):
+        if not self.isWW():
+            return None
+        Ws = self.higgs().kids()
+        assert(all(W in globalvariables.W for W in Ws))
+        Ws.sort(key = lambda W: abs(W.invmass() - W.PDGmass()))
+        return Ws[which - 1]
+
+    def checkZZorWWassignment(self):
         if (self.higgs() not in globalvariables.decayZZ4l
         and self.higgs() not in globalvariables.decayZZ4q
-        and self.higgs() not in globalvariables.decayZZ4nu):
+        and self.higgs() not in globalvariables.decayZZ4nu
+        and self.higgs() not in globalvariables.decayWW4q
+        and self.higgs() not in globalvariables.decayWW2l2nu):
             return ""
         assert(len(self.higgs().kids()) == 2)
-        Z1 = self.Z(1)
-        Z2 = self.Z(2)
-        assert(Z1 is not None and Z2 is not None)
-        assert(len(Z1.kids()) == len(Z2.kids()) == 2)
-        if particle.ParticleCounter(Z1.kids()) != particle.ParticleCounter(Z2.kids()):
+        ZorW1 = self.Z(1)
+        ZorW2 = self.Z(2)
+        if ZorW1 is None and ZorW2 is None:
+            ZorW1 = self.W(1)
+            ZorW2 = self.W(2)
+        assert(ZorW1 is not None and ZorW2 is not None)
+        assert(len(ZorW1.kids()) == len(ZorW2.kids()) == 2)
+        if particle.ParticleCounter(ZorW1.kids()) != particle.ParticleCounter(ZorW2.kids()):
             return ""
-        Z1kid1 = Z1.kids()[0]
-        altZ1kid1 = [kid for kid in Z2.kids() if particletype.ParticleType(kid) == particletype.ParticleType(Z1kid1)]
-        Z1kid2 = Z1.kids()[1]
-        altZ1kid2 = [kid for kid in Z2.kids() if particletype.ParticleType(kid) == particletype.ParticleType(Z1kid2)]
-        if len(altZ1kid1) == len(altZ1kid2) == 0:
+        ZorW1kid1 = ZorW1.kids()[0]
+        altZorW1kid1 = [kid for kid in ZorW2.kids() if particletype.ParticleType(kid) == particletype.ParticleType(ZorW1kid1)]
+        ZorW1kid2 = ZorW1.kids()[1]
+        altZorW1kid2 = [kid for kid in ZorW2.kids() if particletype.ParticleType(kid) == particletype.ParticleType(ZorW1kid2)]
+        if len(altZorW1kid1) == len(altZorW1kid2) == 0:
             return ""
-        elif len(altZ1kid1) == len(altZ1kid2) == 1:
+        elif len(altZorW1kid1) == len(altZorW1kid2) == 1:
             pass
         else:
             assert(0)
-        altZ1kid1 = altZ1kid1[0]
-        altZ1kid2 = altZ1kid2[0]
+        altZorW1kid1 = altZorW1kid1[0]
+        altZorW1kid2 = altZorW1kid2[0]
 
-        altZ1momentum = Z1kid1.momentum() + altZ1kid2.momentum()
-        altZ2momentum = Z1kid2.momentum() + altZ1kid1.momentum()
-        altmass = min(altZ1momentum.M(), altZ2momentum.M(), key = lambda mass: abs(mass - Z1.PDGmass()))
-        if abs(altmass - Z1.PDGmass()) < abs(Z1.invmass() - Z1.PDGmass()):
-            return ("Alternate Z has closer mass to m_Z than listed Z! " + str(self.linenumber) + "\n" +
-                    "listed Z mass    = " + str(Z1.invmass()) + "\n" +
-                    "alternate Z mass = " + str(altmass) + "\n")
+        altZorW1momentum = ZorW1kid1.momentum() + altZorW1kid2.momentum()
+        altZorW2momentum = ZorW1kid2.momentum() + altZorW1kid1.momentum()
+        altmass = min(altZorW1momentum.M(), altZorW2momentum.M(), key = lambda mass: abs(mass - ZorW1.PDGmass()))
+        if abs(altmass - ZorW1.PDGmass()) < abs(ZorW1.invmass() - ZorW1.PDGmass()):
+            return ("Alternate %s has closer mass to m_%s than listed %s! " + str(self.linenumber) + "\n" +
+                    "listed %s mass    = " + str(ZorW1.invmass()) + "\n" +
+                    "alternate %s mass = " + str(altmass) + "\n") % str(ZorW1)
 
     def getdecayangles(self):
         globalvariables.costheta1[0] = -999

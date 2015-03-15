@@ -10,7 +10,7 @@ count2l2levents = True        #counts the total number of events with l+l- l+l-,
                               #  could be the same or different
 countVHdecaytype = True       #prints the breakup of VH decay types
 checklnu2qcharge = False      #for H->WW->lnu2q, checks the charge on the leptons
-checkZZassignment = True      #check that, in symmetric decays, the Zs are assigned so that one has mass as close as possible to m_Z
+checkZZorWWassignment = True  #check that, in symmetric decays, the Zs/Ws are assigned so that one has mass as close as possible to m_Z/m_W
 
 raiseerror = False            #if this is true, raises an IOError when something is wrong
                               #otherwise just prints it
