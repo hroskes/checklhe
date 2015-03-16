@@ -5,6 +5,8 @@ tempargv = sys.argv
 sys.argv = ['-b']
 import ROOT
 sys.argv = tempargv
+#Try both ways
+ROOT.gROOT.SetBatch(True)
 
 import particle
 import event
