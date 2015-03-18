@@ -62,6 +62,7 @@ for file in sys.argv[1:]:
             if "</event>" in line:
                 if not inevent:
                     raiseerror("Extra </event>! " + str(linenumber))
+                    continue
                 ev = event.Event(particle.particlelist, eventline)
                 ev.process()
                 check = ev.check()
