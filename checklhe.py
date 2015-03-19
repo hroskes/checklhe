@@ -2,9 +2,9 @@ import sys
 
 #https://root.cern.ch/phpBB3/viewtopic.php?t=3198
 tempargv = sys.argv
-sys.argv = ['-b']
+sys.argv.insert(0, '-b')
 import ROOT
-sys.argv = tempargv
+del sys.argv[0]
 #Try both ways
 ROOT.gROOT.SetBatch(True)
 
