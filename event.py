@@ -4,6 +4,7 @@ import particlecategory
 import globalvariables
 import config
 import momentum
+import vertex
 from math import copysign, acos
 
 class Event:
@@ -78,24 +79,20 @@ class Event:
 
     def checkmomentum(self):
         results = []
-        for p in self.decaylist:
-            mommomentum = p.momentum()
-            kidsmomentum = sum([kid.momentum() for kid in p.kids()], momentum.Momentum(0, 0, 0, 0))
-            if mommomentum != kidsmomentum:
+        for v in vertex.vertices.values():
+            if v.momentumin() != v.momentumout():
                 results.append("no momentum conservation! " + str(self.linenumber) + "\n" +
-                               "mom momentum  = " + str(mommomentum) + "("  + str(p) + ")\n" +
-                               "kids momentum = " + str(kidsmomentum) + "(" + ", ".join([str(kid) for kid in p.kids()]) + ")")
+                               "mom momentum  = " + str(v.momentumin()) + str(v.particlesin()) + "\n" +
+                               "kids momentum = " + str(v.momentumout()) + str(v.particlesout()))
         return "\n".join(results)
 
     def checkcharge(self):
         results = []
-        for p in self.decaylist:
-            momcharge = p.charge()
-            kidscharge = sum([kid.charge() for kid in p.kids()])
-            if momcharge != kidscharge:
+        for v in vertex.vertices.values():
+            if v.chargein() != v.chargeout():
                 results.append("no charge conservation! " + str(self.linenumber) + "\n" +
-                               "mom charge  = " + str(momcharge) + "("  + str(p) + ")\n" +
-                               "kids charge = " + str(kidscharge) + "(" + ", ".join([str(kid) for kid in p.kids()]) + ")")
+                               "mom charge  = " + str(v.chargein()) + str(v.particlesin()) + "\n" +
+                               "kids charge = " + str(v.chargeout()) + str(v.particlesout()))
         return "\n".join(results)
 
     def count4l(self):

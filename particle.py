@@ -7,16 +7,19 @@ import particletype
 import particlecategory
 import globalvariables
 import config
+import vertex
 
 particlelist = usefulstuff.printablelist([])
 
 def newevent():
     del particlelist[:]
     momentum.newevent()
+    vertex.newevent()
     particlelist.append(None)
 
 class Particle(particletype.ParticleType):
     def __init__(self, line):
+        self.__line = line
         data = line.split()
         if len(data) < 13:
             raise ValueError("This line is not a valid particle line.  Not enough entries.")
@@ -25,7 +28,8 @@ class Particle(particletype.ParticleType):
         self.__momentum = momentum.Momentum(float(data[6]), float(data[7]), float(data[8]), float(data[9]))
         self.__lhemass = float(data[10])
         particlelist.append(self)
-        self.__mothers = [particlelist[int(data[2])], particlelist[int(data[3])]]
+        self.__mothers = usefulstuff.printablefrozenset([particlelist[int(data[2])], particlelist[int(data[3])]])
+        vertex.vertices[self.mothers()].addkid(self)
         self.__kids = usefulstuff.printablelist([])
         for particle in particlelist[1:]:
             if particle in self.mothers():
@@ -35,6 +39,8 @@ class Particle(particletype.ParticleType):
        return self is other
     def __ne__(self, other):
        return not self == other
+    def __hash__(self):
+       return hash(self.__line)
 
     def status(self):
         return self.__status
