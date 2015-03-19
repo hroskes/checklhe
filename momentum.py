@@ -45,7 +45,7 @@ class Momentum(ROOT.TLorentzVector):
         return super(Momentum, self).Rotate(*args)
 
     def __eq__(self, other):
-        return (self-other).P()**2 + (self-other).E()**2 < config.momentumtolerance
+        return (self-other).P()**2 + (self-other).E()**2 < config.momentumtolerance**2
     def __ne__(self, other):
         return not (self == other)
     def __neg__(self):

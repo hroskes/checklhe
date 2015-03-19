@@ -20,8 +20,8 @@ makeZZmassestree    = True    #For ZZ->4l events, makes a tree of the Z1, Z2, Hi
 tree = any([makedecayanglestree, makeZZmassestree])
 
 
-momentumtolerance = 1e-4
-invmasstolerance = 7e-2
+momentumtolerance = 1e-4      #GeV
+invmasstolerance = 7e-2       #GeV
 PDGmasstolerance = 0.01       #relative
 
 
