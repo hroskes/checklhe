@@ -51,9 +51,9 @@ class Particle(particletype.ParticleType):
         self.startvertex.addkid(self)
 
         if self.color() != 0:
-            color.colors[self.color].addparticle(self)
+            color.colors[self.color()].addparticle(self)
         if self.anticolor() != 0:
-            color.colors[self.anticolor].addparticle(self)
+            color.colors[self.anticolor()].addparticle(self)
 
     def __eq__(self, other):
        return self is other

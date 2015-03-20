@@ -104,7 +104,7 @@ class Event:
         results = []
         for c in color.colors.values():
             if not c.check():
-                results.append("color line " + str(c.id()) + " doesn't make sense! " + str(self.linenumber) + "\n" +
+                results.append("color line " + str(c.id) + " doesn't make sense! " + str(self.linenumber) + "\n" +
                                "particles involved: " + str(c.particles.union(c.antiparticles)))
                 
 

@@ -7,9 +7,9 @@ class Color(object):
         self.antiparticles = usefulstuff.printableset()
 
     def addparticle(self, p):
-        if p.color == self.id:
+        if p.color() == self.id:
             self.particles.add(p)
-        if p.anticolor == self.id:
+        if p.anticolor() == self.id:
             self.antiparticles.add(p)
 
     def check(self):
