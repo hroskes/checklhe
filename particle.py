@@ -8,6 +8,7 @@ import particlecategory
 import globalvariables
 import config
 import vertex
+import color
 
 particlelist = usefulstuff.printablelist([])
 
@@ -15,25 +16,44 @@ def newevent():
     del particlelist[:]
     momentum.newevent()
     vertex.newevent()
+    color.newevent()
     particlelist.append(None)
 
 class Particle(particletype.ParticleType):
-    def __init__(self, line):
+    def __init__(self, line, eventline):
         self.__line = line
+        self.__eventline = eventline
         data = line.split()
         if len(data) < 13:
             raise ValueError("This line is not a valid particle line.  Not enough entries.")
         super(Particle, self).__init__(int(data[0]))
         self.__status = int(data[1])
+        self.__color = int(data[4])
+        self.__anticolor = int(data[5])
         self.__momentum = momentum.Momentum(float(data[6]), float(data[7]), float(data[8]), float(data[9]))
         self.__lhemass = float(data[10])
         particlelist.append(self)
         self.__mothers = usefulstuff.printablefrozenset([particlelist[int(data[2])], particlelist[int(data[3])]])
-        vertex.vertices[self.mothers()].addkid(self)
         self.__kids = usefulstuff.printablelist([])
         for particle in particlelist[1:]:
             if particle in self.mothers():
                 particle.kids().append(self)
+
+        self.startvertex = vertex.vertices[self.mothers()]
+        self.endvertex = None
+        for mother in self.mothers():
+            if mother is None:
+                continue
+            if mother.endvertex is None:
+                mother.endvertex = self.startvertex
+            elif mother.endvertex is not self.startvertex:
+                self.__event.miscellaneouschecks += [mother + " decays in multiple vertices!" + str(self.__eventline)]
+        self.startvertex.addkid(self)
+
+        if self.color() != 0:
+            color.colors[self.color].addparticle(self)
+        if self.anticolor() != 0:
+            color.colors[self.anticolor].addparticle(self)
 
     def __eq__(self, other):
        return self is other
@@ -44,6 +64,10 @@ class Particle(particletype.ParticleType):
 
     def status(self):
         return self.__status
+    def color(self):
+        return self.__color
+    def anticolor(self):
+        return self.__anticolor
     def mothers(self):
         return self.__mothers
     def kids(self):

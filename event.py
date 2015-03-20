@@ -5,6 +5,7 @@ import globalvariables
 import config
 import momentum
 import vertex
+import color
 from math import copysign, acos
 
 class Event:
@@ -18,6 +19,8 @@ class Event:
 
         globalvariables.anyevent.increment()
 
+        self.miscellaneouschecks = []
+
         self.checkfunctions = []
         if config.checkinvmass:
             self.checkfunctions.append(self.checkinvmass)
@@ -27,12 +30,14 @@ class Event:
             self.checkfunctions.append(self.checkmomentum)
         if config.checkcharge:
             self.checkfunctions.append(self.checkcharge)
+        if config.checkcolor:
+            self.checkfunctions.append(self.checkcolor)
+        if config.checkZZorWWassignment:
+            self.checkfunctions.append(self.checkZZorWWassignment)
         if config.counthiggsdecaytype:
             self.checkfunctions.append(self.checkhiggsdecay)
         if config.countVHdecaytype and self.isVH():
             self.checkfunctions.append(self.checkVdecay)
-        if config.checkZZorWWassignment:
-            self.checkfunctions.append(self.checkZZorWWassignment)
 
         self.processfunctions = []
         if config.makedecayanglestree:
@@ -55,7 +60,7 @@ class Event:
             prcs()
 
     def check(self):
-        checks = [chk() for chk in self.checkfunctions]
+        checks = self.miscellaneouschecks + [chk() for chk in self.checkfunctions]
         return "\n".join([chk for chk in checks if chk])
 
     def checkinvmass(self):
@@ -94,6 +99,14 @@ class Event:
                                "mom charge  = " + str(v.chargein()) + str(v.particlesin()) + "\n" +
                                "kids charge = " + str(v.chargeout()) + str(v.particlesout()))
         return "\n".join(results)
+
+    def checkcolor(self):
+        results = []
+        for c in color.colors.values():
+            if not c.check():
+                results.append("color line " + str(c.id()) + " doesn't make sense! " + str(self.linenumber) + "\n" +
+                               "particles involved: " + str(c.particles.union(c.antiparticles)))
+                
 
     def count4l(self):
         if self.count(globalvariables.leptons) >= 4:

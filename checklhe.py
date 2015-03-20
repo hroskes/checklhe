@@ -76,7 +76,7 @@ for file in sys.argv[1:]:
 
             counter += 1
             try:
-                p = particle.Particle(line)
+                p = particle.Particle(line, eventline)
             except ValueError:
                 continue
 
