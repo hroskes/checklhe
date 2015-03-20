@@ -37,6 +37,8 @@ class Vertex(object):
 
 class Vertices(dict):
     def __missing__(self, item):
+        if all(a is None for a in item):
+            return None
         itemlist = list(item)
         if len(itemlist) == 1:
             itemlist.append(itemlist[0])

@@ -17,10 +17,14 @@ class Color(object):
 
 
 def linemakessense(particles, antiparticles, start = None, end = None):
+    particles = particles.copy()
+    antiparticles = antiparticles.copy()
     if not particles.isdisjoint(antiparticles):
         raise NotImplementedError("Color checking is not implemented for color singlets.  Feel free to extend it.")
 
     if len(particles) == len(antiparticles) == 0:
+        return True
+    if start is not None and end is not None and start is end and len(particles) + len(antiparticles) == 1 and (start in particles or start in antiparticles):
         return True
 
     for p in particles:
@@ -28,11 +32,19 @@ def linemakessense(particles, antiparticles, start = None, end = None):
             if start is not None and start is not p:
                 return False
             start = p
+        if p.endvertex is None:
+            if end is not None and end is not p:
+                return False
+            end = p
     for p in antiparticles:
         if p.endvertex is None:
             if start is not None and start is not p:
                 return False
             start = p
+        if p.startvertex is None:
+            if end is not None and end is not p:
+                return False
+            end = p
     if start is None and end is not None or start is not None and end is None:
         return False
 
@@ -54,6 +66,9 @@ def linemakessense(particles, antiparticles, start = None, end = None):
             antiparticles.remove(start)
     else:
         assert(0)
+
+    if len(particles) == len(antiparticles) == 0:
+        return True
 
     possiblenextparticles = usefulstuff.printableset()
     for p in particles:

@@ -48,7 +48,8 @@ class Particle(particletype.ParticleType):
                 mother.endvertex = self.startvertex
             elif mother.endvertex is not self.startvertex:
                 self.__event.miscellaneouschecks += [mother + " decays in multiple vertices!" + str(self.__eventline)]
-        self.startvertex.addkid(self)
+        if self.startvertex is not None:
+            self.startvertex.addkid(self)
 
         if self.color() != 0:
             color.colors[self.color()].addparticle(self)

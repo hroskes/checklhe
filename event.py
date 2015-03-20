@@ -106,7 +106,7 @@ class Event:
             if not c.check():
                 results.append("color line " + str(c.id) + " doesn't make sense! " + str(self.linenumber) + "\n" +
                                "particles involved: " + str(c.particles.union(c.antiparticles)))
-                
+        return "\n".join(results)
 
     def count4l(self):
         if self.count(globalvariables.leptons) >= 4:
