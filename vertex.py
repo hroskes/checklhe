@@ -9,6 +9,9 @@ class Vertex(object):
     def __hash__(self):
         return hash(tuple(a for a in self.__in))
 
+    def __str__(self):
+        return str(self.__in) + " --> " + str(self.__out)
+
     def addkid(self, kid):
         if not set(self.__in for mom in kid.mothers()):
             raise ValueError("Trying to add particle '%s' to a vertex '%s', but its mothers '%s' are different from the vertex!" % kid, self.__in, kid.mothers())
