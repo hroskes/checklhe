@@ -2,6 +2,7 @@ import particle
 import particletype
 import particlecategory
 import globalvariables
+import usefulstuff
 import config
 import momentum
 import vertex
@@ -10,7 +11,7 @@ from math import copysign, acos
 
 class Event:
     def __init__(self, particlelist, linenumber):
-        self.particlelist = [p for p in particlelist if p is not None]
+        self.particlelist = usefulstuff.printablelist([p for p in particlelist if p is not None])
         self.particlecounter = particle.ParticleCounter(particlelist)
         self.linenumber = linenumber
 
@@ -19,7 +20,7 @@ class Event:
 
         globalvariables.anyevent.increment()
 
-        self.miscellaneouschecks = []
+        self.miscellaneouschecks = sum(([a + " " + str(self.linenumber) for a in b] for b in particlelist[1:].miscellaneouschecks),[])
 
         self.checkfunctions = []
         if config.checkinvmass:

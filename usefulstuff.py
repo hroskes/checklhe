@@ -1,6 +1,12 @@
 class printablelist(list):
     def __str__(self, joiner = ", "):
         return "[" + joiner.join(str(a) for a in self) + "]"
+    def __getitem__(self, key):
+        if isinstance(key, slice):
+            return printablelist(super(printablelist, self).__getitem__(key))
+        return super(printablelist,self).__getitem__(key)
+    def __getslice__(self, i, j):
+        return self.__getitem__(slice(i, j))
     def __getattr__(self, name):
         return printablelist([(a if a is None else a.__getattribute__(name)) for a in self])
     def __call__(self, *args, **kwargs):

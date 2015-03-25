@@ -20,18 +20,26 @@ def newevent():
     particlelist.append(None)
 
 class Particle(particletype.ParticleType):
-    def __init__(self, line, eventline):
+    def __init__(self, line):
         self.__line = line
-        self.__eventline = eventline
+        self.miscellaneouschecks = []
         data = line.split()
         if len(data) < 13:
-            raise ValueError("This line is not a valid particle line.  Not enough entries.")
+            raise IndexError("This line is not a valid particle line.  Not enough entries.")
         super(Particle, self).__init__(int(data[0]))
         self.__status = int(data[1])
         self.__color = int(data[4])
         self.__anticolor = int(data[5])
         self.__momentum = momentum.Momentum(float(data[6]), float(data[7]), float(data[8]), float(data[9]))
         self.__lhemass = float(data[10])
+        try:
+            self.__lifetime = float(data[11])
+        except ValueError:
+            self.miscellaneouschecks.append("Lifetime for " + str(self) + " is " + data[11] + " instead of a number!")
+        try:
+            self.__spin = float(data[12])
+        except ValueError:
+            self.miscellaneouschecks.append("Spin for " + str(self) + " is " + data[12] + " instead of a number!")
         particlelist.append(self)
         self.__mothers = usefulstuff.printablefrozenset([particlelist[int(data[2])], particlelist[int(data[3])]])
         self.__kids = usefulstuff.printablelist([])
@@ -47,7 +55,7 @@ class Particle(particletype.ParticleType):
             if mother.endvertex is None:
                 mother.endvertex = self.startvertex
             elif mother.endvertex is not self.startvertex:
-                self.__event.miscellaneouschecks += [mother + " decays in multiple vertices!" + str(self.__eventline)]
+                self.miscellaneouschecks.append(str(mother) + " decays in multiple vertices!")
         if self.startvertex is not None:
             self.startvertex.addkid(self)
 
