@@ -10,10 +10,11 @@ import color
 from math import copysign, acos
 
 class Event:
-    def __init__(self, particlelist, linenumber):
+    def __init__(self, linenumber, firstline, particlelist):
         self.particlelist = usefulstuff.printablelist([p for p in particlelist if p is not None])
         self.particlecounter = particle.ParticleCounter(particlelist)
         self.linenumber = linenumber
+        self.firstline = firstline
 
         self.decaylist = [p for p in self.particlelist if p.status() == 2]
         self.incoming = [p for p in self.particlelist if p.status() == -1]
@@ -23,6 +24,8 @@ class Event:
         self.miscellaneouschecks = sum(([a + " " + str(self.linenumber) for a in b] for b in particlelist[1:].miscellaneouschecks),[])
 
         self.checkfunctions = []
+        if config.checkfirstline:
+            self.checkfunctions.append(self.checkfirstline)
         if config.checkinvmass:
             self.checkfunctions.append(self.checkinvmass)
         if config.checkPDGmass:
@@ -63,6 +66,37 @@ class Event:
     def check(self):
         checks = self.miscellaneouschecks + [chk() for chk in self.checkfunctions]
         return "\n".join([chk for chk in checks if chk])
+
+    def checkfirstline(self):
+        results = []
+        firstlinedata = self.firstline.split()
+        try:
+            Nparticles = int(firstlinedata[0])
+            if Nparticles != len(list(self.particlecounter.elements())):
+                results.append(str(len(list(self.particlecounter.elements()))) + " particles in the event, but " + str(Nparticles) + " recorded in the first line!" + str(self.linenumber))
+        except ValueError:
+            results.append("Number of particles is " + firstlinedata[0] + ", not an integer! " + str(self.linenumber))
+        try:
+            processid = int(firstlinedata[1])
+        except ValueError:
+            results.append("Process id is " + firstlinedata[1] + ", not an integer! " + str(self.linenumber))
+        try:
+            eventweight = float(firstlinedata[2])
+        except ValueError:
+            results.append("Event weight is " + firstlinedata[2] + ", not a number! " + str(self.linenumber))
+        try:
+            scale = float(firstlinedata[3])
+        except ValueError:
+            results.append("Scale is " + firstlinedata[3] + ", not a number! " + str(self.linenumber))
+        try:
+            scale = float(firstlinedata[4])
+        except ValueError:
+            results.append("alphaQED is " + firstlinedata[4] + ", not a number! " + str(self.linenumber))
+        try:
+            scale = float(firstlinedata[5])
+        except ValueError:
+            results.append("alphaQCD is " + firstlinedata[5] + ", not a number! " + str(self.linenumber))
+
 
     def checkinvmass(self):
         results = []

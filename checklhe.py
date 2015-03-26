@@ -28,6 +28,7 @@ for file in sys.argv[1:]:
     print file
     with open(file) as f:
         inevent = False
+        firstline = None
         linenumber = 0
         globalvariables.eventcounter = collections.Counter()
         globalvariables.foundhiggsmass = False
@@ -63,7 +64,8 @@ for file in sys.argv[1:]:
                 if not inevent:
                     raiseerror("Extra </event>! " + str(linenumber))
                     continue
-                ev = event.Event(particle.particlelist, eventline)
+                ev = event.Event(eventline, firstline, particle.particlelist)
+                firstline = None
                 ev.process()
                 check = ev.check()
                 if check:
@@ -72,6 +74,10 @@ for file in sys.argv[1:]:
                 inevent = False
                 continue
             if not inevent:
+                continue
+
+            if firstline is None:
+                firstline = line
                 continue
 
             counter += 1
