@@ -126,7 +126,7 @@ class DecayType(ParticleCounter):
             i += 1
             done = True
             for p in decayparticles[:]:
-                if p.status() == 2:
+                if p.kids():
                     done = False
                     decayparticles.remove(p)
                     decayparticles += p.kids()

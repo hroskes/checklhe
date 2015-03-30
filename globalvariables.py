@@ -9,7 +9,7 @@ startedinit = False
 finishedinit = False
 
 def init():
-    global electrons, muons, taus, leptons, neutrinos, uptypequarks, downtypequarks, quarks, neutralbosons, weakbosons, W, Z, higgs
+    global electrons, muons, taus, leptons, neutrinos, uptypequarks, downtypequarks, quarks, neutralbosons, weakbosons, gluon, photon, Z, W, higgs
     global neutralbosons
     global decayZZ4l, decayZZ2l2nu, decayZZ2l2q, decayZZ4nu, decayZZ2q2nu, decayZZ4q
     global decayWW2l2nu, decayWW4q, decayWWlnu2q
@@ -32,9 +32,11 @@ def init():
         uptypequarks = particlecategory.ParticleCategory([2, 4, 6])
         downtypequarks = particlecategory.ParticleCategory([1, 3, 5])
         quarks = uptypequarks.union(downtypequarks)
+        gluon = particlecategory.ParticleCategory([21])
+        photon = particlecategory.ParticleCategory([22])
         weakbosons = particlecategory.ParticleCategory([23, 24])
-        W = particlecategory.ParticleCategory([24])
         Z = particlecategory.ParticleCategory([23])
+        W = particlecategory.ParticleCategory([24])
         higgs = particlecategory.ParticleCategory([25])
         print "initialized particle categories"
 

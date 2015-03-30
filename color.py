@@ -15,6 +15,9 @@ class Color(object):
     def check(self):
         return linemakessense(self.particles, self.antiparticles)
 
+    def __str__(self):
+        return str(self.id)
+
 
 def linemakessense(particles, antiparticles, start = None, end = None):
     particles = particles.copy()

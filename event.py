@@ -16,7 +16,7 @@ class Event:
         self.linenumber = linenumber
         self.firstline = firstline
 
-        self.decaylist = [p for p in self.particlelist if p.status() == 2]
+        self.decaylist = [p for p in self.particlelist if p.kids()]
         self.incoming = [p for p in self.particlelist if p.status() == -1]
 
         globalvariables.anyevent.increment()
@@ -26,6 +26,8 @@ class Event:
         self.checkfunctions = []
         if config.checkfirstline:
             self.checkfunctions.append(self.checkfirstline)
+        if config.checkstatus:
+            self.checkfunctions.append(self.checkstatus)
         if config.checkinvmass:
             self.checkfunctions.append(self.checkinvmass)
         if config.checkPDGmass:
@@ -97,6 +99,27 @@ class Event:
         except ValueError:
             results.append("alphaQCD is " + firstlinedata[5] + ", not a number! " + str(self.linenumber))
 
+    def checkstatus(self):
+        results = []
+        for p in self.particlelist:
+            if p.status() not in [-1, 1, -2, 2, 3, -9]:
+                results.append("Particle " + str(p) + " has unknown status " + str(p.status()) +  "! " + str(self.linenumber))
+
+            if (p.status() == -1 or p.status() == -9) and any(p.mothers()):
+                results.append("Particle " + str(p) + " with status " + str(p.status()) + " has mothers " + str(p.mothers()) + "! " + str(self.linenumber))
+            if p.status() != -1 and p.status() != -9 and not any(p.mothers()):
+                results.append("Particle " + str(p) + " with status " + str(p.status()) + " has no mothers! " + str(self.linenumber))
+
+            if p.status() == 1 and p.kids():
+                results.append("Particle " + str(p) + " with status 1 has kids " + str(p.kids()) + "! " + str(self.linenumber))
+            if p.status() != 1 and not p.kids():
+                results.append("Particle " + str(p) + " with status " + str(p.status()) + " has no kids! " + str(self.linenumber))
+
+            if p.status() == -2 and p.lhemass() > 0:
+                results.append("Particle " + str(p) + " with status -2 has m = " + str(p.lhemass()) + " > 0! " + str(self.linenumber))
+            if p.status() != -2 and p.status() != 3 and p.lhemass() < 0:
+                results.append("Particle " + str(p) + " with status " + str(p.status()) + " has m = " + str(p.lhemass()) + " < 0! " + str(self.linenumber))
+        return "\n".join(results)
 
     def checkinvmass(self):
         results = []
@@ -137,9 +160,20 @@ class Event:
 
     def checkcolor(self):
         results = []
+        for p in self.particlelist:
+            if not p.color() and ((p in globalvariables.quarks and p.id() > 0) or p in globalvariables.gluon):
+                results.append(str(p) + " has no color! " + str(self.linenumber))
+            if p.color() and not ((p in globalvariables.quarks and p.id() > 0) or p in globalvariables.gluon):
+                results.append(str(p) + " has color " + str(p.color()) + "! " + str(self.linenumber))
+
+            if not p.anticolor() and ((p in globalvariables.quarks and p.id() < 0) or p in globalvariables.gluon):
+                results.append(str(p) + " has no anticolor! " + str(self.linenumber))
+            if p.anticolor() and not ((p in globalvariables.quarks and p.id() < 0) or p in globalvariables.gluon):
+                results.append(str(p) + " has anticolor " + str(p.anticolor()) + "! " + str(self.linenumber))
+
         for c in color.colors.values():
             if not c.check():
-                results.append("color line " + str(c.id) + " doesn't make sense! " + str(self.linenumber) + "\n" +
+                results.append("color line " + str(c) + " doesn't make sense! " + str(self.linenumber) + "\n" +
                                "particles involved: " + str(c.particles.union(c.antiparticles)))
         return "\n".join(results)
 
@@ -174,7 +208,7 @@ class Event:
         return particle.DecayType(self.higgs(), level)
 
     def checkhiggsdecay(self):
-        if self.higgs().status() != 2:
+        if not self.higgs().kids():
             return ""
         for family in globalvariables.decayfamiliestoplevel:
             if self.higgs() in family:
