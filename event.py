@@ -54,6 +54,8 @@ class Event:
             self.processfunctions.append(self.count4l)
         if config.count2l2levents:
             self.processfunctions.append(self.count2l2l)
+        if config.countallleptonnumbers:
+            self.processfunctions.append(self.countallleptonnumbers)
         if config.tree:
             self.anythingtofill = False
             self.processfunctions.append(self.filltree)
@@ -192,6 +194,15 @@ class Event:
         haslplm = [min(hasl[f][1], hasl[f][-1]) for f in flavors]
         if sum(haslplm) >= 2:
             globalvariables.any2l2l.increment()
+
+    def countallleptonnumbers(self):
+        for i in globalvariables.leptoncount:
+            if self.count(globalvariables.leptons) == i:
+                globalvariables.leptoncount[i].increment()
+                return
+        else:
+            raise RuntimeError(str(self.count(globalvariables.leptons)) + "leptons in event! " + str(self.linenumber) + "\n" +
+                               "increase the range of globalvariables.leptoncount")
 
     def higgs(self):
         higgs = [p for p in self.particlelist if str(p) == "H"]

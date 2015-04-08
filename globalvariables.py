@@ -14,7 +14,7 @@ def init():
     global decayZZ4l, decayZZ2l2nu, decayZZ2l2q, decayZZ4nu, decayZZ2q2nu, decayZZ4q
     global decayWW2l2nu, decayWW4q, decayWWlnu2q
     global HZZ, HWW, ZH, WH, VH
-    global any2l2l, any4l, anyevent
+    global any2l2l, any4l, anyevent, leptoncount
     global decayfamiliesZZ4l, decayfamiliesZZ2l2nu, decayfamiliesWW2l2nu, decayfamiliesZZ2l2q, decayfamiliesWWlnu2q
     global decayfamiliestoplevel
     global startedinit, finishedinit
@@ -152,12 +152,17 @@ def init():
             print "initialized VH decay"
 
         #big categories
+        leptoncount = {}
+        for i in range(10):
+            leptoncount[i] = particle.EventCount("exactly" + str(i) + "l", [])
+
         any2l2lsubcats = []
         if config.counthiggsdecaytype:
             any2l2lsubcats.append(decayZZ4l)
         any2l2l = particle.EventCount("2l2l", any2l2lsubcats)
-        any4l = particle.EventCount("4l", [any2l2l])
-        anyeventsubcats = [any4l]
+        any4l = particle.EventCount("4l", [any2l2l, leptoncount[4]])
+
+        anyeventsubcats = [(leptoncount[i] if i != 4 else any4l) for i in leptoncount]
         if config.counthiggsdecaytype:
             anyeventsubcats += [HZZ, HWW]
         if config.countVHdecaytype:

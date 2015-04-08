@@ -18,6 +18,7 @@ counthiggsdecaytype = True    #prints the breakup of Higgs decay types
 count4levents = True          #counts the total number of events with 4 leptons
 count2l2levents = True        #counts the total number of events with l+l- l+l-, where the first flavor and the second flavor
                               #  could be the same or different
+countallleptonnumbers = False #count events with 1 lepton, 2 leptons, ...
 countVHdecaytype = True       #prints the breakup of VH decay types
 checklnu2qcharge = False      #for H->WW->lnu2q, check the charge on the leptons instead of the lepton flavor
 
