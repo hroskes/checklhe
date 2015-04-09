@@ -185,15 +185,30 @@ class Event:
 
     def count2l2l(self):
         leptons = [p for p in self.particlelist if p in globalvariables.leptons]
-        flavors = [globalvariables.electrons, globalvariables.muons, globalvariables.taus]
+        e = globalvariables.electrons
+        mu = globalvariables.muons
+        tau = globalvariables.taus
+        flavors = [e, mu, tau]
         hasl = {f: {1: 0, -1: 0} for f in flavors}
         for p in leptons:
             for f in flavors:
                 if p in f:
                     hasl[f][p.charge()] += 1
-        haslplm = [min(hasl[f][1], hasl[f][-1]) for f in flavors]
-        if sum(haslplm) >= 2:
+        haslplm = {f: min(hasl[f][1], hasl[f][-1]) for f in flavors}
+        npairs = sum(haslplm[f] for f in haslplm)
+        if config.counttauaseormu:
+            for f in hasl:
+                for charge in hasl[f]:
+                    hasl[charge] -= haslplm[f]
+            for f in [e, mu]:
+                for charge in [1, -1]:
+                    while hasl[f][charge] and hasl[tau][-charge]:
+                        hasl[f][charge] -= 1
+                        hasl[tau][-charge] -= 1
+                        npairs += 1
+        if npairs >= 2:
             globalvariables.any2l2l.increment()
+            return
 
     def countallleptonnumbers(self):
         for i in globalvariables.leptoncount:
