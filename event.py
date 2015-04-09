@@ -199,7 +199,7 @@ class Event:
         if config.counttauaseormu:
             for f in hasl:
                 for charge in hasl[f]:
-                    hasl[charge] -= haslplm[f]
+                    hasl[f][charge] -= haslplm[f]
             for f in [e, mu]:
                 for charge in [1, -1]:
                     while hasl[f][charge] and hasl[tau][-charge]:
@@ -208,7 +208,6 @@ class Event:
                         npairs += 1
         if npairs >= 2:
             globalvariables.any2l2l.increment()
-            return
 
     def countallleptonnumbers(self):
         for i in globalvariables.leptoncount:
