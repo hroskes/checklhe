@@ -15,8 +15,11 @@ import globalvariables
 import particletype
 import usefulstuff
 
-config.checkhiggsdecaytype = False
-config.countVHdecaytype = False
+if __name__ == "__main__":
+    #no need for these here, they make init take longer
+    config.checkhiggsdecaytype = False
+    config.countVHdecaytype = False
+
 globalvariables.init()
 
 
@@ -31,7 +34,6 @@ def count2l2l(leptons):
             if p in f:
                 hasl[f][p.charge()] += 1
     haslplm = {f: min(hasl[f][1], hasl[f][-1]) for f in flavors}
-    npairs = sum(haslplm[f] for f in haslplm)
     if config.counttauaseormu:
         for f in hasl:
             for charge in hasl[f]:
@@ -41,8 +43,15 @@ def count2l2l(leptons):
                 while hasl[f][charge] and hasl[tau][-charge]:
                     hasl[f][charge] -= 1
                     hasl[tau][-charge] -= 1
-                    npairs += 1
-    return npairs >= 2
+                    haslplm[f] += 1
+                while hasl[f][charge] and haslplm[tau]:
+                    hasl[f][charge] -= 1
+                    #disassemble the tau pair, e.g. for f-, take apart tau+tau- and put it into tau+f-
+                    #and then put tau- back in hasl
+                    haslplm[tau] -= 1
+                    hasl[tau][charge] += 1
+                    haslplm[f] += 1
+    return sum(haslplm[f] for f in haslplm) >= 2
 
 
 for file in sys.argv[1:]:

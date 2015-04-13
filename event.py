@@ -7,6 +7,7 @@ import config
 import momentum
 import vertex
 import color
+import checkdebugoutput
 from math import copysign, acos
 
 class Event:
@@ -185,28 +186,7 @@ class Event:
 
     def count2l2l(self):
         leptons = [p for p in self.particlelist if p in globalvariables.leptons]
-        e = globalvariables.electrons
-        mu = globalvariables.muons
-        tau = globalvariables.taus
-        flavors = [e, mu, tau]
-        hasl = {f: {1: 0, -1: 0} for f in flavors}
-        for p in leptons:
-            for f in flavors:
-                if p in f:
-                    hasl[f][p.charge()] += 1
-        haslplm = {f: min(hasl[f][1], hasl[f][-1]) for f in flavors}
-        npairs = sum(haslplm[f] for f in haslplm)
-        if config.counttauaseormu:
-            for f in hasl:
-                for charge in hasl[f]:
-                    hasl[f][charge] -= haslplm[f]
-            for f in [e, mu]:
-                for charge in [1, -1]:
-                    while hasl[f][charge] and hasl[tau][-charge]:
-                        hasl[f][charge] -= 1
-                        hasl[tau][-charge] -= 1
-                        npairs += 1
-        if npairs >= 2:
+        if checkdebugoutput.count2l2l(leptons):
             globalvariables.any2l2l.increment()
 
     def countallleptonnumbers(self):
