@@ -15,14 +15,6 @@ import globalvariables
 import particletype
 import usefulstuff
 
-if __name__ == "__main__":
-    #no need for these here, they make init take longer
-    config.checkhiggsdecaytype = False
-    config.countVHdecaytype = False
-
-globalvariables.init()
-
-
 def count2l2l(leptons):
     e = globalvariables.electrons
     mu = globalvariables.muons
@@ -53,30 +45,43 @@ def count2l2l(leptons):
                     haslplm[f] += 1
     return sum(haslplm[f] for f in haslplm) >= 2
 
+if __name__ == "__main__":
+    #no need for these here, they make init take longer
+    config.checkhiggsdecaytype = False
+    config.countVHdecaytype = False
 
-for file in sys.argv[1:]:
-    print file
-    with open(file) as f:
-        inheader = True
-        inevent = False
-        linenumber = 0
-        for line in f:
-            linenumber += 1
-            if inheader and "leptons in event" not in line:
-                continue
-            if "leptons in event" in line:
-                inheader = False
-                leptons = usefulstuff.printablelist()
-                for lepton in line.split(":")[1].split():
-                    leptons.append(particletype.ParticleType(lepton))
-                shouldaccept = count2l2l(leptons)
-                print leptons, "accept =", shouldaccept,
-                continue
-            if "found" in line:
-                continue
-            if "accept" in line:
-                print "accept"
-            if "reject" in line:
-                print "reject"
-            if "accept" in line and not shouldaccept or "reject" in line and shouldaccept:
-                print "Wrong! " + str(linenumber)
+    globalvariables.init()
+
+    shouldaccept = {True: "accept", False: "reject"}
+
+    for file in sys.argv[1:]:
+        print file
+        with open(file) as f:
+            inheader = True
+            linenumber = 0
+            acceptcounter = 0
+            for line in f:
+                linenumber += 1
+                if inheader and "leptons in event" not in line:
+                    continue
+                if "leptons in event" in line:
+                    inheader = False
+                    leptons = usefulstuff.printablelist()
+                    for lepton in line.split(":")[1].split():
+                        leptons.append(particletype.ParticleType(lepton))
+                    hasOSSF = count2l2l(leptons)
+                    print leptons, "accept =", shouldaccept[hasOSSF],
+                    continue
+                if "found" in line:
+                    continue
+                if "accept" in line:
+                    print "accept"
+                    acceptcounter += 1
+                if "reject" in line and "The number of rejected events exceeds" not in line:
+                    print "reject"
+                if "accept" in line and not shouldaccept or "reject" in line and shouldaccept:
+                    print "Wrong! " + str(linenumber)
+                if "Acceptance Counter:" in line:
+                    naccepted = int(line.split(":")[1])
+                    if acceptcounter != naccepted:
+                        print "Inconsistent!", acceptacounter, "events accepted but Acceptance Counter =", naccepted
