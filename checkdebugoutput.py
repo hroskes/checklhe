@@ -84,4 +84,4 @@ if __name__ == "__main__":
                 if "Acceptance Counter:" in line:
                     naccepted = int(line.split(":")[1])
                     if acceptcounter != naccepted:
-                        print "Inconsistent!", acceptacounter, "events accepted but Acceptance Counter =", naccepted
+                        print "Inconsistent!", acceptcounter, "events accepted but Acceptance Counter =", naccepted
