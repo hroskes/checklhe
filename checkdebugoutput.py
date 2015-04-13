@@ -70,7 +70,7 @@ if __name__ == "__main__":
                     for lepton in line.split(":")[1].split():
                         leptons.append(particletype.ParticleType(lepton))
                     hasOSSF = count2l2l(leptons)
-                    print leptons, "accept =", shouldaccept[hasOSSF],
+                    print leptons, shouldaccept[hasOSSF],
                     continue
                 if "found" in line:
                     continue
@@ -79,7 +79,7 @@ if __name__ == "__main__":
                     acceptcounter += 1
                 if "reject" in line and "The number of rejected events exceeds" not in line:
                     print "reject"
-                if "accept" in line and not shouldaccept or "reject" in line and shouldaccept:
+                if "accept" in line and not hasOSSF or "reject" in line and "The number of rejected events exceeds" not in line and hasOSSF:
                     print "Wrong! " + str(linenumber)
                 if "Acceptance Counter:" in line:
                     naccepted = int(line.split(":")[1])
