@@ -28,18 +28,28 @@ class Particle(particletype.ParticleType):
             raise IndexError("This line is not a valid particle line.  Not enough entries.")
         super(Particle, self).__init__(int(data[0]))
         self.__status = int(data[1])
-        self.__color = int(data[4])
-        self.__anticolor = int(data[5])
+        try:
+            self.__color = int(data[4])
+        except ValueError:
+            self.miscellaneouschecks.append("Color for " + str(self) + " is " + data[4] + " instead of a number!")
+            self.__color = 0
+        try:
+            self.__anticolor = int(data[5])
+        except ValueError:
+            self.miscellaneouschecks.append("Anticolor for " + str(self) + " is " + data[5] + " instead of a number!")
+            self.__color = 0
         self.__momentum = momentum.Momentum(float(data[6]), float(data[7]), float(data[8]), float(data[9]))
         self.__lhemass = float(data[10])
         try:
             self.__lifetime = float(data[11])
         except ValueError:
             self.miscellaneouschecks.append("Lifetime for " + str(self) + " is " + data[11] + " instead of a number!")
+            self.__lifetime = 0
         try:
             self.__spin = float(data[12])
         except ValueError:
             self.miscellaneouschecks.append("Spin for " + str(self) + " is " + data[12] + " instead of a number!")
+            self.__spin = 9
         particlelist.append(self)
         self.__mothers = usefulstuff.printablefrozenset([particlelist[int(data[2])], particlelist[int(data[3])]])
         self.__kids = usefulstuff.printablelist([])
