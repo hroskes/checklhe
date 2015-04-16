@@ -74,12 +74,12 @@ if __name__ == "__main__":
                     continue
                 if "found" in line:
                     continue
-                if "accept" in line:
+                if "accept" in line and "events accepted" not in line:
                     print "accept"
                     acceptcounter += 1
                 if "reject" in line and "The number of rejected events exceeds" not in line:
                     print "reject"
-                if "accept" in line and not hasOSSF or "reject" in line and "The number of rejected events exceeds" not in line and hasOSSF:
+                if "accept" in line and "events accepted" not in line and not hasOSSF or "reject" in line and "The number of rejected events exceeds" not in line and hasOSSF:
                     print "Wrong! " + str(linenumber)
                 if "Acceptance Counter:" in line:
                     naccepted = int(line.split(":")[1])
