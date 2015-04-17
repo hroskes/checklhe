@@ -14,7 +14,9 @@ particlename = {1: "d",
                 22: "gamma",
                 23: "Z",
                 24: "W+",
-                25: "H"}
+                25: "H",
+                32: "Z'",
+                39: "G"}
 
 #PDG, checked March 3, 2015
 PDGmass = {1: 0.0023,        #everything in GeV
@@ -33,7 +35,9 @@ PDGmass = {1: 0.0023,        #everything in GeV
            22: 0,
            23: 91.1876,
            24: 80.385,
-           25: 125.7}
+           25: 125.7,
+           32: None,
+           39: None}
 PDGmasserror = {1: 0.0007,   #everything in GeV
                 2: 0.0005,
                 3: 0.005,
@@ -50,4 +54,6 @@ PDGmasserror = {1: 0.0007,   #everything in GeV
                 22: 1e-27,   #wow
                 23: 0.0021,
                 24: 0.015,
-                25: 0.4}
+                25: 0.4,
+                32: None,
+                39: None}

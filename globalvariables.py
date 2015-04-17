@@ -10,7 +10,6 @@ finishedinit = False
 
 def init():
     global electrons, muons, taus, leptons, neutrinos, uptypequarks, downtypequarks, quarks, neutralbosons, weakbosons, gluon, photon, Z, W, higgs
-    global neutralbosons
     global decayZZ4l, decayZZ2l2nu, decayZZ2l2q, decayZZ4nu, decayZZ2q2nu, decayZZ4q
     global decayWW2l2nu, decayWW4q, decayWWlnu2q
     global HZZ, HWW, ZH, WH, VH
@@ -23,7 +22,7 @@ def init():
         startedinit = True
 
         #Particle categories
-        neutralbosons = particlecategory.ParticleCategory([21, 22, 23, 25], Csymmetric = False)
+        neutralbosons = particlecategory.ParticleCategory([21, 22, 23, 25, 32, 39], Csymmetric = False)
         electrons = particlecategory.ParticleCategory([11])
         muons = particlecategory.ParticleCategory([13])
         taus = particlecategory.ParticleCategory([15])
@@ -37,7 +36,7 @@ def init():
         weakbosons = particlecategory.ParticleCategory([23, 24])
         Z = particlecategory.ParticleCategory([23])
         W = particlecategory.ParticleCategory([24])
-        higgs = particlecategory.ParticleCategory([25])
+        higgs = particlecategory.ParticleCategory([25, 32, 39])
         print "initialized particle categories"
 
         if config.counthiggsdecaytype:

@@ -199,7 +199,7 @@ class Event:
                                "increase the range of globalvariables.leptoncount")
 
     def higgs(self):
-        higgs = [p for p in self.particlelist if str(p) == "H"]
+        higgs = [p for p in self.particlelist if str(p) == "H" or str(p) == "Z'" or str(p) == "G"]
         if len(higgs) == 0:
             raise IOError("No higgs in event! " + str(self.linenumber))
         if len(higgs) > 1:
@@ -223,7 +223,7 @@ class Event:
                 "H -> " + str(self.higgsdecay()))
 
     def ishiggs(self):
-        return len([p for p in self.particlelist if str(p) == "H"]) == 1
+        return len([p for p in self.particlelist if str(p) == "H" or str(p) == "Z'" or str(p) == "G"]) == 1
 
 
 #VH

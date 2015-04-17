@@ -31,7 +31,6 @@ for file in sys.argv[1:]:
         firstline = None
         linenumber = 0
         globalvariables.eventcounter = collections.Counter()
-        globalvariables.foundhiggsmass = False
         if config.tree:
             globalvariables.rootfile = ROOT.TFile(file.replace(".lhe","",1) + '.root', 'recreate')
             globalvariables.tree = ROOT.TTree("tree", "tree")
