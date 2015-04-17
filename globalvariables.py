@@ -99,7 +99,7 @@ def init():
             decayZZ4nu = particle.DecayFamily([[neutrinos, neutrinos, neutrinos, neutrinos]], charge = 0, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "H --> ZZ --> 4nu")
 
             #Higgs decay families
-            HZZ = particle.DecayFamily([[Z, Z]], name = "H --> ZZ", subcategories = [decayZZ4l, decayZZ2l2q, decayZZ2l2nu, decayZZ4q, decayZZ4nu])
+            HZZ = particle.DecayFamily([[Z, Z]], name = "H --> ZZ", subcategories = [decayZZ4l, decayZZ2l2q, decayZZ2l2nu, decayZZ4q, decayZZ4nu, decayZZ2q2nu])
             HWW = particle.DecayFamily([[W, W]], charge = 0, name = "H --> WW", subcategories = [decayWW2l2nu, decayWW4q, decayWWlnu2q])
             decayfamiliestoplevel = [HZZ, HWW]
 
