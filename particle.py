@@ -10,17 +10,13 @@ import config
 import vertex
 import color
 
-particlelist = usefulstuff.printablelist([])
-
 def newevent():
-    del particlelist[:]
     momentum.newevent()
     vertex.newevent()
     color.newevent()
-    particlelist.append(None)
 
 class Particle(particletype.ParticleType):
-    def __init__(self, line):
+    def __init__(self, line, particlelist):
         self.__line = line
         self.miscellaneouschecks = []
         data = line.split()
@@ -50,7 +46,6 @@ class Particle(particletype.ParticleType):
         except ValueError:
             self.miscellaneouschecks.append("Spin for " + str(self) + " is " + data[12] + " instead of a number!")
             self.__spin = 9
-        particlelist.append(self)
         self.__mothers = usefulstuff.printablefrozenset([particlelist[int(data[2])], particlelist[int(data[3])]])
         self.__kids = usefulstuff.printablelist([])
         for particle in particlelist[1:]:

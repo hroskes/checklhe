@@ -53,18 +53,17 @@ for file in sys.argv[1:]:
             if "<event>" in line:
                 if inevent:
                     raiseerror("Extra <event>! " + str(linenumber))
+                    continue
                 inevent = True
-                eventline = linenumber
+                ev = event.Event(linenumber)
                 particle.newevent()
-                counter = -1
                 nleptons = 0
                 continue
             if "</event>" in line:
                 if not inevent:
                     raiseerror("Extra </event>! " + str(linenumber))
                     continue
-                ev = event.Event(eventline, firstline, particle.particlelist)
-                firstline = None
+                ev.finished()
                 ev.process()
                 check = ev.check()
                 if check:
@@ -75,13 +74,12 @@ for file in sys.argv[1:]:
             if not inevent:
                 continue
 
-            if firstline is None:
-                firstline = line
+            if ev.firstline is None:
+                ev.setfirstline(line)
                 continue
 
-            counter += 1
             try:
-                p = particle.Particle(line)
+                ev.addparticle(line)
             except IndexError:
                 continue
 

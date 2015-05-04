@@ -11,18 +11,36 @@ import checkdebugoutput
 from math import copysign, acos
 
 class Event:
-    def __init__(self, linenumber, firstline, particlelist):
-        self.particlelist = usefulstuff.printablelist([p for p in particlelist if p is not None])
-        self.particlecounter = particle.ParticleCounter(particlelist)
+    def __init__(self, linenumber):
         self.linenumber = linenumber
+        self.firstline = None
+        self.particlelist = usefulstuff.printablelist([None])
+        self.done = False
+
+    def setfirstline(self, firstline):
+        if self.firstline is not None:
+            raise ValueError("The first line for this event is already set to:\n" + self.firstline + "\nand cannot be set again to:\n")
         self.firstline = firstline
+
+    def addparticle(self, particleline):
+        if self.firstline is None:
+            raise ValueError("The first line for this event has not been set yet!")
+        if self.done:
+            raise ValueError("finished() has already been called for this event, so no more particles can be added!")
+        self.particlelist.append(particle.Particle(particleline, self.particlelist))
+
+    def finished(self):
+        if self.firstline is None:
+            raise ValueError("The first line for this event has not been set yet!")
+        self.particlelist.remove(None)
+        self.particlecounter = particle.ParticleCounter(self.particlelist)
 
         self.decaylist = [p for p in self.particlelist if p.kids()]
         self.incoming = [p for p in self.particlelist if p.status() == -1]
 
         globalvariables.anyevent.increment()
 
-        self.miscellaneouschecks = sum(([a + " " + str(self.linenumber) for a in b] for b in particlelist[1:].miscellaneouschecks),[])
+        self.miscellaneouschecks = sum(([a + " " + str(self.linenumber) for a in b] for b in self.particlelist[1:].miscellaneouschecks),[])
 
         self.checkfunctions = []
         if config.checkfirstline:
