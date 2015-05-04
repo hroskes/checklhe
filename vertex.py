@@ -46,8 +46,3 @@ class Vertices(dict):
             raise ValueError("The only items that should be added to Vertices are collections of 1 or 2 particles")
         self[item] = Vertex(itemlist[0], itemlist[1])
         return self[item]
-
-vertices = Vertices()
-
-def newevent():
-    vertices.clear()

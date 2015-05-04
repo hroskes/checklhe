@@ -56,7 +56,6 @@ for file in sys.argv[1:]:
                     continue
                 inevent = True
                 ev = event.Event(linenumber)
-                particle.newevent()
                 nleptons = 0
                 continue
             if "</event>" in line:

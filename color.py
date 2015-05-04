@@ -88,8 +88,3 @@ class Colors(dict):
     def __missing__(self, id):
         self[id] = Color(id)
         return self[id]
-
-colors = Colors()
-
-def newevent():
-    colors.clear()

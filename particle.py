@@ -10,12 +10,8 @@ import config
 import vertex
 import color
 
-def newevent():
-    vertex.newevent()
-    color.newevent()
-
 class Particle(particletype.ParticleType):
-    def __init__(self, line, particlelist):
+    def __init__(self, line, ev):
         self.__line = line
         self.miscellaneouschecks = []
         data = line.split()
@@ -45,13 +41,14 @@ class Particle(particletype.ParticleType):
         except ValueError:
             self.miscellaneouschecks.append("Spin for " + str(self) + " is " + data[12] + " instead of a number!")
             self.__spin = 9
-        self.__mothers = usefulstuff.printablefrozenset([particlelist[int(data[2])], particlelist[int(data[3])]])
+        self.__mothers = usefulstuff.printablefrozenset([ev.particlelist[int(data[2])], ev.particlelist[int(data[3])]])
         self.__kids = usefulstuff.printablelist([])
-        for particle in particlelist[1:]:
+        for particle in ev.particlelist[1:]:
             if particle in self.mothers():
                 particle.kids().append(self)
+        ev.particlelist.append(self)
 
-        self.startvertex = vertex.vertices[self.mothers()]
+        self.startvertex = ev.vertices[self.mothers()]
         self.endvertex = None
         for mother in self.mothers():
             if mother is None:
@@ -64,9 +61,9 @@ class Particle(particletype.ParticleType):
             self.startvertex.addkid(self)
 
         if self.color() != 0:
-            color.colors[self.color()].addparticle(self)
+            ev.colors[self.color()].addparticle(self)
         if self.anticolor() != 0:
-            color.colors[self.anticolor()].addparticle(self)
+            ev.colors[self.anticolor()].addparticle(self)
 
     def __eq__(self, other):
        return self is other

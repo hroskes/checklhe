@@ -16,6 +16,8 @@ class Event:
         self.linenumber = linenumber
         self.firstline = None
         self.particlelist = usefulstuff.printablelist([None])
+        self.vertices = vertex.Vertices()
+        self.colors = color.Colors()
         self.done = False
 
     def setfirstline(self, firstline):
@@ -28,7 +30,7 @@ class Event:
             raise ValueError("The first line for this event has not been set yet!")
         if self.done:
             raise ValueError("finished() has already been called for this event, so no more particles can be added!")
-        self.particlelist.append(particle.Particle(particleline, self.particlelist))
+        particle.Particle(particleline, self)
 
     def finished(self):
         if self.firstline is None:
@@ -164,7 +166,7 @@ class Event:
 
     def checkmomentum(self):
         results = []
-        for v in vertex.vertices.values():
+        for v in self.vertices.values():
             if v.momentumin() != v.momentumout():
                 results.append("no momentum conservation! " + str(self.linenumber) + "\n" +
                                "mom momentum  = " + str(v.momentumin()) + str(v.particlesin()) + "\n" +
@@ -173,7 +175,7 @@ class Event:
 
     def checkcharge(self):
         results = []
-        for v in vertex.vertices.values():
+        for v in self.vertices.values():
             if v.chargein() != v.chargeout():
                 results.append("no charge conservation! " + str(self.linenumber) + "\n" +
                                "mom charge  = " + str(v.chargein()) + str(v.particlesin()) + "\n" +
@@ -193,7 +195,7 @@ class Event:
             if p.anticolor() and not ((p in globalvariables.quarks and p.id() < 0) or p in globalvariables.gluon):
                 results.append(str(p) + " has anticolor " + str(p.anticolor()) + "! " + str(self.linenumber))
 
-        for c in color.colors.values():
+        for c in self.colors.values():
             if not c.check():
                 results.append("color line " + str(c) + " doesn't make sense! " + str(self.linenumber) + "\n" +
                                "particles involved: " + str(c.particles.union(c.antiparticles)))
