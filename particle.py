@@ -11,7 +11,6 @@ import vertex
 import color
 
 def newevent():
-    momentum.newevent()
     vertex.newevent()
     color.newevent()
 
@@ -92,6 +91,15 @@ class Particle(particletype.ParticleType):
         return self.__momentum.M()
     def lhemass(self):
         return self.__lhemass
+
+    def Boost(self, *args):
+        self.__momentum.Boost(*args)
+    def Rotate(self, *args):
+        self.__momentum.Rotate(*args)
+    def Vect(self):
+        return self.__momentum.Vect()
+    def BoostVector(self):
+        return self.__momentum.BoostVector()
 
 class ParticleCounter(Counter):
     def __init__(self, particles):

@@ -8,6 +8,7 @@ import momentum
 import vertex
 import color
 import checkdebugoutput
+import ROOT
 from math import copysign, acos
 
 class Event:
@@ -279,6 +280,49 @@ class Event:
 
 #conversion
 
+    def boostall(self, xorvect, y = None, z = None):
+        if y is None and z is not None or y is not None and z is None:
+            raise TypeError
+        if y is None and z is None:
+            for p in self.particlelist:
+                p.Boost(xorvect)
+        else:
+            for p in self.particlelist:
+                p.Boost(x, y, z)
+
+    def boosttocom(self, vect):
+        boostvector = -vect.BoostVector()
+        self.boostall(boostvector)
+
+    def gotoframe(self, frame):
+        self.boosttocom(frame.t)
+        self.rotatetozx(frame.z, frame.x)
+
+    def rotateall(self, angle, axis):
+        for p in self.particlelist:
+            p.Rotate(angle, axis)
+
+    def rotatetozx(self, toz, tozx):
+        try:
+            toz = toz.Vect()
+        except AttributeError:
+            pass
+        try:
+            tozx = tozx.Vect()
+        except AttributeError:
+            pass
+        angle = acos(toz.Unit().Z())
+        axis = toz.Unit().Cross(ROOT.TVector3(0,0,1))
+        if axis == ROOT.TVector3(0,0,0):            #if thisOneGoesToZ cross z = 0, it's in the -z direction and angle = pi, so rotate around y
+            axis = ROOT.TVector3(0,1,0)             #                               or it's in the +z direction and angle = 0, so it doesn't matter.
+        self.rotateall(angle,axis)
+        if tozx is not None:
+            tozx.Rotate(angle,axis)
+
+            angle2 = -tozx.Phi()
+            axis2 = ROOT.TVector3(0,0,1)
+            self.rotateall(angle2,axis2)
+
     def filltree(self):
         if self.anythingtofill:
             globalvariables.tree.Fill()
@@ -361,17 +405,17 @@ class Event:
         for i in leptons:
             if leptons[i] not in globalvariables.leptons:
                 return
-        momentum.boosttocom(Zs[1].momentum())
-        globalvariables.costheta1[0] = -leptons[(1, 1)].momentum().Vect().Unit().Dot(Zs[2].momentum().Vect().Unit())
-        momentum.boosttocom(Zs[2].momentum())
-        globalvariables.costheta2[0] = -leptons[(2, 1)].momentum().Vect().Unit().Dot(Zs[1].momentum().Vect().Unit())
+        self.boosttocom(Zs[1])
+        globalvariables.costheta1[0] = -leptons[(1, 1)].Vect().Unit().Dot(Zs[2].Vect().Unit())
+        self.boosttocom(Zs[2])
+        globalvariables.costheta2[0] = -leptons[(2, 1)].Vect().Unit().Dot(Zs[1].Vect().Unit())
 
-        momentum.boosttocom(self.higgs().momentum())
-        normal1 = leptons[1, 1].momentum().Vect().Cross(leptons[1, -1].momentum().Vect()).Unit()
-        normal2 = leptons[2, 1].momentum().Vect().Cross(leptons[2, -1].momentum().Vect()).Unit()
-        globalvariables.Phi[0] = copysign(acos(-normal1.Dot(normal2)),Zs[1].momentum().Vect().Dot(normal1.Cross(normal2)))
+        self.boosttocom(self.higgs())
+        normal1 = leptons[1, 1].Vect().Cross(leptons[1, -1].Vect()).Unit()
+        normal2 = leptons[2, 1].Vect().Cross(leptons[2, -1].Vect()).Unit()
+        globalvariables.Phi[0] = copysign(acos(-normal1.Dot(normal2)),Zs[1].Vect().Dot(normal1.Cross(normal2)))
 
-        lab.goto()
+        self.gotoframe(lab)
         self.anythingtofill = True
 
     def getZZmasses(self):
