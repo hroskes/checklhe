@@ -27,9 +27,9 @@ raiseerror = False            #if this is true, raise an IOError when something 
                               #otherwise just print it
 
 #Make tree
-makedecayanglestree = True    #For ZZ->4l events, makes a tree of costheta1, costheta2, and Phi
+makeZZ4langlestree  = True    #For ZZ->4l events, makes a tree of costheta1, costheta2, and Phi
 makeZZmassestree    = True    #For ZZ->4l events, makes a tree of the Z1, Z2, Higgs masses
-tree = any([makedecayanglestree, makeZZmassestree])
+tree = any([makeZZ4langlestree, makeZZmassestree])
 
 
 #tolerances

@@ -68,8 +68,8 @@ class Event:
             self.checkfunctions.append(self.checkVdecay)
 
         self.processfunctions = []
-        if config.makedecayanglestree:
-            self.processfunctions.append(self.getdecayangles)
+        if config.makeZZ4langlestree:
+            self.processfunctions.append(self.getZZ4langles)
         if config.makeZZmassestree:
             self.processfunctions.append(self.getZZmasses)
         if config.count4levents:
@@ -389,7 +389,7 @@ class Event:
                     "listed %s mass    = " + str(ZorW1.invmass()) + "\n" +
                     "alternate %s mass = " + str(altmass) + "\n") % str(ZorW1)
 
-    def getdecayangles(self):
+    def getZZ4langles(self):
         globalvariables.globalvariables.costheta1[0] = -999
         globalvariables.globalvariables.costheta2[0] = -999
         globalvariables.globalvariables.Phi[0] = -999
