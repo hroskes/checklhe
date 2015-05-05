@@ -34,14 +34,24 @@ class GlobalVariables:
 
         #Particle categories
         self.neutralbosons = particlecategory.ParticleCategory([21, 22, 23, 25, 32, 39], Csymmetric = False)
+
         self.electrons = particlecategory.ParticleCategory([11])
         self.muons = particlecategory.ParticleCategory([13])
         self.taus = particlecategory.ParticleCategory([15])
         self.leptons = self.electrons.union(self.muons).union(self.taus)
+
         self.neutrinos = particlecategory.ParticleCategory([12, 14, 16])
-        self.uptypequarks = particlecategory.ParticleCategory([2, 4, 6])
-        self.downtypequarks = particlecategory.ParticleCategory([1, 3, 5])
+
+        self.down    = particlecategory.ParticleCategory([1])
+        self.up      = particlecategory.ParticleCategory([2])
+        self.strange = particlecategory.ParticleCategory([3])
+        self.charm   = particlecategory.ParticleCategory([4])
+        self.bottom  = particlecategory.ParticleCategory([5])
+        self.top     = particlecategory.ParticleCategory([6])
+        self.uptypequarks = self.up.union(self.charm).union(self.top)
+        self.downtypequarks = self.down.union(self.strange).union(self.bottom)
         self.quarks = self.uptypequarks.union(self.downtypequarks)
+
         self.gluon = particlecategory.ParticleCategory([21])
         self.photon = particlecategory.ParticleCategory([22])
         self.weakbosons = particlecategory.ParticleCategory([23, 24])
@@ -134,6 +144,30 @@ class GlobalVariables:
         self.Wplusdecaytaunu = particle.DecayFamily([[self.taus, self.neutrinos]], charge = 1, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "W+ --> taunu")
         self.Wplusdecayfamilieslnu = [self.Wplusdecayenu, self.Wplusdecaymunu, self.Wplusdecaytaunu]
 
+        #Wminus qqb' decay families
+        self.Wminusdecayubard = particle.DecayFamily([[self.up, self.down]], charge = -1, name = "W- --> ubar d")
+        self.Wminusdecayubars = particle.DecayFamily([[self.up, self.strange]], charge = -1, name = "W- --> ubar s")
+        self.Wminusdecayubarb = particle.DecayFamily([[self.up, self.bottom]], charge = -1, name = "W- --> ubar b")
+        self.Wminusdecaycbard = particle.DecayFamily([[self.charm, self.down]], charge = -1, name = "W- --> cbar d")
+        self.Wminusdecaycbars = particle.DecayFamily([[self.charm, self.strange]], charge = -1, name = "W- --> cbar s")
+        self.Wminusdecaycbarb = particle.DecayFamily([[self.charm, self.bottom]], charge = -1, name = "W- --> cbar b")
+        self.Wminusdecaytbard = particle.DecayFamily([[self.top, self.down]], charge = -1, name = "W- --> tbar d")
+        self.Wminusdecaytbars = particle.DecayFamily([[self.top, self.strange]], charge = -1, name = "W- --> tbar s")
+        self.Wminusdecaytbarb = particle.DecayFamily([[self.top, self.bottom]], charge = -1, name = "W- --> tbar b")
+        self.Wminusdecayfamilies2q = [self.Wminusdecayubard, self.Wminusdecayubars, self.Wminusdecayubarb, self.Wminusdecaycbard, self.Wminusdecaycbars, self.Wminusdecaycbarb, self.Wminusdecaytbard, self.Wminusdecaytbars, self.Wminusdecaytbarb]
+
+        #Wplus qqb' decay families
+        self.Wplusdecayudbar = particle.DecayFamily([[self.up, self.down]], charge = 1, name = "W+ --> u dbar")
+        self.Wplusdecayusbar = particle.DecayFamily([[self.up, self.strange]], charge = 1, name = "W+ --> u sbar")
+        self.Wplusdecayubbar = particle.DecayFamily([[self.up, self.bottom]], charge = 1, name = "W+ --> u bbar")
+        self.Wplusdecaycdbar = particle.DecayFamily([[self.charm, self.down]], charge = 1, name = "W+ --> c dbar")
+        self.Wplusdecaycsbar = particle.DecayFamily([[self.charm, self.strange]], charge = 1, name = "W+ --> c sbar")
+        self.Wplusdecaycbbar = particle.DecayFamily([[self.charm, self.bottom]], charge = 1, name = "W+ --> c bbar")
+        self.Wplusdecaytdbar = particle.DecayFamily([[self.top, self.down]], charge = 1, name = "W+ --> t dbar")
+        self.Wplusdecaytsbar = particle.DecayFamily([[self.top, self.strange]], charge = 1, name = "W+ --> t sbar")
+        self.Wplusdecaytbbar = particle.DecayFamily([[self.top, self.bottom]], charge = 1, name = "W+ --> t bbar")
+        self.Wplusdecayfamilies2q = [self.Wplusdecayudbar, self.Wplusdecayusbar, self.Wplusdecayubbar, self.Wplusdecaycdbar, self.Wplusdecaycsbar, self.Wplusdecaycbbar, self.Wplusdecaytdbar, self.Wplusdecaytsbar, self.Wplusdecaytbbar]
+
         #VH decay families
         self.Zdecay2l = particle.DecayFamily([[self.leptons, self.leptons]], charge = 0, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "Z --> 2l",
                                         subcategories = self.Zdecayfamilies2l)
@@ -143,8 +177,10 @@ class GlobalVariables:
                                               subcategories = self.Wminusdecayfamilieslnu)
         self.Wplusdecaylnu = particle.DecayFamily([[self.leptons, self.neutrinos]], charge = +1, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "W+ --> lnu",
                                              subcategories = self.Wplusdecayfamilieslnu)
-        self.Wminusdecay2q = particle.DecayFamily([[self.quarks, self.quarks]], charge = -1, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "W- --> 2q")
-        self.Wplusdecay2q = particle.DecayFamily([[self.quarks, self.quarks]], charge = 1, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "W+ --> 2q")
+        self.Wminusdecay2q = particle.DecayFamily([[self.quarks, self.quarks]], charge = -1, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "W- --> 2q",
+                                             subcategories = self.Wminusdecayfamilies2q)
+        self.Wplusdecay2q = particle.DecayFamily([[self.quarks, self.quarks]], charge = 1, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "W+ --> 2q",
+                                             subcategories = self.Wplusdecayfamilies2q)
 
         self.Zdecaycategories = [self.Zdecay2l, self.Zdecay2q, self.Zdecay2nu]
         self.ZH = particle.DecayFamily([], name = "ZH", subcategories = self.Zdecaycategories)
