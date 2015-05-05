@@ -16,9 +16,9 @@ import particletype
 import usefulstuff
 
 def count2l2l(leptons):
-    e = globalvariables.electrons
-    mu = globalvariables.muons
-    tau = globalvariables.taus
+    e = globalvariables.globalvariables.electrons
+    mu = globalvariables.globalvariables.muons
+    tau = globalvariables.globalvariables.taus
     flavors = [e, mu, tau]
     hasl = {f: {1: 0, -1: 0} for f in flavors}
     for p in leptons:

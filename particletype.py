@@ -4,7 +4,7 @@ import particledata
 class ParticleType(object):
     def __init__(self, particleorid):
         self.__id = int(particleorid)
-        if particleorid < 0 and -particleorid in globalvariables.neutralbosons.ids():
+        if particleorid < 0 and -particleorid in globalvariables.globalvariables.neutralbosons.ids():
             self.__id = -self.__id
 
     def id(self):
@@ -16,9 +16,9 @@ class ParticleType(object):
                 result = result.replace("-","+")
             elif "+" in result:
                 result = result.replace("+","-")
-            elif self in globalvariables.neutrinos:
+            elif self in globalvariables.globalvariables.neutrinos:
                 result = result.replace("nu","nubar")
-            elif self in globalvariables.quarks:
+            elif self in globalvariables.globalvariables.quarks:
                 result = result + "bar"
             else:
                 raise ValueError("Invalid particle id! " + str(self.id()))
@@ -34,17 +34,17 @@ class ParticleType(object):
     def charge(self):
         if self.id() < 0:
             return -(-self).charge()
-        if self in globalvariables.downtypequarks:
+        if self in globalvariables.globalvariables.downtypequarks:
             return Fraction(-1, 3)
-        if self in globalvariables.uptypequarks:
+        if self in globalvariables.globalvariables.uptypequarks:
             return Fraction(2, 3)
-        if self in globalvariables.leptons:
+        if self in globalvariables.globalvariables.leptons:
             return -1
-        if self in globalvariables.neutrinos:
+        if self in globalvariables.globalvariables.neutrinos:
             return 0
-        if self in globalvariables.neutralbosons:
+        if self in globalvariables.globalvariables.neutralbosons:
             return 0
-        if self in globalvariables.W:
+        if self in globalvariables.globalvariables.W:
             return 1
         raise ValueError("Invalid particle id: " + str(self.id()))
 
@@ -60,7 +60,7 @@ class ParticleType(object):
     def baryonnumber(self):
         if self.id() < 0:
             return -(-self).baryonnumber()
-        if self in globalvariables.quarks:
+        if self in globalvariables.globalvariables.quarks:
             return Fraction(1,3)
         return 0
     def leptonnumber(self, generation):

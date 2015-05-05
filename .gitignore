@@ -1,2 +1,4 @@
 *.pyc
 *.lhe
+*.root
+globalvariables.pkl

@@ -2,171 +2,205 @@ import particlecategory
 import particle
 import config
 import collections
+import cPickle
 
 eventcounter = collections.Counter()
 
 startedinit = False
 finishedinit = False
 
-def init():
-    global electrons, muons, taus, leptons, neutrinos, uptypequarks, downtypequarks, quarks, neutralbosons, weakbosons, gluon, photon, Z, W, higgs
-    global decayZZ4l, decayZZ2l2nu, decayZZ2l2q, decayZZ4nu, decayZZ2q2nu, decayZZ4q
-    global decayWW2l2nu, decayWW4q, decayWWlnu2q
-    global HZZ, HWW, ZH, WH, VH
-    global any2l2l, any4l, anyevent, leptoncount
-    global decayfamiliesZZ4l, decayfamiliesZZ2l2nu, decayfamiliesWW2l2nu, decayfamiliesZZ2l2q, decayfamiliesWWlnu2q
-    global decayfamiliestoplevel
-    global startedinit, finishedinit
+class GlobalVariablesMinimal:
+    #for stuff that's needed before GlobalVariables is inited
+    #I'm aware this is ugly
+    def __init__(self):
+        class ParticleCategory:
+            def __init__(self, particles):
+                self.particles = particles
+            def ids(self):
+                return self.particles
 
-    if not startedinit:
-        startedinit = True
+        self.neutralbosons = ParticleCategory([21, 22, 23, 25, 32, 39])
+
+class GlobalVariables:
+    def __init__(self):
+        self.startedinit = False
+        self.finishedinit = False
+
+    #Not __init__, I want the object to exist even before the variables are assigned
+    def init(self):
+        if self.startedinit:
+            return
+        self.startedinit = True
 
         #Particle categories
-        neutralbosons = particlecategory.ParticleCategory([21, 22, 23, 25, 32, 39], Csymmetric = False)
-        electrons = particlecategory.ParticleCategory([11])
-        muons = particlecategory.ParticleCategory([13])
-        taus = particlecategory.ParticleCategory([15])
-        leptons = electrons.union(muons).union(taus)
-        neutrinos = particlecategory.ParticleCategory([12, 14, 16])
-        uptypequarks = particlecategory.ParticleCategory([2, 4, 6])
-        downtypequarks = particlecategory.ParticleCategory([1, 3, 5])
-        quarks = uptypequarks.union(downtypequarks)
-        gluon = particlecategory.ParticleCategory([21])
-        photon = particlecategory.ParticleCategory([22])
-        weakbosons = particlecategory.ParticleCategory([23, 24])
-        Z = particlecategory.ParticleCategory([23])
-        W = particlecategory.ParticleCategory([24])
-        higgs = particlecategory.ParticleCategory([25, 32, 39])
+        self.neutralbosons = particlecategory.ParticleCategory([21, 22, 23, 25, 32, 39], Csymmetric = False)
+        self.electrons = particlecategory.ParticleCategory([11])
+        self.muons = particlecategory.ParticleCategory([13])
+        self.taus = particlecategory.ParticleCategory([15])
+        self.leptons = self.electrons.union(self.muons).union(self.taus)
+        self.neutrinos = particlecategory.ParticleCategory([12, 14, 16])
+        self.uptypequarks = particlecategory.ParticleCategory([2, 4, 6])
+        self.downtypequarks = particlecategory.ParticleCategory([1, 3, 5])
+        self.quarks = self.uptypequarks.union(self.downtypequarks)
+        self.gluon = particlecategory.ParticleCategory([21])
+        self.photon = particlecategory.ParticleCategory([22])
+        self.weakbosons = particlecategory.ParticleCategory([23, 24])
+        self.Z = particlecategory.ParticleCategory([23])
+        self.W = particlecategory.ParticleCategory([24])
+        self.higgs = particlecategory.ParticleCategory([25, 32, 39])
         print "initialized particle categories"
 
-        if config.counthiggsdecaytype:
+        #4l decays by flavor
+        self.decayZZ4e = particle.DecayFamily([[11, 11, -11, -11]], name = "H --> ZZ --> 4e")
+        self.decayZZ4mu = particle.DecayFamily([[13, 13, -13, -13]], name = "H --> ZZ --> 4mu")
+        self.decayZZ4tau = particle.DecayFamily([[15, 15, -15, -15]], name = "H --> ZZ --> 4tau")
+        self.decayZZ2e2mu = particle.DecayFamily([[11, 13, -11, -13]], name = "H --> ZZ --> 2e2mu")
+        self.decayZZ2e2tau = particle.DecayFamily([[11, 15, -11, -15]], name = "H --> ZZ --> 2e2tau")
+        self.decayZZ2mu2tau = particle.DecayFamily([[13, 15, -13, -15]], name = "H --> ZZ --> 2mu2tau")
+        self.decayfamiliesZZ4l = [self.decayZZ4e, self.decayZZ4mu, self.decayZZ4tau, self.decayZZ2e2mu, self.decayZZ2e2tau, self.decayZZ2mu2tau]
 
-            #4l decays by flavor
-            decayZZ4e = particle.DecayFamily([[11, 11, -11, -11]], name = "H --> ZZ --> 4e")
-            decayZZ4mu = particle.DecayFamily([[13, 13, -13, -13]], name = "H --> ZZ --> 4mu")
-            decayZZ4tau = particle.DecayFamily([[15, 15, -15, -15]], name = "H --> ZZ --> 4tau")
-            decayZZ2e2mu = particle.DecayFamily([[11, 13, -11, -13]], name = "H --> ZZ --> 2e2mu")
-            decayZZ2e2tau = particle.DecayFamily([[11, 15, -11, -15]], name = "H --> ZZ --> 2e2tau")
-            decayZZ2mu2tau = particle.DecayFamily([[13, 15, -13, -15]], name = "H --> ZZ --> 2mu2tau")
-            decayfamiliesZZ4l = [decayZZ4e, decayZZ4mu, decayZZ4tau, decayZZ2e2mu, decayZZ2e2tau, decayZZ2mu2tau]
+        #2l2q decays by flavor
+        self.decayZZ2e2q = particle.DecayFamily([[self.electrons, self.electrons, self.quarks, self.quarks]], charge = 0, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "H --> ZZ --> 2e2q")
+        self.decayZZ2mu2q = particle.DecayFamily([[self.muons, self.muons, self.quarks, self.quarks]], charge = 0, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "H --> ZZ --> 2mu2q")
+        self.decayZZ2tau2q = particle.DecayFamily([[self.taus, self.taus, self.quarks, self.quarks]], charge = 0, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "H --> ZZ --> 2tau2q")
+        self.decayfamiliesZZ2l2q = [self.decayZZ2e2q, self.decayZZ2mu2q, self.decayZZ2tau2q]
 
-            #2l2q decays by flavor
-            decayZZ2e2q = particle.DecayFamily([[electrons, electrons, quarks, quarks]], charge = 0, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "H --> ZZ --> 2e2q")
-            decayZZ2mu2q = particle.DecayFamily([[muons, muons, quarks, quarks]], charge = 0, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "H --> ZZ --> 2mu2q")
-            decayZZ2tau2q = particle.DecayFamily([[taus, taus, quarks, quarks]], charge = 0, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "H --> ZZ --> 2tau2q")
-            decayfamiliesZZ2l2q = [decayZZ2e2q, decayZZ2mu2q, decayZZ2tau2q]
+        #2l2nu decays by flavor
+        self.decayZZ2e2nu = particle.DecayFamily([[self.electrons, self.electrons, self.neutrinos, self.neutrinos]], charge = 0, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "H --> ZZ --> 2e2nu")
+        self.decayZZ2mu2nu = particle.DecayFamily([[self.muons, self.muons, self.neutrinos, self.neutrinos]], charge = 0, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "H --> ZZ --> 2mu2nu")
+        self.decayZZ2tau2nu = particle.DecayFamily([[self.taus, self.taus, self.neutrinos, self.neutrinos]], charge = 0, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "H --> ZZ --> 2tau2nu")
+        self.decayfamiliesZZ2l2nu = [self.decayZZ2e2nu, self.decayZZ2mu2nu, self.decayZZ2tau2nu]
+        self.decayWW2e2nu = particle.DecayFamily([[self.electrons, self.electrons, self.neutrinos, self.neutrinos]], charge = 0, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "H --> WW --> 2e2nu")
+        self.decayWW2mu2nu = particle.DecayFamily([[self.muons, self.muons, self.neutrinos, self.neutrinos]], charge = 0, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "H --> WW --> 2mu2nu")
+        self.decayWW2tau2nu = particle.DecayFamily([[self.taus, self.taus, self.neutrinos, self.neutrinos]], charge = 0, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "H --> WW --> 2tau2nu")
+        self.decayWWemu2nu = particle.DecayFamily([[self.electrons, self.muons, self.neutrinos, self.neutrinos]], charge = 0, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "H --> WW -->emu2nu")
+        self.decayWWetau2nu = particle.DecayFamily([[self.electrons, self.taus, self.neutrinos, self.neutrinos]], charge = 0, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "H --> WW -->etau2nu")
+        self.decayWWmutau2nu = particle.DecayFamily([[self.muons, self.taus, self.neutrinos, self.neutrinos]], charge = 0, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "H --> WW -->mutau2nu")
+        self.decayfamiliesWW2l2nu = [self.decayWW2e2nu, self.decayWW2mu2nu, self.decayWW2tau2nu, self.decayWWemu2nu, self.decayWWetau2nu, self.decayWWmutau2nu]
 
-            #2l2nu decays by flavor
-            decayZZ2e2nu = particle.DecayFamily([[electrons, electrons, neutrinos, neutrinos]], charge = 0, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "H --> ZZ --> 2e2nu")
-            decayZZ2mu2nu = particle.DecayFamily([[muons, muons, neutrinos, neutrinos]], charge = 0, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "H --> ZZ --> 2mu2nu")
-            decayZZ2tau2nu = particle.DecayFamily([[taus, taus, neutrinos, neutrinos]], charge = 0, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "H --> ZZ --> 2tau2nu")
-            decayfamiliesZZ2l2nu = [decayZZ2e2nu, decayZZ2mu2nu, decayZZ2tau2nu]
-            decayWW2e2nu = particle.DecayFamily([[electrons, electrons, neutrinos, neutrinos]], charge = 0, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "H --> WW --> 2e2nu")
-            decayWW2mu2nu = particle.DecayFamily([[muons, muons, neutrinos, neutrinos]], charge = 0, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "H --> WW --> 2mu2nu")
-            decayWW2tau2nu = particle.DecayFamily([[taus, taus, neutrinos, neutrinos]], charge = 0, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "H --> WW --> 2tau2nu")
-            decayWWemu2nu = particle.DecayFamily([[electrons, muons, neutrinos, neutrinos]], charge = 0, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "H --> WW -->emu2nu")
-            decayWWetau2nu = particle.DecayFamily([[electrons, taus, neutrinos, neutrinos]], charge = 0, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "H --> WW -->etau2nu")
-            decayWWmutau2nu = particle.DecayFamily([[muons, taus, neutrinos, neutrinos]], charge = 0, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "H --> WW -->mutau2nu")
-            decayfamiliesWW2l2nu = [decayWW2e2nu, decayWW2mu2nu, decayWW2tau2nu, decayWWemu2nu, decayWWetau2nu, decayWWmutau2nu]
+        #lnu2q decays by flavor
+        self.decayWWlplusnu2q = particle.DecayFamily([[[-11], self.neutrinos, self.quarks, self.quarks], [[-13], self.neutrinos, self.quarks, self.quarks], [[-15], self.neutrinos, self.quarks, self.quarks]],
+                                                                                 charge = 0, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "H --> WW --> l+nu2q", Csymmetric = False)
+        self.decayWWlminusnu2q = particle.DecayFamily([[[+11], self.neutrinos, self.quarks, self.quarks], [[+13], self.neutrinos, self.quarks, self.quarks], [[+15], self.neutrinos, self.quarks, self.quarks]],
+                                                                                 charge = 0, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "H --> WW --> l-nu2q", Csymmetric = False)
+        self.decayfamiliesWWlnu2q = []
+        self.decayWWenu2q = particle.DecayFamily([[self.electrons, self.neutrinos, self.quarks, self.quarks]], charge = 0, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "H --> WW --> enu2q")
+        self.decayWWmunu2q = particle.DecayFamily([[self.muons, self.neutrinos, self.quarks, self.quarks]], charge = 0, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "H --> WW --> munu2q")
+        self.decayWWtaunu2q = particle.DecayFamily([[self.taus, self.neutrinos, self.quarks, self.quarks]], charge = 0, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "H --> WW --> taunu2q")
+        self.decayfamiliesWWlnu2q = [self.decayWWlplusnu2q, self.decayWWlminusnu2q, self.decayWWenu2q, self.decayWWmunu2q, self.decayWWtaunu2q]
 
-            #lnu2q decays by flavor
-            if config.checklnu2qcharge:
-                decayWWlplusnu2q = particle.DecayFamily([[[-11], neutrinos, quarks, quarks], [[-13], neutrinos, quarks, quarks], [[-15], neutrinos, quarks, quarks]],
-                                                                                         charge = 0, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "H --> WW --> l+nu2q", Csymmetric = False)
-                decayWWlminusnu2q = particle.DecayFamily([[[+11], neutrinos, quarks, quarks], [[+13], neutrinos, quarks, quarks], [[+15], neutrinos, quarks, quarks]],
-                                                                                         charge = 0, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "H --> WW --> l-nu2q", Csymmetric = False)
-                decayfamiliesWWlnu2q = [decayWWlplusnu2q, decayWWlminusnu2q]
-            else:
-                decayWWenu2q = particle.DecayFamily([[electrons, neutrinos, quarks, quarks]], charge = 0, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "H --> WW --> enu2q")
-                decayWWmunu2q = particle.DecayFamily([[muons, neutrinos, quarks, quarks]], charge = 0, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "H --> WW --> munu2q")
-                decayWWtaunu2q = particle.DecayFamily([[taus, neutrinos, quarks, quarks]], charge = 0, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "H --> WW --> taunu2q")
-                decayfamiliesWWlnu2q = [decayWWenu2q, decayWWmunu2q, decayWWtaunu2q]
+        #top level decay categories
+        self.decayZZ4l = particle.DecayFamily([[self.leptons, self.leptons, self.leptons, self.leptons]], charge = 0, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "H --> ZZ --> 4l",
+                                       subcategories = self.decayfamiliesZZ4l)
+        self.decayZZ2l2q = particle.DecayFamily([[self.quarks, self.quarks, self.leptons, self.leptons]], charge = 0, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "H --> ZZ --> 2l2q",
+                                         subcategories = self.decayfamiliesZZ2l2q)
+        self.decayZZ2l2nu = particle.DecayFamily([[self.neutrinos, self.neutrinos, self.leptons, self.leptons]], charge = 0, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "H --> ZZ --> 2l2nu",
+                                          subcategories = self.decayfamiliesZZ2l2nu)
+        self.decayWW2l2nu = particle.DecayFamily([[self.neutrinos, self.neutrinos, self.leptons, self.leptons]], charge = 0, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "H --> WW --> 2l2nu",
+                                          subcategories = self.decayfamiliesWW2l2nu)
+        self.decayWWlnu2q = particle.DecayFamily([[self.leptons, self.neutrinos, self.quarks, self.quarks]], charge = 0, leptonnumber = (0,0,0), baryonnumber = 0, name = "H --> WW -->lnu2q",
+                                          subcategories = self.decayfamiliesWWlnu2q)
+        self.decayZZ2q2nu = particle.DecayFamily([[self.quarks, self.quarks, self.neutrinos, self.neutrinos]], charge = 0, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "H --> ZZ --> 2q2nu")
+        self.decayZZ4q = particle.DecayFamily([[self.quarks, self.quarks, self.quarks, self.quarks]], charge = 0, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "H --> ZZ --> 4q")
+        self.decayWW4q = particle.DecayFamily([[self.quarks, self.quarks, self.quarks, self.quarks]], charge = 0, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "H --> WW --> 4q")
+        self.decayZZ4nu = particle.DecayFamily([[self.neutrinos, self.neutrinos, self.neutrinos, self.neutrinos]], charge = 0, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "H --> ZZ --> 4nu")
 
-            #top level decay categories
-            decayZZ4l = particle.DecayFamily([[leptons, leptons, leptons, leptons]], charge = 0, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "H --> ZZ --> 4l",
-                                           subcategories = decayfamiliesZZ4l)
-            decayZZ2l2q = particle.DecayFamily([[quarks, quarks, leptons, leptons]], charge = 0, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "H --> ZZ --> 2l2q",
-                                             subcategories = decayfamiliesZZ2l2q)
-            decayZZ2l2nu = particle.DecayFamily([[neutrinos, neutrinos, leptons, leptons]], charge = 0, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "H --> ZZ --> 2l2nu",
-                                              subcategories = decayfamiliesZZ2l2nu)
-            decayWW2l2nu = particle.DecayFamily([[neutrinos, neutrinos, leptons, leptons]], charge = 0, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "H --> WW --> 2l2nu",
-                                              subcategories = decayfamiliesWW2l2nu)
-            decayWWlnu2q = particle.DecayFamily([[leptons, neutrinos, quarks, quarks]], charge = 0, leptonnumber = (0,0,0), baryonnumber = 0, name = "H --> WW -->lnu2q",
-                                              subcategories = decayfamiliesWWlnu2q)
-            decayZZ2q2nu = particle.DecayFamily([[quarks, quarks, neutrinos, neutrinos]], charge = 0, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "H --> ZZ --> 2q2nu")
-            decayZZ4q = particle.DecayFamily([[quarks, quarks, quarks, quarks]], charge = 0, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "H --> ZZ --> 4q")
-            decayWW4q = particle.DecayFamily([[quarks, quarks, quarks, quarks]], charge = 0, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "H --> WW --> 4q")
-            decayZZ4nu = particle.DecayFamily([[neutrinos, neutrinos, neutrinos, neutrinos]], charge = 0, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "H --> ZZ --> 4nu")
+        #Higgs decay families
+        self.HZZ = particle.DecayFamily([[self.Z, self.Z]], name = "H --> ZZ", subcategories = [self.decayZZ4l, self.decayZZ2l2q, self.decayZZ2l2nu, self.decayZZ4q, self.decayZZ4nu, self.decayZZ2q2nu])
+        self.HWW = particle.DecayFamily([[self.W, self.W]], charge = 0, name = "H --> WW", subcategories = [self.decayWW2l2nu, self.decayWW4q, self.decayWWlnu2q])
+        self.decayfamiliestoplevel = [self.HZZ, self.HWW]
 
-            #Higgs decay families
-            HZZ = particle.DecayFamily([[Z, Z]], name = "H --> ZZ", subcategories = [decayZZ4l, decayZZ2l2q, decayZZ2l2nu, decayZZ4q, decayZZ4nu, decayZZ2q2nu])
-            HWW = particle.DecayFamily([[W, W]], charge = 0, name = "H --> WW", subcategories = [decayWW2l2nu, decayWW4q, decayWWlnu2q])
-            decayfamiliestoplevel = [HZZ, HWW]
+        print "initialized Higgs decay"
 
-            print "initialized Higgs decay"
+        ################
+        #      VH      #
+        ################
 
-        if config.countVHdecaytype:
+        #Z 2l decay families
+        self.Zdecay2e = particle.DecayFamily([[self.electrons, self.electrons]], charge = 0, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "Z --> 2e")
+        self.Zdecay2mu = particle.DecayFamily([[self.muons, self.muons]], charge = 0, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "Z --> 2mu")
+        self.Zdecay2tau = particle.DecayFamily([[self.taus, self.taus]], charge = 0, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "Z --> 2tau")
+        self.Zdecayfamilies2l = [self.Zdecay2e, self.Zdecay2mu, self.Zdecay2tau]
 
-            ################
-            #      VH      #
-            ################
+        #Wminus lnu decay families
+        self.Wminusdecayenu = particle.DecayFamily([[self.electrons, self.neutrinos]], charge = -1, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "W- --> enu")
+        self.Wminusdecaymunu = particle.DecayFamily([[self.muons, self.neutrinos]], charge = -1, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "W- --> munu")
+        self.Wminusdecaytaunu = particle.DecayFamily([[self.taus, self.neutrinos]], charge = -1, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "W- --> taunu")
+        self.Wminusdecayfamilieslnu = [self.Wminusdecayenu, self.Wminusdecaymunu, self.Wminusdecaytaunu]
 
-            #Z 2l decay families
-            Zdecay2e = particle.DecayFamily([[electrons, electrons]], charge = 0, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "Z --> 2e")
-            Zdecay2mu = particle.DecayFamily([[muons, muons]], charge = 0, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "Z --> 2mu")
-            Zdecay2tau = particle.DecayFamily([[taus, taus]], charge = 0, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "Z --> 2tau")
-            Zdecayfamilies2l = [Zdecay2e, Zdecay2mu, Zdecay2tau]
+        #Wplus lnu decay families
+        self.Wplusdecayenu = particle.DecayFamily([[self.electrons, self.neutrinos]], charge = 1, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "W+ --> enu")
+        self.Wplusdecaymunu = particle.DecayFamily([[self.muons, self.neutrinos]], charge = 1, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "W+ --> munu")
+        self.Wplusdecaytaunu = particle.DecayFamily([[self.taus, self.neutrinos]], charge = 1, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "W+ --> taunu")
+        self.Wplusdecayfamilieslnu = [self.Wplusdecayenu, self.Wplusdecaymunu, self.Wplusdecaytaunu]
 
-            #Wminus lnu decay families
-            Wminusdecayenu = particle.DecayFamily([[electrons, neutrinos]], charge = -1, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "W- --> enu")
-            Wminusdecaymunu = particle.DecayFamily([[muons, neutrinos]], charge = -1, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "W- --> munu")
-            Wminusdecaytaunu = particle.DecayFamily([[taus, neutrinos]], charge = -1, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "W- --> taunu")
-            Wminusdecayfamilieslnu = [Wminusdecayenu, Wminusdecaymunu, Wminusdecaytaunu]
+        #VH decay families
+        self.Zdecay2l = particle.DecayFamily([[self.leptons, self.leptons]], charge = 0, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "Z --> 2l",
+                                        subcategories = self.Zdecayfamilies2l)
+        self.Zdecay2q = particle.DecayFamily([[self.quarks, self.quarks]], charge = 0, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "Z --> 2q")
+        self.Zdecay2nu = particle.DecayFamily([[self.neutrinos, self.neutrinos]], charge = 0, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "Z --> 2nu")
+        self.Wminusdecaylnu = particle.DecayFamily([[self.leptons, self.neutrinos]], charge = -1, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "W- --> lnu",
+                                              subcategories = self.Wminusdecayfamilieslnu)
+        self.Wplusdecaylnu = particle.DecayFamily([[self.leptons, self.neutrinos]], charge = +1, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "W+ --> lnu",
+                                             subcategories = self.Wplusdecayfamilieslnu)
+        self.Wminusdecay2q = particle.DecayFamily([[self.quarks, self.quarks]], charge = -1, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "W- --> 2q")
+        self.Wplusdecay2q = particle.DecayFamily([[self.quarks, self.quarks]], charge = 1, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "W+ --> 2q")
 
-            #Wplus lnu decay families
-            Wplusdecayenu = particle.DecayFamily([[electrons, neutrinos]], charge = 1, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "W+ --> enu")
-            Wplusdecaymunu = particle.DecayFamily([[muons, neutrinos]], charge = 1, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "W+ --> munu")
-            Wplusdecaytaunu = particle.DecayFamily([[taus, neutrinos]], charge = 1, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "W+ --> taunu")
-            Wplusdecayfamilieslnu = [Wplusdecayenu, Wplusdecaymunu, Wplusdecaytaunu]
+        self.Zdecaycategories = [self.Zdecay2l, self.Zdecay2q, self.Zdecay2nu]
+        self.ZH = particle.DecayFamily([], name = "ZH", subcategories = self.Zdecaycategories)
+        self.Wdecaycategories = [self.Wminusdecaylnu, self.Wplusdecaylnu, self.Wminusdecay2q, self.Wplusdecay2q]
+        self.WH = particle.DecayFamily([], name = "WH", subcategories = self.Wdecaycategories)
 
-            #VH decay families
-            Zdecay2l = particle.DecayFamily([[leptons, leptons]], charge = 0, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "Z --> 2l",
-                                            subcategories = Zdecayfamilies2l)
-            Zdecay2q = particle.DecayFamily([[quarks, quarks]], charge = 0, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "Z --> 2q")
-            Zdecay2nu = particle.DecayFamily([[neutrinos, neutrinos]], charge = 0, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "Z --> 2nu")
-            Wminusdecaylnu = particle.DecayFamily([[leptons, neutrinos]], charge = -1, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "W- --> lnu",
-                                                  subcategories = Wminusdecayfamilieslnu)
-            Wplusdecaylnu = particle.DecayFamily([[leptons, neutrinos]], charge = +1, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "W+ --> lnu",
-                                                 subcategories = Wplusdecayfamilieslnu)
-            Wminusdecay2q = particle.DecayFamily([[quarks, quarks]], charge = -1, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "W- --> 2q")
-            Wplusdecay2q = particle.DecayFamily([[quarks, quarks]], charge = 1, leptonnumber = (0, 0, 0), baryonnumber = 0, name = "W+ --> 2q")
+        self.VH = particle.EventCount("VH", [self.ZH, self.WH])
 
-            Zdecaycategories = [Zdecay2l, Zdecay2q, Zdecay2nu]
-            ZH = particle.DecayFamily([], name = "ZH", subcategories = Zdecaycategories)
-            Wdecaycategories = [Wminusdecaylnu, Wplusdecaylnu, Wminusdecay2q, Wplusdecay2q]
-            WH = particle.DecayFamily([], name = "WH", subcategories = Wdecaycategories)
-
-            VH = particle.EventCount("VH", [ZH, WH])
-
-            print "initialized VH decay"
+        print "initialized VH decay"
 
         #big categories
-        leptoncount = {}
+        self.leptoncount = {}
         for i in range(10):
-            leptoncount[i] = particle.EventCount("exactly" + str(i) + "l", [])
+            self.leptoncount[i] = particle.EventCount("exactly" + str(i) + "l", [])
 
-        any2l2lsubcats = []
+        self.any2l2lsubcats = []
         if config.counthiggsdecaytype:
-            any2l2lsubcats.append(decayZZ4l)
-        any2l2l = particle.EventCount("2l2l", any2l2lsubcats)
-        any4l = particle.EventCount("4l", [any2l2l, leptoncount[4]])
+            self.any2l2lsubcats.append(self.decayZZ4l)
+        self.any2l2l = particle.EventCount("2l2l", self.any2l2lsubcats)
+        self.any4l = particle.EventCount("4l", [self.any2l2l, self.leptoncount[4]])
 
-        anyeventsubcats = [(leptoncount[i] if i != 4 else any4l) for i in leptoncount]
+        self.anyeventsubcats = [(self.leptoncount[i] if i != 4 else self.any4l) for i in self.leptoncount]
         if config.counthiggsdecaytype:
-            anyeventsubcats += [HZZ, HWW]
+            self.anyeventsubcats += [self.HZZ, self.HWW]
         if config.countVHdecaytype:
-            anyeventsubcats += [VH]
-        anyevent = particle.EventCount("total", anyeventsubcats)
+            self.anyeventsubcats += [self.VH]
+        self.anyevent = particle.EventCount("total", self.anyeventsubcats)
 
         config.init()
-        finishedinit = True
+        self.finishedinit = True
+
+
+
+def init():
+    global globalvariables, startedinit, finishedinit
+    if startedinit:
+        return
+    startedinit = True
+
+    try:
+        with open("globalvariables.pkl", "rb") as f:
+            globalvariables = GlobalVariablesMinimal()
+            globalvariables = cPickle.load(f)
+    except (IOError, cPickle.UnpicklingError):
+        globalvariables = GlobalVariables()
+        globalvariables.init()
+        #cPickle.dump(globalvariables, open("globalvariables.pkl", "wb"))
+
+    if not config.counthiggsdecaytype:
+        globalvariables.HZZ.deactivate(True)
+        globalvariables.HWW.deactivate(True)
+    if not config.countVHdecaytype:
+        globalvariables.VH.deactivate(True)
+    if not config.checklnu2qcharge:
+        globalvariables.decayWWlplusnu2q.deactivate(True)
+        globalvariables.decayWWlminusnu2q.deactivate(True)
+
+    config.init()
+    finishedinit = True

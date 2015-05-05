@@ -50,6 +50,6 @@ def init():
         globalvariables.init()
 ####################################################
 #the stuff in here is configurable
-        checkPDGmasslist = globalvariables.leptons
+        checkPDGmasslist = globalvariables.globalvariables.leptons
 ####################################################
         finishedinit = True

@@ -41,7 +41,7 @@ class Event:
         self.decaylist = [p for p in self.particlelist if p.kids()]
         self.incoming = [p for p in self.particlelist if p.status() == -1]
 
-        globalvariables.anyevent.increment()
+        globalvariables.globalvariables.anyevent.increment()
 
         self.miscellaneouschecks = sum(([a + " " + str(self.linenumber) for a in b] for b in self.particlelist[1:].miscellaneouschecks),[])
 
@@ -185,14 +185,14 @@ class Event:
     def checkcolor(self):
         results = []
         for p in self.particlelist:
-            if not p.color() and ((p in globalvariables.quarks and p.id() > 0) or p in globalvariables.gluon):
+            if not p.color() and ((p in globalvariables.globalvariables.quarks and p.id() > 0) or p in globalvariables.globalvariables.gluon):
                 results.append(str(p) + " has no color! " + str(self.linenumber))
-            if p.color() and not ((p in globalvariables.quarks and p.id() > 0) or p in globalvariables.gluon):
+            if p.color() and not ((p in globalvariables.globalvariables.quarks and p.id() > 0) or p in globalvariables.globalvariables.gluon):
                 results.append(str(p) + " has color " + str(p.color()) + "! " + str(self.linenumber))
 
-            if not p.anticolor() and ((p in globalvariables.quarks and p.id() < 0) or p in globalvariables.gluon):
+            if not p.anticolor() and ((p in globalvariables.globalvariables.quarks and p.id() < 0) or p in globalvariables.globalvariables.gluon):
                 results.append(str(p) + " has no anticolor! " + str(self.linenumber))
-            if p.anticolor() and not ((p in globalvariables.quarks and p.id() < 0) or p in globalvariables.gluon):
+            if p.anticolor() and not ((p in globalvariables.globalvariables.quarks and p.id() < 0) or p in globalvariables.globalvariables.gluon):
                 results.append(str(p) + " has anticolor " + str(p.anticolor()) + "! " + str(self.linenumber))
 
         for c in self.colors.values():
@@ -202,33 +202,33 @@ class Event:
         return "\n".join(results)
 
     def count4l(self):
-        if self.count(globalvariables.leptons) >= 4:
-            globalvariables.any4l.increment()
+        if self.count(globalvariables.globalvariables.leptons) >= 4:
+            globalvariables.globalvariables.any4l.increment()
 
     def count2l2l(self):
-        leptons = [p for p in self.particlelist if p in globalvariables.leptons]
+        leptons = [p for p in self.particlelist if p in globalvariables.globalvariables.leptons]
         if checkdebugoutput.count2l2l(leptons):
-            globalvariables.any2l2l.increment()
+            globalvariables.globalvariables.any2l2l.increment()
 
     def countallleptonnumbers(self):
-        for i in globalvariables.leptoncount:
-            if self.count(globalvariables.leptons) == i:
-                globalvariables.leptoncount[i].increment()
+        for i in globalvariables.globalvariables.leptoncount:
+            if self.count(globalvariables.globalvariables.leptons) == i:
+                globalvariables.globalvariables.leptoncount[i].increment()
                 return
         else:
-            raise RuntimeError(str(self.count(globalvariables.leptons)) + "leptons in event! " + str(self.linenumber) + "\n" +
-                               "increase the range of globalvariables.leptoncount")
+            raise RuntimeError(str(self.count(globalvariables.globalvariables.leptons)) + "leptons in event! " + str(self.linenumber) + "\n" +
+                               "increase the range of globalvariables.globalvariables.leptoncount")
 
     def higgs(self):
-        higgs = [p for p in self.particlelist if str(p) == "H" or str(p) == "Z'" or str(p) == "G"]
-        if len(higgs) == 0:
+        higgslist = [p for p in self.particlelist if str(p) == "H" or str(p) == "Z'" or str(p) == "G"]
+        if len(higgslist) == 0:
             raise IOError("No higgs in event! " + str(self.linenumber))
-        if len(higgs) > 1:
+        if len(higgslist) > 1:
             raise IOError("Multiple higgs in event! " + str(self.linenumber))
-        return higgs[0]
+        return higgslist[0]
 
     def higgsdecay(self, level = None):
-        return particle.DecayType(self.higgs(), level).particles()
+        return particle.DecayType(self.higgs(), level).particles
 
     def higgsdecaytype(self, level = None):
         return particle.DecayType(self.higgs(), level)
@@ -236,7 +236,7 @@ class Event:
     def checkhiggsdecay(self):
         if not self.higgs().kids():
             return ""
-        for family in globalvariables.decayfamiliestoplevel:
+        for family in globalvariables.globalvariables.decayfamiliestoplevel:
             if self.higgs() in family:
                 family.increment(self.higgs())
                 return ""
@@ -253,8 +253,8 @@ class Event:
     def getVfromVH(self):
         immediateproduction = [p for p in self.particlelist if all(parent in self.incoming for parent in p.mothers())]
         counter = particle.ParticleCounter(immediateproduction)
-        if counter.count(globalvariables.weakbosons) == 1 and counter.count(globalvariables.higgs) == 1:
-            return [p for p in immediateproduction if p in globalvariables.weakbosons][0]
+        if counter.count(globalvariables.globalvariables.weakbosons) == 1 and counter.count(globalvariables.globalvariables.higgs) == 1:
+            return [p for p in immediateproduction if p in globalvariables.globalvariables.weakbosons][0]
         else:
             return None
 
@@ -265,10 +265,10 @@ class Event:
         Vdecay = particle.DecayType(V)
 
         categories = None
-        if V in globalvariables.W:
-            categories = globalvariables.WH.increment(particle.DecayType(V))     #automatically increments the correct decay
-        if V in globalvariables.Z:
-            categories = globalvariables.ZH.increment(particle.DecayType(V))     #automatically increments the correct decay
+        if V in globalvariables.globalvariables.W:
+            categories = globalvariables.globalvariables.WH.increment(particle.DecayType(V))     #automatically increments the correct decay
+        if V in globalvariables.globalvariables.Z:
+            categories = globalvariables.globalvariables.ZH.increment(particle.DecayType(V))     #automatically increments the correct decay
 
         if categories is None:
             assert(0)                                        #Has to be ZH or WH
@@ -277,7 +277,7 @@ class Event:
             return ("unknown V decay type! " + str(self.linenumber) + "\n" +
                     "V -> " + str(Vdecay))
 
-        globalvariables.VH.increment()
+        globalvariables.globalvariables.VH.increment()
         return ""
 
 #conversion
@@ -327,36 +327,36 @@ class Event:
 
     def filltree(self):
         if self.anythingtofill:
-            globalvariables.tree.Fill()
+            globalvariables.globalvariables.tree.Fill()
 
     def isZZ(self):
-        return len(self.higgs().kids()) == 2 and all(kid in globalvariables.Z for kid in self.higgs().kids())
+        return len(self.higgs().kids()) == 2 and all(kid in globalvariables.globalvariables.Z for kid in self.higgs().kids())
 
     def Z(self, which):
         if not self.isZZ():
             return None
         Zs = self.higgs().kids()
-        assert(all(Z in globalvariables.Z for Z in Zs))
+        assert(all(Z in globalvariables.globalvariables.Z for Z in Zs))
         Zs.sort(key = lambda Z: abs(Z.invmass() - Z.PDGmass()))
         return Zs[which - 1]
 
     def isWW(self):
-        return len(self.higgs().kids()) == 2 and all(kid in globalvariables.W for kid in self.higgs().kids())
+        return len(self.higgs().kids()) == 2 and all(kid in globalvariables.globalvariables.W for kid in self.higgs().kids())
 
     def W(self, which):
         if not self.isWW():
             return None
         Ws = self.higgs().kids()
-        assert(all(W in globalvariables.W for W in Ws))
+        assert(all(W in globalvariables.globalvariables.W for W in Ws))
         Ws.sort(key = lambda W: abs(W.invmass() - W.PDGmass()))
         return Ws[which - 1]
 
     def checkZZorWWassignment(self):
-        if (self.higgs() not in globalvariables.decayZZ4l
-        and self.higgs() not in globalvariables.decayZZ4q
-        and self.higgs() not in globalvariables.decayZZ4nu
-        and self.higgs() not in globalvariables.decayWW4q
-        and self.higgs() not in globalvariables.decayWW2l2nu):
+        if (self.higgs() not in globalvariables.globalvariables.decayZZ4l
+        and self.higgs() not in globalvariables.globalvariables.decayZZ4q
+        and self.higgs() not in globalvariables.globalvariables.decayZZ4nu
+        and self.higgs() not in globalvariables.globalvariables.decayWW4q
+        and self.higgs() not in globalvariables.globalvariables.decayWW2l2nu):
             return ""
         assert(len(self.higgs().kids()) == 2)
         ZorW1 = self.Z(1)
@@ -390,9 +390,9 @@ class Event:
                     "alternate %s mass = " + str(altmass) + "\n") % str(ZorW1)
 
     def getdecayangles(self):
-        globalvariables.costheta1[0] = -999
-        globalvariables.costheta2[0] = -999
-        globalvariables.Phi[0] = -999
+        globalvariables.globalvariables.costheta1[0] = -999
+        globalvariables.globalvariables.costheta2[0] = -999
+        globalvariables.globalvariables.Phi[0] = -999
 
         lab = momentum.Frame()
 
@@ -405,25 +405,25 @@ class Event:
                 leptons[(Z, sign)] = [p for p in Zs[Z].kids() if p.id()*sign > 0][0]
         #sign is -charge
         for i in leptons:
-            if leptons[i] not in globalvariables.leptons:
+            if leptons[i] not in globalvariables.globalvariables.leptons:
                 return
         self.boosttocom(Zs[1])
-        globalvariables.costheta1[0] = -leptons[(1, 1)].Vect().Unit().Dot(Zs[2].Vect().Unit())
+        globalvariables.globalvariables.costheta1[0] = -leptons[(1, 1)].Vect().Unit().Dot(Zs[2].Vect().Unit())
         self.boosttocom(Zs[2])
-        globalvariables.costheta2[0] = -leptons[(2, 1)].Vect().Unit().Dot(Zs[1].Vect().Unit())
+        globalvariables.globalvariables.costheta2[0] = -leptons[(2, 1)].Vect().Unit().Dot(Zs[1].Vect().Unit())
 
         self.boosttocom(self.higgs())
         normal1 = leptons[1, 1].Vect().Cross(leptons[1, -1].Vect()).Unit()
         normal2 = leptons[2, 1].Vect().Cross(leptons[2, -1].Vect()).Unit()
-        globalvariables.Phi[0] = copysign(acos(-normal1.Dot(normal2)),Zs[1].Vect().Dot(normal1.Cross(normal2)))
+        globalvariables.globalvariables.Phi[0] = copysign(acos(-normal1.Dot(normal2)),Zs[1].Vect().Dot(normal1.Cross(normal2)))
 
         self.gotoframe(lab)
         self.anythingtofill = True
 
     def getZZmasses(self):
-        globalvariables.mZ1[0] = -999
-        globalvariables.mZ2[0] = -999
-        globalvariables.mH[0] = -999
+        globalvariables.globalvariables.mZ1[0] = -999
+        globalvariables.globalvariables.mZ2[0] = -999
+        globalvariables.globalvariables.mH[0] = -999
         Zs = {1: self.Z(1), 2: self.Z(2)}
         if Zs[1] is None or Zs[2] is None:
             return
@@ -433,9 +433,9 @@ class Event:
                 leptons[(Z, sign)] = [p for p in Zs[Z].kids() if p.id()*sign > 0][0]
         #sign is -charge
         for i in leptons:
-            if leptons[i] not in globalvariables.leptons:
+            if leptons[i] not in globalvariables.globalvariables.leptons:
                 return
-        globalvariables.mZ1[0] = Zs[1].invmass()
-        globalvariables.mZ2[0] = Zs[2].invmass()
-        globalvariables.mH[0] = self.higgs().invmass()
+        globalvariables.globalvariables.mZ1[0] = Zs[1].invmass()
+        globalvariables.globalvariables.mZ2[0] = Zs[2].invmass()
+        globalvariables.globalvariables.mH[0] = self.higgs().invmass()
         self.anythingtofill = True

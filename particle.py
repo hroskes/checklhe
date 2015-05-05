@@ -140,12 +140,13 @@ class DecayType(ParticleCounter):
                     done = False
                     decayparticles.remove(p)
                     decayparticles += p.kids()
-        self.particles = decayparticles
+        self.particles = usefulstuff.printablelist(decayparticles)
         super(DecayType, self).__init__(decayparticles)
 
 class EventCount(object):
     def __init__(self, name = "", subcategories = None):
         self.name = name
+        self.__active = True
         self.subcategories = []
         if subcategories is not None:
             self.subcategories = subcategories
@@ -154,8 +155,8 @@ class EventCount(object):
         return hash(self.name)
 
     def printcount(self):
-        count = globalvariables.eventcounter[self]
-        total = globalvariables.eventcounter[globalvariables.anyevent]
+        count = globalvariables.globalvariables.eventcounter[self]
+        total = globalvariables.globalvariables.eventcounter[globalvariables.globalvariables.anyevent]
         if count > 0:
             joiner = "\n    "
             result = "%s %s events (%s%%)" % (count, self.name, 100.0*count/total)
@@ -168,7 +169,21 @@ class EventCount(object):
         return result.rstrip(" ")
 
     def increment(self):
-        globalvariables.eventcounter[self] += 1
+        if self.__active:
+            globalvariables.globalvariables.eventcounter[self] += 1
+
+    def activate(self, recursive = False):
+        self.__active = True
+        if recursive:
+            for s in self.subcategories:
+                s.activate(recursive)
+    def deactivate(self, recursive = False):
+        self.__active = False
+        if recursive:
+            for s in self.subcategories:
+                s.deactivate(recursive)
+    def isactive(self):
+        return self.__active
 
 class DecayFamily(EventCount, set):
     def __init__(self, decaytypes, charge = None, baryonnumber = None, leptonnumber = (None, None, None), name = "", subcategories = None, Csymmetric = True):
