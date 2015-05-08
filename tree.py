@@ -22,6 +22,7 @@ class tree(ROOT.TTree):
 
     def __init__(self, *args, **kwargs):
         self.branches = {}
+        self.types = {}
         self.setyet = {}
         super(tree, self).__init__(*args, **kwargs)
 
@@ -33,10 +34,17 @@ class tree(ROOT.TTree):
             if type not in typemap:
                 raise IndexError("The allowed types for tree are\n" + ", ".join(a for a in typemap) + "\n" + type + " is not allowed")
             self.branches[name] = array.array(typemap[type], [0])
+            self.types[name] = type
             self.setyet[name] = False
             super(tree, self).Branch(name, self.branches[name], name + "/" + typemap[type])
         else:
             super(tree, self).Branch(*args, **kwargs)
+    def EnsureBranch(self, name, type):
+        if name not in self:
+            print name, self.branches
+            self.Branch(name, type)
+        if type != self.types[name]:
+            raise TypeError("Branch " + name + " already has type " + self.types[name] + " and you are trying to ensure it with type " + type + "!")
 
     def __setitem__(self, name, value):
         if name in self.branches:
@@ -49,6 +57,8 @@ class tree(ROOT.TTree):
             return self.branches[name][0]
         except KeyError:
             raise KeyError(name + " is not yet a branch in the tree!")
+    def __contains__(self, branch):
+        return branch in self.branches
 
     def Fill(self, force = False):
         if not force:

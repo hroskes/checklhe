@@ -17,14 +17,6 @@ class LHEFile:
         if config.tree:
             self.rootfile = ROOT.TFile(filename.replace(".lhe","",1) + '.root', 'recreate')
             self.tree = tree.tree("tree", "tree")
-        if config.makeZZ4langlestree:
-            self.tree.Branch("costheta1", "D")
-            self.tree.Branch("costheta2", "D")
-            self.tree.Branch("Phi",       "D")
-        if config.makeZZmassestree:
-            self.tree.Branch("mZ1", "D")
-            self.tree.Branch("mZ2", "D")
-            self.tree.Branch("mH",  "D")
 
     def __enter__(self):
         return self

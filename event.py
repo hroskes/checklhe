@@ -392,6 +392,9 @@ class Event:
                     "alternate %s mass = " + str(altmass) + "\n") % str(ZorW1)
 
     def getZZ4langles(self):
+        self.tree.EnsureBranch("costheta1", "D")
+        self.tree.EnsureBranch("costheta2", "D")
+        self.tree.EnsureBranch("Phi",       "D")
         self.tree["costheta1"] = -999
         self.tree["costheta2"] = -999
         self.tree["Phi"] = -999
@@ -423,6 +426,9 @@ class Event:
         self.anythingtofill = True
 
     def getZZmasses(self):
+        self.tree.EnsureBranch("mZ1", "D")
+        self.tree.EnsureBranch("mZ2", "D")
+        self.tree.EnsureBranch("mH",  "D")
         self.tree["mZ1"] = -999
         self.tree["mZ2"] = -999
         self.tree["mH"] = -999
