@@ -1,7 +1,7 @@
 import usefulstuff
 import config
 import ROOT
-from math import copysign, acos
+from math import acos, atan2, copysign, log, tan
 
 class Momentum(ROOT.TLorentzVector):
     def __init__(self, px, py, pz, E):
@@ -24,6 +24,14 @@ class Momentum(ROOT.TLorentzVector):
         return self.m
     def P(self):
         return (self.px**2+self.py**2+self.pz**2)**.5
+    def Pt(self):
+        return (self.px**2+self.py**2)**.5
+    def Theta(self):
+        return atan2(self.pz, self.Pt())
+    def Eta(self):
+        return -log(tan(self.Theta()/2))
+    def Phi(self):
+        return atan2(self.py, self.px)
 
     def Vect(self):
         self.superinit()

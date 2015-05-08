@@ -10,6 +10,7 @@ ROOT.gROOT.SetBatch(True)
 
 import particle
 import event
+import tree
 import globalvariables
 import config
 import collections
@@ -33,21 +34,15 @@ for file in sys.argv[1:]:
         globalvariables.globalvariables.eventcounter = collections.Counter()
         if config.tree:
             globalvariables.globalvariables.rootfile = ROOT.TFile(file.replace(".lhe","",1) + '.root', 'recreate')
-            globalvariables.globalvariables.tree = ROOT.TTree("tree", "tree")
-        if config.makedecayanglestree:
-            globalvariables.globalvariables.costheta1 = array.array('d', [0])
-            globalvariables.globalvariables.costheta2 = array.array('d', [0])
-            globalvariables.globalvariables.Phi       = array.array('d', [0])
-            globalvariables.globalvariables.tree.Branch("costheta1", globalvariables.globalvariables.costheta1, "costheta1/D")
-            globalvariables.globalvariables.tree.Branch("costheta2", globalvariables.globalvariables.costheta2, "costheta2/D")
-            globalvariables.globalvariables.tree.Branch("Phi",       globalvariables.globalvariables.Phi,       "Phi/D")
+            globalvariables.globalvariables.tree = tree.tree("tree", "tree")
+        if config.makeZZ4langlestree:
+            globalvariables.globalvariables.tree.Branch("costheta1", "D")
+            globalvariables.globalvariables.tree.Branch("costheta2", "D")
+            globalvariables.globalvariables.tree.Branch("Phi",       "D")
         if config.makeZZmassestree:
-            globalvariables.globalvariables.mZ1 = array.array('d', [0])
-            globalvariables.globalvariables.mZ2 = array.array('d', [0])
-            globalvariables.globalvariables.mH  = array.array('d', [0])
-            globalvariables.globalvariables.tree.Branch("mZ1", globalvariables.globalvariables.mZ1, "mZ1/D")
-            globalvariables.globalvariables.tree.Branch("mZ2", globalvariables.globalvariables.mZ2, "mZ2/D")
-            globalvariables.globalvariables.tree.Branch("mH",  globalvariables.globalvariables.mH,  "mH/D")
+            globalvariables.globalvariables.tree.Branch("mZ1", "D")
+            globalvariables.globalvariables.tree.Branch("mZ2", "D")
+            globalvariables.globalvariables.tree.Branch("mH",  "D")
         for line in f:
             linenumber += 1
             if "<event>" in line:

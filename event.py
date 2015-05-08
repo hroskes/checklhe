@@ -390,9 +390,9 @@ class Event:
                     "alternate %s mass = " + str(altmass) + "\n") % str(ZorW1)
 
     def getZZ4langles(self):
-        globalvariables.globalvariables.costheta1[0] = -999
-        globalvariables.globalvariables.costheta2[0] = -999
-        globalvariables.globalvariables.Phi[0] = -999
+        globalvariables.globalvariables.tree["costheta1"] = -999
+        globalvariables.globalvariables.tree["costheta2"] = -999
+        globalvariables.globalvariables.tree["Phi"] = -999
 
         lab = momentum.Frame()
 
@@ -408,22 +408,22 @@ class Event:
             if leptons[i] not in globalvariables.globalvariables.leptons:
                 return
         self.boosttocom(Zs[1])
-        globalvariables.globalvariables.costheta1[0] = -leptons[(1, 1)].Vect().Unit().Dot(Zs[2].Vect().Unit())
+        globalvariables.globalvariables.tree["costheta1"] = -leptons[(1, 1)].Vect().Unit().Dot(Zs[2].Vect().Unit())
         self.boosttocom(Zs[2])
-        globalvariables.globalvariables.costheta2[0] = -leptons[(2, 1)].Vect().Unit().Dot(Zs[1].Vect().Unit())
+        globalvariables.globalvariables.tree["costheta2"] = -leptons[(2, 1)].Vect().Unit().Dot(Zs[1].Vect().Unit())
 
         self.boosttocom(self.higgs())
         normal1 = leptons[1, 1].Vect().Cross(leptons[1, -1].Vect()).Unit()
         normal2 = leptons[2, 1].Vect().Cross(leptons[2, -1].Vect()).Unit()
-        globalvariables.globalvariables.Phi[0] = copysign(acos(-normal1.Dot(normal2)),Zs[1].Vect().Dot(normal1.Cross(normal2)))
+        globalvariables.globalvariables.tree["Phi"] = copysign(acos(-normal1.Dot(normal2)),Zs[1].Vect().Dot(normal1.Cross(normal2)))
 
         self.gotoframe(lab)
         self.anythingtofill = True
 
     def getZZmasses(self):
-        globalvariables.globalvariables.mZ1[0] = -999
-        globalvariables.globalvariables.mZ2[0] = -999
-        globalvariables.globalvariables.mH[0] = -999
+        globalvariables.globalvariables.tree["mZ1"] = -999
+        globalvariables.globalvariables.tree["mZ2"] = -999
+        globalvariables.globalvariables.tree["mH"] = -999
         Zs = {1: self.Z(1), 2: self.Z(2)}
         if Zs[1] is None or Zs[2] is None:
             return
@@ -435,7 +435,7 @@ class Event:
         for i in leptons:
             if leptons[i] not in globalvariables.globalvariables.leptons:
                 return
-        globalvariables.globalvariables.mZ1[0] = Zs[1].invmass()
-        globalvariables.globalvariables.mZ2[0] = Zs[2].invmass()
-        globalvariables.globalvariables.mH[0] = self.higgs().invmass()
+        globalvariables.globalvariables.tree["mZ1"] = Zs[1].invmass()
+        globalvariables.globalvariables.tree["mZ2"] = Zs[2].invmass()
+        globalvariables.globalvariables.tree["mH"] = self.higgs().invmass()
         self.anythingtofill = True
