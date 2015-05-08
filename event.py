@@ -12,8 +12,10 @@ import ROOT
 from math import copysign, acos
 
 class Event:
-    def __init__(self, linenumber):
+    def __init__(self, linenumber, eventcounter, tree):
         self.linenumber = linenumber
+        self.eventcounter = eventcounter
+        self.tree = tree
         self.firstline = None
         self.particlelist = usefulstuff.printablelist([None])
         self.vertices = vertex.Vertices()
@@ -41,7 +43,7 @@ class Event:
         self.decaylist = [p for p in self.particlelist if p.kids()]
         self.incoming = [p for p in self.particlelist if p.status() == -1]
 
-        globalvariables.globalvariables.anyevent.increment()
+        globalvariables.globalvariables.anyevent.increment(self.eventcounter)
 
         self.miscellaneouschecks = sum(([a + " " + str(self.linenumber) for a in b] for b in self.particlelist[1:].miscellaneouschecks),[])
 
@@ -203,17 +205,17 @@ class Event:
 
     def count4l(self):
         if self.count(globalvariables.globalvariables.leptons) >= 4:
-            globalvariables.globalvariables.any4l.increment()
+            globalvariables.globalvariables.any4l.increment(self.eventcounter)
 
     def count2l2l(self):
         leptons = [p for p in self.particlelist if p in globalvariables.globalvariables.leptons]
         if checkdebugoutput.count2l2l(leptons):
-            globalvariables.globalvariables.any2l2l.increment()
+            globalvariables.globalvariables.any2l2l.increment(self.eventcounter)
 
     def countallleptonnumbers(self):
         for i in globalvariables.globalvariables.leptoncount:
             if self.count(globalvariables.globalvariables.leptons) == i:
-                globalvariables.globalvariables.leptoncount[i].increment()
+                globalvariables.globalvariables.leptoncount[i].increment(self.eventcounter)
                 return
         else:
             raise RuntimeError(str(self.count(globalvariables.globalvariables.leptons)) + "leptons in event! " + str(self.linenumber) + "\n" +
@@ -238,7 +240,7 @@ class Event:
             return ""
         for family in globalvariables.globalvariables.decayfamiliestoplevel:
             if self.higgs() in family:
-                family.increment(self.higgs())
+                family.increment(self.higgs(), self.eventcounter)
                 return ""
         return ("unknown decay type! " + str(self.linenumber) + "\n" +
                 "H -> " + str(self.higgsdecay()))
@@ -266,9 +268,9 @@ class Event:
 
         categories = None
         if V in globalvariables.globalvariables.W:
-            categories = globalvariables.globalvariables.WH.increment(particle.DecayType(V))     #automatically increments the correct decay
+            categories = globalvariables.globalvariables.WH.increment(particle.DecayType(V), self.eventcounter)     #automatically increments the correct decay
         if V in globalvariables.globalvariables.Z:
-            categories = globalvariables.globalvariables.ZH.increment(particle.DecayType(V))     #automatically increments the correct decay
+            categories = globalvariables.globalvariables.ZH.increment(particle.DecayType(V), self.eventcounter)     #automatically increments the correct decay
 
         if categories is None:
             assert(0)                                        #Has to be ZH or WH
@@ -277,7 +279,7 @@ class Event:
             return ("unknown V decay type! " + str(self.linenumber) + "\n" +
                     "V -> " + str(Vdecay))
 
-        globalvariables.globalvariables.VH.increment()
+        globalvariables.globalvariables.VH.increment(self.eventcounter)
         return ""
 
 #conversion
@@ -327,7 +329,7 @@ class Event:
 
     def filltree(self):
         if self.anythingtofill:
-            globalvariables.globalvariables.tree.Fill()
+            self.tree.Fill()
 
     def isZZ(self):
         return len(self.higgs().kids()) == 2 and all(kid in globalvariables.globalvariables.Z for kid in self.higgs().kids())
@@ -390,9 +392,9 @@ class Event:
                     "alternate %s mass = " + str(altmass) + "\n") % str(ZorW1)
 
     def getZZ4langles(self):
-        globalvariables.globalvariables.tree["costheta1"] = -999
-        globalvariables.globalvariables.tree["costheta2"] = -999
-        globalvariables.globalvariables.tree["Phi"] = -999
+        self.tree["costheta1"] = -999
+        self.tree["costheta2"] = -999
+        self.tree["Phi"] = -999
 
         lab = momentum.Frame()
 
@@ -408,22 +410,22 @@ class Event:
             if leptons[i] not in globalvariables.globalvariables.leptons:
                 return
         self.boosttocom(Zs[1])
-        globalvariables.globalvariables.tree["costheta1"] = -leptons[(1, 1)].Vect().Unit().Dot(Zs[2].Vect().Unit())
+        self.tree["costheta1"] = -leptons[(1, 1)].Vect().Unit().Dot(Zs[2].Vect().Unit())
         self.boosttocom(Zs[2])
-        globalvariables.globalvariables.tree["costheta2"] = -leptons[(2, 1)].Vect().Unit().Dot(Zs[1].Vect().Unit())
+        self.tree["costheta2"] = -leptons[(2, 1)].Vect().Unit().Dot(Zs[1].Vect().Unit())
 
         self.boosttocom(self.higgs())
         normal1 = leptons[1, 1].Vect().Cross(leptons[1, -1].Vect()).Unit()
         normal2 = leptons[2, 1].Vect().Cross(leptons[2, -1].Vect()).Unit()
-        globalvariables.globalvariables.tree["Phi"] = copysign(acos(-normal1.Dot(normal2)),Zs[1].Vect().Dot(normal1.Cross(normal2)))
+        self.tree["Phi"] = copysign(acos(-normal1.Dot(normal2)),Zs[1].Vect().Dot(normal1.Cross(normal2)))
 
         self.gotoframe(lab)
         self.anythingtofill = True
 
     def getZZmasses(self):
-        globalvariables.globalvariables.tree["mZ1"] = -999
-        globalvariables.globalvariables.tree["mZ2"] = -999
-        globalvariables.globalvariables.tree["mH"] = -999
+        self.tree["mZ1"] = -999
+        self.tree["mZ2"] = -999
+        self.tree["mH"] = -999
         Zs = {1: self.Z(1), 2: self.Z(2)}
         if Zs[1] is None or Zs[2] is None:
             return
@@ -435,7 +437,7 @@ class Event:
         for i in leptons:
             if leptons[i] not in globalvariables.globalvariables.leptons:
                 return
-        globalvariables.globalvariables.tree["mZ1"] = Zs[1].invmass()
-        globalvariables.globalvariables.tree["mZ2"] = Zs[2].invmass()
-        globalvariables.globalvariables.tree["mH"] = self.higgs().invmass()
+        self.tree["mZ1"] = Zs[1].invmass()
+        self.tree["mZ2"] = Zs[2].invmass()
+        self.tree["mH"] = self.higgs().invmass()
         self.anythingtofill = True

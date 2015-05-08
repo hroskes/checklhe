@@ -154,9 +154,9 @@ class EventCount(object):
     def __hash__(self):
         return hash(self.name)
 
-    def printcount(self):
-        count = globalvariables.globalvariables.eventcounter[self]
-        total = globalvariables.globalvariables.eventcounter[globalvariables.globalvariables.anyevent]
+    def printcount(self, eventcounter):
+        count = eventcounter[self]
+        total = eventcounter[globalvariables.globalvariables.anyevent]
         if count > 0:
             joiner = "\n    "
             result = "%s %s events (%s%%)" % (count, self.name, 100.0*count/total)
@@ -165,12 +165,12 @@ class EventCount(object):
             result = ""
             joiner = "\n"
         for subcategory in self.subcategories:
-            result += joiner.join([line for line in subcategory.printcount().split("\n")])
+            result += joiner.join([line for line in subcategory.printcount(eventcounter).split("\n")])
         return result.rstrip(" ")
 
-    def increment(self):
+    def increment(self, eventcounter):
         if self.__active:
-            globalvariables.globalvariables.eventcounter[self] += 1
+            eventcounter[self] += 1
 
     def activate(self, recursive = False):
         self.__active = True
@@ -206,13 +206,13 @@ class DecayFamily(EventCount, set):
         set.__init__(self, finallist)
         EventCount.__init__(self, name, subcategories)
 
-    def increment(self, decay):
+    def increment(self, decay, eventcounter):
         incremented = []
         if len(self) == 0 or decay in self:
-            super(DecayFamily, self).increment()
+            super(DecayFamily, self).increment(eventcounter)
             incremented.append(self)
         for subcategory in self.subcategories:
-            subincremented = subcategory.increment(decay)
+            subincremented = subcategory.increment(decay, eventcounter)
             incremented += subincremented
             #to check
             if (self not in incremented) and subincremented:
