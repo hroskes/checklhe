@@ -89,6 +89,23 @@ class Particle(particletype.ParticleType):
     def lhemass(self):
         return self.__lhemass
 
+    def Px(self):
+        return self.__momentum.Px()
+    def Py(self):
+        return self.__momentum.Py()
+    def Pz(self):
+        return self.__momentum.Pz()
+    def E(self):
+        return self.__momentum.E()
+    def Pt(self):
+        return self.__momentum.Pt()
+    def Eta(self):
+        return self.__momentum.Eta()
+    def Phi(self):
+        return self.__momentum.Phi()
+    def Rapidity(self):
+        return self.__momentum.Rapidity()
+
     def Boost(self, *args):
         self.__momentum.Boost(*args)
     def Rotate(self, *args):

@@ -27,8 +27,10 @@ raiseerror = False            #if this is true, raise an IOError when something 
                               #otherwise just print it
 
 #Make tree
+makeZZmassestree    = True    #For ZZ events, makes a tree of the Z1, Z2, Higgs masses
+getHiggsMomentum    = True    #Makes a tree of the Higgs momentum
+getLeptonMomenta    = True    #For ZZ->4l events, makes a tree of the lepton momenta
 makeZZ4langlestree  = True    #For ZZ->4l events, makes a tree of costheta1, costheta2, and Phi
-makeZZmassestree    = True    #For ZZ->4l events, makes a tree of the Z1, Z2, Higgs masses
 tree = any([makeZZ4langlestree, makeZZmassestree])
 
 

@@ -27,11 +27,13 @@ class Momentum(ROOT.TLorentzVector):
     def Pt(self):
         return (self.px**2+self.py**2)**.5
     def Theta(self):
-        return atan2(self.pz, self.Pt())
+        return atan2(self.Pt(), self.pz)
     def Eta(self):
         return -log(tan(self.Theta()/2))
     def Phi(self):
         return atan2(self.py, self.px)
+    def Rapidity(self):
+        return 1/2*log((self.e+self.pz)/(self.e-self.pz))
 
     def Vect(self):
         self.superinit()
