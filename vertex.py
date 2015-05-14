@@ -25,9 +25,9 @@ class Vertex(object):
     def momentumin(self):
         if all(a is None for a in self.__in):
             return self.momentumout()               #momentum is automatically "conserved"
-        return sum(self.__in.momentum(), momentum.Momentum(0, 0, 0, 0))
+        return sum(self.__in.momentum(), momentum.Momentum(None, 0, 0, 0, 0))
     def momentumout(self):
-        return sum(self.__out.momentum(), momentum.Momentum(0, 0, 0, 0))
+        return sum(self.__out.momentum(), momentum.Momentum(None, 0, 0, 0, 0))
     def chargein(self):
         if all(a is None for a in self.__in):
             return self.chargeout()                 #charge is automatically "conserved"

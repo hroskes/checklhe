@@ -4,12 +4,17 @@ import ROOT
 from math import acos, atan2, copysign, log, tan
 
 class Momentum(ROOT.TLorentzVector):
+    def __init__(self, event, *args, **kwargs):
+        ROOT.TLorentzVector.__init__(self, *args, **kwargs)
+        self.event = event
+        if event is not None:
+            event.momenta.append(self)
     def momentum(self):
         return self        #so that particle and momentum can be used symmetrically
     def __neg__(self):
-        return Momentum(-self.Px(), -self.Py(), -self.Pz(), -self.E())
+        return Momentum(self.event, -self.Px(), -self.Py(), -self.Pz(), -self.E())
     def __add__(self, other):
-        return Momentum(self.Px()+other.Px(), self.Py()+other.Py(), self.Pz()+other.Pz(), self.E()+other.E())
+        return Momentum(self.event, self.Px()+other.Px(), self.Py()+other.Py(), self.Pz()+other.Pz(), self.E()+other.E())
     def __sub__(self, other):
         return self + (-other)
     def __eq__(self, other):
@@ -20,11 +25,11 @@ class Momentum(ROOT.TLorentzVector):
         return "(%s, %s, %s, %s)" % (self.Px(), self.Py(), self.Pz(), self.E())
 
 class Frame(object):
-    def __init__(self):
-        self.x = Momentum(1, 0, 0, 0)
-        self.y = Momentum(0, 1, 0, 0)
-        self.z = Momentum(0, 0, 1, 0)
-        self.t = Momentum(0, 0, 0, 1)
+    def __init__(self, event):
+        self.x = Momentum(event, 1, 0, 0, 0)
+        self.y = Momentum(event, 0, 1, 0, 0)
+        self.z = Momentum(event, 0, 0, 1, 0)
+        self.t = Momentum(event, 0, 0, 0, 1)
 
     def Boost(self, *args):
         for v in (self.x, self.y, self.z, self.t):

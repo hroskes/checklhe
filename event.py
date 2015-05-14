@@ -26,7 +26,8 @@ class Event:
         self.vertices = vertex.Vertices()
         self.colors = color.Colors()
         self.done = False
-        self.frames = {"lab": momentum.Frame()}
+        self.momenta = []
+        self.frames = {"lab": self.frame()}
 
     def setfirstline(self, firstline):
         if self.firstline is not None:
@@ -376,7 +377,7 @@ class Event:
 #      Conversion      #
 ########################
 
-    def boostall(self, xorvect, y = None, z = None, othermomenta = []):
+    def boostall(self, xorvect, y = None, z = None):
         if y is None and z is not None or y is not None and z is None:
             raise TypeError
         elif y is None and z is None:
@@ -384,39 +385,22 @@ class Event:
         else:
             args = [xorvect, y, z]
 
-        boosted = []
-        for p in self.particlelist + self.frames.values():
+        for p in self.momenta:
             p.Boost(*args)
-        for p in othermomenta:
-            for b in boosted:
-                if p is b:
-                    break
-            else:
-                p.Boost(*args)
-                boosted.append(p)
 
-    def boosttocom(self, vect, othermomenta = []):
+    def boosttocom(self, vect):
         boostvector = -vect.BoostVector()
-        self.boostall(boostvector, othermomenta = othermomenta)
+        self.boostall(boostvector)
 
-    def gotoframe(self, frame, othermomenta = []):
-        self.boosttocom(frame.t, othermomenta)
-        self.rotatetozx(frame.z, frame.x, othermomenta)
+    def gotoframe(self, frame):
+        self.boosttocom(frame.t)
+        self.rotatetozx(frame.z, frame.x)
 
-    def rotateall(self, angle, axis, othermomenta = []):
-        rotated = []
-        for p in self.particlelist + self.frames.values():
+    def rotateall(self, angle, axis):
+        for p in self.momenta:
             p.Rotate(angle, axis)
-            rotated.append(p)
-        for p in othermomenta:
-            for r in rotated:
-                if p is r:
-                    break
-            else:
-                p.Rotate(angle, axis)
-                rotated.append(p)
 
-    def rotatetozx(self, toz, tozx, othermomenta = []):
+    def rotatetozx(self, toz, tozx):
         try:
             toz = toz.Vect()
         except AttributeError:
@@ -429,14 +413,15 @@ class Event:
         axis = toz.Unit().Cross(ROOT.TVector3(0,0,1))
         if axis == ROOT.TVector3(0,0,0):            #if thisOneGoesToZ cross z = 0, it's in the -z direction and angle = pi, so rotate around y
             axis = ROOT.TVector3(0,1,0)             #                               or it's in the +z direction and angle = 0, so it doesn't matter.
+        self.rotateall(angle,axis)
         if tozx is not None:
-            othermomenta = othermomenta[:]
-            othermomenta.append(tozx)
-        self.rotateall(angle,axis, othermomenta)
-        if tozx is not None:
+            tozx.Rotate(angle, axis)
             angle2 = -tozx.Phi()
             axis2 = ROOT.TVector3(0,0,1)
-            self.rotateall(angle2,axis2, othermomenta)
+            self.rotateall(angle2,axis2)
+
+    def frame(self):
+        return momentum.Frame(self)
 
     def filltree(self):
         if self.anythingtofill:
@@ -578,14 +563,14 @@ class Event:
             partons.sort(key = lambda p: p.Pz(), reverse = True)
             return partons[i-1]
         else:
-            bkpframe = momentum.Frame()
+            bkpframe = self.frame()
             HJJ = self.higgs().momentum() + self.VBFjet(1).momentum() + self.VBFjet(2).momentum()
-            HJJ_T = momentum.Momentum(HJJ.Px(), HJJ.Py(), 0, HJJ.E())
-            self.boosttocom(HJJ_T, [HJJ, HJJ_T, bkpframe])
-            self.boosttocom(HJJ, [HJJ, HJJ_T, bkpframe])     #sequential boosts to preserve the z direction
+            HJJ_T = momentum.Momentum(self, HJJ.Px(), HJJ.Py(), 0, HJJ.E())
+            self.boosttocom(HJJ_T)
+            self.boosttocom(HJJ)     #sequential boosts to preserve the z direction
             pzsign = {1: 1, 2: -1}
-            parton = momentum.Momentum(0, 0, pzsign[i]*HJJ.E()/2, HJJ.E()/2)
-            self.gotoframe(bkpframe, [parton])
+            parton = momentum.Momentum(self, 0, 0, pzsign[i]*HJJ.E()/2, HJJ.E()/2)
+            self.gotoframe(bkpframe)
             return parton
 
     def VBFV(self, i, uselhepartons = False):
@@ -616,12 +601,7 @@ class Event:
         P1 = self.incomingparton(1, uselhepartons).momentum()
         P2 = self.incomingparton(2, uselhepartons).momentum()
 
-        self.rotatetozx(self.Z(1), V1, [jet1, jet2, V1, V2, P1, P2])
-        print "Higgs:", self.higgs().momentum()
-        print "Jets: ", jet1, jet2
-        print "V's:  ", V1, V2
-        print "P's:  ", P1, P2
-        print "Z's:  ", self.Z(1).momentum(), self.Z(2).momentum()
+        self.rotatetozx(self.Z(1), V1)
 
         self.tree["costheta1_VBF"] = -V1.Vect().Dot(jet1.Vect())/jet1.Vect().Mag()/V1.Vect().Mag()
         self.tree["costheta2_VBF"] = -V2.Vect().Dot(jet2.Vect())/jet2.Vect().Mag()/V2.Vect().Mag()
@@ -629,7 +609,7 @@ class Event:
         tmp2 = P2.Vect().Cross(jet2.Vect()).Unit()
         cosPhi = tmp1.Dot(tmp2)
         sgnPhi = tmp1.Cross(tmp2).Dot(V1.Vect())
-        self.tree["Phi_VBF"] = copysign(cosPhi, sgnPhi)
+        self.tree["Phi_VBF"] = copysign(acos(cosPhi), sgnPhi)
 
         if config.makeVBFdecayanglestree and self.isZZ():
             Z1 = self.Z(1)
@@ -637,9 +617,6 @@ class Event:
             self.tree.EnsureBranch("Phi1_VBF",         "D")
             self.tree["costhetastar_VBF"] = -V1.Vect().Dot(Z1.Vect())/V1.Vect().Mag()/Z1.Vect().Mag()
             tmp3 = V1.Vect().Cross(Z1.Vect()).Unit()
-            print "tmps: ", tmp1.X(), tmp1.Y(), tmp1.Z()
-            print "      ", tmp2.X(), tmp2.Y(), tmp2.Z()
-            print "      ", tmp3.X(), tmp3.Y(), tmp3.Z()
             cosPhi1 = -tmp1.Dot(tmp3)
             sgnPhi1 = tmp1.Dot(Z1.Vect())
-            self.tree["Phi1_VBF"] = copysign(cosPhi1, sgnPhi1)
+            self.tree["Phi1_VBF"] = copysign(acos(cosPhi1), sgnPhi1)

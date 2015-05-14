@@ -29,7 +29,7 @@ class Particle(particletype.ParticleType):
         except ValueError:
             self.miscellaneouschecks.append("Anticolor for " + str(self) + " is " + data[5] + " instead of a number!")
             self.__color = 0
-        self.__momentum = momentum.Momentum(float(data[6]), float(data[7]), float(data[8]), float(data[9]))
+        self.__momentum = momentum.Momentum(ev, float(data[6]), float(data[7]), float(data[8]), float(data[9]))
         self.__lhemass = float(data[10])
         try:
             self.__lifetime = float(data[11])
