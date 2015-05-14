@@ -87,6 +87,8 @@ class Event:
 
         if config.makeq2VBFtree:
             self.processfunctions.append(self.getq2VBF)
+        if config.makeVBFanglestree:
+            self.processfunctions.append(self.getVBFangles)
 
         if config.count4levents:
             self.processfunctions.append(self.count4l)
@@ -191,7 +193,6 @@ class Event:
                 results.append("no momentum conservation! " + str(self.linenumber) + "\n" +
                                "mom momentum  = " + str(v.momentumin()) + str(v.particlesin()) + "\n" +
                                "kids momentum = " + str(v.momentumout()) + str(v.particlesout()))
-                print v.momentumin()
         return "\n".join(results)
 
     def checkcharge(self):
@@ -378,12 +379,21 @@ class Event:
     def boostall(self, xorvect, y = None, z = None, othermomenta = []):
         if y is None and z is not None or y is not None and z is None:
             raise TypeError
-        if y is None and z is None:
-            for p in self.particlelist + self.frames.values() + othermomenta:
-                p.Boost(xorvect)
+        elif y is None and z is None:
+            args = [xorvect]
         else:
-            for p in self.particlelist + self.frames.values() + othermomenta:
-                p.Boost(xorvect, y, z)
+            args = [xorvect, y, z]
+
+        boosted = []
+        for p in self.particlelist + self.frames.values():
+            p.Boost(*args)
+        for p in othermomenta:
+            for b in boosted:
+                if p is b:
+                    break
+            else:
+                p.Boost(*args)
+                boosted.append(p)
 
     def boosttocom(self, vect, othermomenta = []):
         boostvector = -vect.BoostVector()
@@ -394,8 +404,17 @@ class Event:
         self.rotatetozx(frame.z, frame.x, othermomenta)
 
     def rotateall(self, angle, axis, othermomenta = []):
-        for p in self.particlelist + self.frames.values() + othermomenta:
+        rotated = []
+        for p in self.particlelist + self.frames.values():
             p.Rotate(angle, axis)
+            rotated.append(p)
+        for p in othermomenta:
+            for r in rotated:
+                if p is r:
+                    break
+            else:
+                p.Rotate(angle, axis)
+                rotated.append(p)
 
     def rotatetozx(self, toz, tozx, othermomenta = []):
         try:
@@ -551,24 +570,25 @@ class Event:
         jets.sort(key = lambda j: j.Pz(), reverse = True)
         return jets[i-1]
 
-    def incomingparton(self, i, uselhepartons):
+    def incomingparton(self, i, uselhepartons = False):
         if uselhepartons:
             partons = self.incoming
             if len(partons) != 2:
-                raise NotImplementedError("There should be 2 incoming partons")
+                raise NotImplementedError("There should be exactly 2 incoming partons")
             partons.sort(key = lambda p: p.Pz(), reverse = True)
             return partons[i-1]
         else:
+            bkpframe = momentum.Frame()
             HJJ = self.higgs().momentum() + self.VBFjet(1).momentum() + self.VBFjet(2).momentum()
             HJJ_T = momentum.Momentum(HJJ.Px(), HJJ.Py(), 0, HJJ.E())
-            self.boosttocom(HJJ_T, [HJJ, HJJ_T])
-            self.boosttocom(HJJ, [HJJ, HJJ_T])     #sequential boosts to preserve the z direction
+            self.boosttocom(HJJ_T, [HJJ, HJJ_T, bkpframe])
+            self.boosttocom(HJJ, [HJJ, HJJ_T, bkpframe])     #sequential boosts to preserve the z direction
             pzsign = {1: 1, 2: -1}
             parton = momentum.Momentum(0, 0, pzsign[i]*HJJ.E()/2, HJJ.E()/2)
-            self.gotoframe(self.frames["lab"], [parton])
+            self.gotoframe(bkpframe, [parton])
             return parton
 
-    def VBFV(self, i, uselhepartons):
+    def VBFV(self, i, uselhepartons = False):
         return self.VBFjet(i).momentum() - self.incomingparton(i, uselhepartons).momentum()
 
     def getq2VBF(self, uselhepartons = False):
@@ -582,3 +602,44 @@ class Event:
         self.tree.EnsureBranch(q2V2, "D")
         self.tree[q2V1] = self.VBFV(1, uselhepartons).M2()
         self.tree[q2V2] = self.VBFV(2, uselhepartons).M2()
+
+    def getVBFangles(self, uselhepartons = True):
+        self.boosttocom(self.higgs())
+        self.tree.EnsureBranch("costheta1_VBF", "D")
+        self.tree.EnsureBranch("costheta2_VBF", "D")
+        self.tree.EnsureBranch("Phi_VBF",       "D")
+
+        jet1 = self.VBFjet(1).momentum()
+        jet2 = self.VBFjet(2).momentum()
+        V1 = self.VBFV(1, uselhepartons).momentum()
+        V2 = self.VBFV(2, uselhepartons).momentum()
+        P1 = self.incomingparton(1, uselhepartons).momentum()
+        P2 = self.incomingparton(2, uselhepartons).momentum()
+
+        self.rotatetozx(self.Z(1), V1, [jet1, jet2, V1, V2, P1, P2])
+        print "Higgs:", self.higgs().momentum()
+        print "Jets: ", jet1, jet2
+        print "V's:  ", V1, V2
+        print "P's:  ", P1, P2
+        print "Z's:  ", self.Z(1).momentum(), self.Z(2).momentum()
+
+        self.tree["costheta1_VBF"] = -V1.Vect().Dot(jet1.Vect())/jet1.Vect().Mag()/V1.Vect().Mag()
+        self.tree["costheta2_VBF"] = -V2.Vect().Dot(jet2.Vect())/jet2.Vect().Mag()/V2.Vect().Mag()
+        tmp1 = P1.Vect().Cross(jet1.Vect()).Unit()
+        tmp2 = P2.Vect().Cross(jet2.Vect()).Unit()
+        cosPhi = tmp1.Dot(tmp2)
+        sgnPhi = tmp1.Cross(tmp2).Dot(V1.Vect())
+        self.tree["Phi_VBF"] = copysign(cosPhi, sgnPhi)
+
+        if config.makeVBFdecayanglestree and self.isZZ():
+            Z1 = self.Z(1)
+            self.tree.EnsureBranch("costhetastar_VBF", "D")
+            self.tree.EnsureBranch("Phi1_VBF",         "D")
+            self.tree["costhetastar_VBF"] = -V1.Vect().Dot(Z1.Vect())/V1.Vect().Mag()/Z1.Vect().Mag()
+            tmp3 = V1.Vect().Cross(Z1.Vect()).Unit()
+            print "tmps: ", tmp1.X(), tmp1.Y(), tmp1.Z()
+            print "      ", tmp2.X(), tmp2.Y(), tmp2.Z()
+            print "      ", tmp3.X(), tmp3.Y(), tmp3.Z()
+            cosPhi1 = -tmp1.Dot(tmp3)
+            sgnPhi1 = tmp1.Dot(Z1.Vect())
+            self.tree["Phi1_VBF"] = copysign(cosPhi1, sgnPhi1)
