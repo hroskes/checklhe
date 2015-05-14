@@ -41,7 +41,6 @@ class tree(ROOT.TTree):
             super(tree, self).Branch(*args, **kwargs)
     def EnsureBranch(self, name, type):
         if name not in self:
-            print name, self.branches
             self.Branch(name, type)
         if type != self.types[name]:
             raise TypeError("Branch " + name + " already has type " + self.types[name] + " and you are trying to ensure it with type " + type + "!")

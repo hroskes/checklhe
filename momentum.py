@@ -9,7 +9,8 @@ class Momentum(ROOT.TLorentzVector):
         self.py = py
         self.pz = pz
         self.e = E
-        self.m = copysign(abs(E**2-px**2-py**2-pz**2)**0.5,E**2-px**2-py**2-pz**2)
+        self.m2 = E**2-px**2-py**2-pz**2
+        self.m = copysign(abs(self.m2)**0.5,self.m2)
         self.superinited = False
 
     def Px(self):
@@ -20,6 +21,8 @@ class Momentum(ROOT.TLorentzVector):
         return self.pz
     def E(self):
         return self.e
+    def M2(self):
+        return self.m2
     def M(self):
         return self.m
     def P(self):
@@ -34,6 +37,9 @@ class Momentum(ROOT.TLorentzVector):
         return atan2(self.py, self.px)
     def Rapidity(self):
         return 1/2*log((self.e+self.pz)/(self.e-self.pz))
+
+    def momentum(self):
+        return self        #so that particle and momentum can be used symmetrically
 
     def Vect(self):
         self.superinit()

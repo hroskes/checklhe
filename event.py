@@ -84,6 +84,12 @@ class Event:
             self.processfunctions.append(self.getLeptonMomenta)
         if config.makeZZ4langlestree:
             self.processfunctions.append(self.getZZ4langles)
+
+        if config.makeq2VBFtree:
+            self.processfunctions.append(self.getq2VBF)
+        if config.makeq2VBFtree_lhe:
+            self.processfunctions.append(self.getq2VBF_lhe)
+
         if config.count4levents:
             self.processfunctions.append(self.count4l)
         if config.count2l2levents:
@@ -370,29 +376,29 @@ class Event:
 #      Conversion      #
 ########################
 
-    def boostall(self, xorvect, y = None, z = None):
+    def boostall(self, xorvect, y = None, z = None, othermomenta = []):
         if y is None and z is not None or y is not None and z is None:
             raise TypeError
         if y is None and z is None:
-            for p in self.particlelist + self.frames.values():
+            for p in self.particlelist + self.frames.values() + othermomenta:
                 p.Boost(xorvect)
         else:
-            for p in self.particlelist + self.frames.values():
+            for p in self.particlelist + self.frames.values() + othermomenta:
                 p.Boost(xorvect, y, z)
 
-    def boosttocom(self, vect):
+    def boosttocom(self, vect, othermomenta = []):
         boostvector = -vect.BoostVector()
-        self.boostall(boostvector)
+        self.boostall(boostvector, othermomenta = othermomenta)
 
-    def gotoframe(self, frame):
-        self.boosttocom(frame.t)
-        self.rotatetozx(frame.z, frame.x)
+    def gotoframe(self, frame, othermomenta = []):
+        self.boosttocom(frame.t, othermomenta)
+        self.rotatetozx(frame.z, frame.x, othermomenta)
 
-    def rotateall(self, angle, axis):
-        for p in self.particlelist + self.frames.values():
+    def rotateall(self, angle, axis, othermomenta = []):
+        for p in self.particlelist + self.frames.values() + othermomenta:
             p.Rotate(angle, axis)
 
-    def rotatetozx(self, toz, tozx):
+    def rotatetozx(self, toz, tozx, othermomenta = []):
         try:
             toz = toz.Vect()
         except AttributeError:
@@ -405,13 +411,14 @@ class Event:
         axis = toz.Unit().Cross(ROOT.TVector3(0,0,1))
         if axis == ROOT.TVector3(0,0,0):            #if thisOneGoesToZ cross z = 0, it's in the -z direction and angle = pi, so rotate around y
             axis = ROOT.TVector3(0,1,0)             #                               or it's in the +z direction and angle = 0, so it doesn't matter.
-        self.rotateall(angle,axis)
         if tozx is not None:
-            tozx.Rotate(angle,axis)
-
+            othermomenta = othermomenta[:]
+            othermomenta.append(tozx)
+        self.rotateall(angle,axis, othermomenta)
+        if tozx is not None:
             angle2 = -tozx.Phi()
             axis2 = ROOT.TVector3(0,0,1)
-            self.rotateall(angle2,axis2)
+            self.rotateall(angle2,axis2, othermomenta)
 
     def filltree(self):
         if self.anythingtofill:
@@ -527,3 +534,55 @@ class Event:
 
         self.gotoframe(self.frames["lab"])
         self.anythingtofill = True
+
+###################
+#       VBF       #
+###################
+
+    def getproductionjets(self):
+        return [p for p in self.particlelist if all(parent in self.incoming for parent in p.mothers()) \
+                    and p in globalvariables.globalvariables.jets]
+
+    def VBFjet(self, i):
+        jets = self.getproductionjets()
+        if len(jets) > 2:
+            raise NotImplementedError("VBF not implemented with >2 jets")
+        if len(jets) < 2:
+            return None
+        jets.sort(key = lambda j: j.Pz(), reverse = True)
+        return jets[i-1]
+
+    def incomingparton(self, i, uselhepartons):
+        if uselhepartons:
+            partons = self.incoming
+            if len(partons) != 2:
+                raise NotImplementedError("There should be 2 incoming partons")
+            partons.sort(key = lambda p: p.Pz(), reverse = True)
+            return partons[i-1]
+        else:
+            HJJ = self.higgs().momentum() + self.VBFjet(1).momentum() + self.VBFjet(2).momentum()
+            HJJ_T = momentum.Momentum(HJJ.Px(), HJJ.Py(), 0, HJJ.E())
+            self.boosttocom(HJJ_T, [HJJ, HJJ_T])
+            self.boosttocom(HJJ, [HJJ, HJJ_T])     #sequential boosts to preserve the z direction
+            pzsign = {1: 1, 2: -1}
+            parton = momentum.Momentum(0, 0, pzsign[i]*HJJ.E()/2, HJJ.E()/2)
+            self.gotoframe(self.frames["lab"], [parton])
+            return parton
+
+    def VBFV(self, i, uselhepartons):
+        return self.VBFjet(i).momentum() - self.incomingparton(i, uselhepartons).momentum()
+
+    def getq2VBF(self, uselhepartons = False):
+        if uselhepartons:
+            appendstring = "_lhe"
+        else:
+            appendstring = ""
+        q2V1 = "q2V1" + appendstring
+        q2V2 = "q2V2" + appendstring
+        self.tree.EnsureBranch(q2V1, "D")
+        self.tree.EnsureBranch(q2V2, "D")
+        self.tree[q2V1] = self.VBFV(1, uselhepartons).M2()
+        self.tree[q2V2] = self.VBFV(2, uselhepartons).M2()
+
+    def getq2VBF_lhe(self):
+        return self.getq2VBF(True)
