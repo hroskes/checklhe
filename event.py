@@ -87,8 +87,6 @@ class Event:
 
         if config.makeq2VBFtree:
             self.processfunctions.append(self.getq2VBF)
-        if config.makeq2VBFtree_lhe:
-            self.processfunctions.append(self.getq2VBF_lhe)
 
         if config.count4levents:
             self.processfunctions.append(self.count4l)
@@ -193,6 +191,7 @@ class Event:
                 results.append("no momentum conservation! " + str(self.linenumber) + "\n" +
                                "mom momentum  = " + str(v.momentumin()) + str(v.particlesin()) + "\n" +
                                "kids momentum = " + str(v.momentumout()) + str(v.particlesout()))
+                print v.momentumin()
         return "\n".join(results)
 
     def checkcharge(self):
@@ -583,6 +582,3 @@ class Event:
         self.tree.EnsureBranch(q2V2, "D")
         self.tree[q2V1] = self.VBFV(1, uselhepartons).M2()
         self.tree[q2V2] = self.VBFV(2, uselhepartons).M2()
-
-    def getq2VBF_lhe(self):
-        return self.getq2VBF(True)

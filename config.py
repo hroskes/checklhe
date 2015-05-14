@@ -33,7 +33,6 @@ getLeptonMomenta    = True    #For ZZ->4l events, makes a tree of the lepton mom
 makeZZ4langlestree  = True    #For ZZ->4l events, makes a tree of costheta1, costheta2, and Phi
 
 makeq2VBFtree       = True    #For VBF, makes a tree of q^2 for the Vs
-makeq2VBFtree_lhe   = True    #For VBF, makes a tree of q^2 for the Vs using the LHE partons
 
 tree = any([makeZZ4langlestree, makeZZmassestree])
 
