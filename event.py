@@ -12,6 +12,11 @@ import ROOT
 from math import copysign, acos
 
 class Event:
+
+#############################
+#        Event setup        #
+#############################
+
     def __init__(self, linenumber, eventcounter, tree):
         self.linenumber = linenumber
         self.eventcounter = eventcounter
@@ -21,6 +26,7 @@ class Event:
         self.vertices = vertex.Vertices()
         self.colors = color.Colors()
         self.done = False
+        self.frames = {"lab": momentum.Frame()}
 
     def setfirstline(self, firstline):
         if self.firstline is not None:
@@ -98,6 +104,10 @@ class Event:
     def check(self):
         checks = self.miscellaneouschecks + [chk() for chk in self.checkfunctions]
         return "\n".join([chk for chk in checks if chk])
+
+##########################
+#     Syntax checks      #
+##########################
 
     def checkfirstline(self):
         results = []
@@ -207,6 +217,10 @@ class Event:
                                "particles involved: " + str(c.particles.union(c.antiparticles)))
         return "\n".join(results)
 
+########################
+#     Event counts     #
+########################
+
     def count4l(self):
         if self.count(globalvariables.globalvariables.leptons) >= 4:
             globalvariables.globalvariables.any4l.increment(self.eventcounter)
@@ -224,6 +238,10 @@ class Event:
         else:
             raise RuntimeError(str(self.count(globalvariables.globalvariables.leptons)) + "leptons in event! " + str(self.linenumber) + "\n" +
                                "increase the range of globalvariables.globalvariables.leptoncount")
+
+#######################
+#     Higgs decay     #
+#######################
 
     def higgs(self):
         higgslist = [p for p in self.particlelist if str(p) == "H" or str(p) == "Z'" or str(p) == "G"]
@@ -251,89 +269,6 @@ class Event:
 
     def ishiggs(self):
         return len([p for p in self.particlelist if str(p) == "H" or str(p) == "Z'" or str(p) == "G"]) == 1
-
-
-#VH
-    def isVH(self):
-        return bool(self.getVfromVH())
-    def getVfromVH(self):
-        immediateproduction = [p for p in self.particlelist if all(parent in self.incoming for parent in p.mothers())]
-        counter = particle.ParticleCounter(immediateproduction)
-        if counter.count(globalvariables.globalvariables.weakbosons) == 1 and counter.count(globalvariables.globalvariables.higgs) == 1:
-            return [p for p in immediateproduction if p in globalvariables.globalvariables.weakbosons][0]
-        else:
-            return None
-
-    def checkVdecay(self):
-        V = self.getVfromVH()
-        if V is None:
-            return "Not VH event! " + str(self.linenumber)
-        Vdecay = particle.DecayType(V)
-
-        categories = None
-        if V in globalvariables.globalvariables.W:
-            categories = globalvariables.globalvariables.WH.increment(particle.DecayType(V), self.eventcounter)     #automatically increments the correct decay
-        if V in globalvariables.globalvariables.Z:
-            categories = globalvariables.globalvariables.ZH.increment(particle.DecayType(V), self.eventcounter)     #automatically increments the correct decay
-
-        if categories is None:
-            assert(0)                                        #Has to be ZH or WH
-
-        if len(categories) == 1:
-            return ("unknown V decay type! " + str(self.linenumber) + "\n" +
-                    "V -> " + str(Vdecay))
-
-        globalvariables.globalvariables.VH.increment(self.eventcounter)
-        return ""
-
-#conversion
-
-    def boostall(self, xorvect, y = None, z = None):
-        if y is None and z is not None or y is not None and z is None:
-            raise TypeError
-        if y is None and z is None:
-            for p in self.particlelist:
-                p.Boost(xorvect)
-        else:
-            for p in self.particlelist:
-                p.Boost(x, y, z)
-
-    def boosttocom(self, vect):
-        boostvector = -vect.BoostVector()
-        self.boostall(boostvector)
-
-    def gotoframe(self, frame):
-        self.boosttocom(frame.t)
-        self.rotatetozx(frame.z, frame.x)
-
-    def rotateall(self, angle, axis):
-        for p in self.particlelist:
-            p.Rotate(angle, axis)
-
-    def rotatetozx(self, toz, tozx):
-        try:
-            toz = toz.Vect()
-        except AttributeError:
-            pass
-        try:
-            tozx = tozx.Vect()
-        except AttributeError:
-            pass
-        angle = acos(toz.Unit().Z())
-        axis = toz.Unit().Cross(ROOT.TVector3(0,0,1))
-        if axis == ROOT.TVector3(0,0,0):            #if thisOneGoesToZ cross z = 0, it's in the -z direction and angle = pi, so rotate around y
-            axis = ROOT.TVector3(0,1,0)             #                               or it's in the +z direction and angle = 0, so it doesn't matter.
-        self.rotateall(angle,axis)
-        if tozx is not None:
-            tozx.Rotate(angle,axis)
-
-            angle2 = -tozx.Phi()
-            axis2 = ROOT.TVector3(0,0,1)
-            self.rotateall(angle2,axis2)
-
-    def filltree(self):
-        if self.anythingtofill:
-            self.tree.Fill()
 
     def isZZ(self):
         return len(self.higgs().kids()) == 2 and all(kid in globalvariables.globalvariables.Z for kid in self.higgs().kids())
@@ -395,6 +330,97 @@ class Event:
                     "listed %s mass    = " + str(ZorW1.invmass()) + "\n" +
                     "alternate %s mass = " + str(altmass) + "\n") % str(ZorW1)
 
+########################
+#          VH          #
+########################
+
+    def isVH(self):
+        return bool(self.getVfromVH())
+    def getVfromVH(self):
+        immediateproduction = [p for p in self.particlelist if all(parent in self.incoming for parent in p.mothers())]
+        counter = particle.ParticleCounter(immediateproduction)
+        if counter.count(globalvariables.globalvariables.weakbosons) == 1 and counter.count(globalvariables.globalvariables.higgs) == 1:
+            return [p for p in immediateproduction if p in globalvariables.globalvariables.weakbosons][0]
+        else:
+            return None
+
+    def checkVdecay(self):
+        V = self.getVfromVH()
+        if V is None:
+            return "Not VH event! " + str(self.linenumber)
+        Vdecay = particle.DecayType(V)
+
+        categories = None
+        if V in globalvariables.globalvariables.W:
+            categories = globalvariables.globalvariables.WH.increment(particle.DecayType(V), self.eventcounter)     #automatically increments the correct decay
+        if V in globalvariables.globalvariables.Z:
+            categories = globalvariables.globalvariables.ZH.increment(particle.DecayType(V), self.eventcounter)     #automatically increments the correct decay
+
+        if categories is None:
+            assert(0)                                        #Has to be ZH or WH
+
+        if len(categories) == 1:
+            return ("unknown V decay type! " + str(self.linenumber) + "\n" +
+                    "V -> " + str(Vdecay))
+
+        globalvariables.globalvariables.VH.increment(self.eventcounter)
+        return ""
+
+########################
+#      Conversion      #
+########################
+
+    def boostall(self, xorvect, y = None, z = None):
+        if y is None and z is not None or y is not None and z is None:
+            raise TypeError
+        if y is None and z is None:
+            for p in self.particlelist + self.frames.values():
+                p.Boost(xorvect)
+        else:
+            for p in self.particlelist + self.frames.values():
+                p.Boost(xorvect, y, z)
+
+    def boosttocom(self, vect):
+        boostvector = -vect.BoostVector()
+        self.boostall(boostvector)
+
+    def gotoframe(self, frame):
+        self.boosttocom(frame.t)
+        self.rotatetozx(frame.z, frame.x)
+
+    def rotateall(self, angle, axis):
+        for p in self.particlelist + self.frames.values():
+            p.Rotate(angle, axis)
+
+    def rotatetozx(self, toz, tozx):
+        try:
+            toz = toz.Vect()
+        except AttributeError:
+            pass
+        try:
+            tozx = tozx.Vect()
+        except AttributeError:
+            pass
+        angle = acos(toz.Unit().Z())
+        axis = toz.Unit().Cross(ROOT.TVector3(0,0,1))
+        if axis == ROOT.TVector3(0,0,0):            #if thisOneGoesToZ cross z = 0, it's in the -z direction and angle = pi, so rotate around y
+            axis = ROOT.TVector3(0,1,0)             #                               or it's in the +z direction and angle = 0, so it doesn't matter.
+        self.rotateall(angle,axis)
+        if tozx is not None:
+            tozx.Rotate(angle,axis)
+
+            angle2 = -tozx.Phi()
+            axis2 = ROOT.TVector3(0,0,1)
+            self.rotateall(angle2,axis2)
+
+    def filltree(self):
+        if self.anythingtofill:
+            self.tree.Fill()
+
+###############################
+#       ZZ4l conversion       #
+###############################
+
     def getZZmasses(self):
         self.tree.EnsureBranch("mZ1", "D")
         self.tree.EnsureBranch("mZ2", "D")
@@ -419,6 +445,7 @@ class Event:
         self.anythingtofill = True
 
     def getHiggsMomentum(self):
+        self.gotoframe(self.frames["lab"])
         self.tree.EnsureBranch("pTH", "D")
         self.tree.EnsureBranch("YH", "D")
         self.tree.EnsureBranch("etaH", "D")
@@ -448,6 +475,7 @@ class Event:
                 for coordinate in ["pT", "eta", "phi"]:
                     self.tree["l%(number)s%(charge)s_%(coordinate)s" % {"number": number, "charge": charge, "coordinate": coordinate}] = -999
 
+        self.gotoframe(self.frames["lab"])
         Zs = {1: self.Z(1), 2: self.Z(2)}
         leptons = {}
         for Z in (1, 2):
@@ -474,7 +502,7 @@ class Event:
         self.tree["costheta2_ZZ4l"] = -999
         self.tree["Phi_ZZ4l"] = -999
 
-        lab = momentum.Frame()
+        self.gotoframe(self.frames["lab"])
 
         Zs = {1: self.Z(1), 2: self.Z(2)}
         if Zs[1] is None or Zs[2] is None:
@@ -497,5 +525,5 @@ class Event:
         normal2 = leptons[2, 1].Vect().Cross(leptons[2, -1].Vect()).Unit()
         self.tree["Phi_ZZ4l"] = copysign(acos(-normal1.Dot(normal2)),Zs[1].Vect().Dot(normal1.Cross(normal2)))
 
-        self.gotoframe(lab)
+        self.gotoframe(self.frames["lab"])
         self.anythingtofill = True

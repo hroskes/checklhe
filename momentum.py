@@ -72,3 +72,10 @@ class Frame(object):
         self.y = Momentum(0, 1, 0, 0)
         self.z = Momentum(0, 0, 1, 0)
         self.t = Momentum(0, 0, 0, 1)
+
+    def Boost(self, *args):
+        for v in (self.x, self.y, self.z, self.t):
+            v.Boost(*args)
+    def Rotate(self, *args):
+        for v in (self.x, self.y, self.z, self.t):
+            v.Rotate(*args)
