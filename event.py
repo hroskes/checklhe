@@ -27,7 +27,7 @@ class Event:
         self.colors = color.Colors()
         self.done = False
         self.momenta = []
-        self.frames = {"lab": self.frame()}
+        self.labframe = self.frame()
 
     def setfirstline(self, firstline):
         if self.firstline is not None:
@@ -455,7 +455,7 @@ class Event:
         self.anythingtofill = True
 
     def getHiggsMomentum(self):
-        self.gotoframe(self.frames["lab"])
+        self.gotoframe(self.labframe)
         self.tree.EnsureBranch("pTH", "D")
         self.tree.EnsureBranch("YH", "D")
         self.tree.EnsureBranch("etaH", "D")
@@ -485,7 +485,7 @@ class Event:
                 for coordinate in ["pT", "eta", "phi"]:
                     self.tree["l%(number)s%(charge)s_%(coordinate)s" % {"number": number, "charge": charge, "coordinate": coordinate}] = -999
 
-        self.gotoframe(self.frames["lab"])
+        self.gotoframe(self.labframe)
         Zs = {1: self.Z(1), 2: self.Z(2)}
         leptons = {}
         for Z in (1, 2):
@@ -512,7 +512,7 @@ class Event:
         self.tree["costheta2_ZZ4l"] = -999
         self.tree["Phi_ZZ4l"] = -999
 
-        self.gotoframe(self.frames["lab"])
+        self.gotoframe(self.labframe)
 
         Zs = {1: self.Z(1), 2: self.Z(2)}
         if Zs[1] is None or Zs[2] is None:
@@ -525,17 +525,17 @@ class Event:
         for i in leptons:
             if leptons[i] not in globalvariables.globalvariables.leptons:
                 return
+
         self.boosttocom(Zs[1])
         self.tree["costheta1_ZZ4l"] = -leptons[(1, 1)].Vect().Unit().Dot(Zs[2].Vect().Unit())
         self.boosttocom(Zs[2])
         self.tree["costheta2_ZZ4l"] = -leptons[(2, 1)].Vect().Unit().Dot(Zs[1].Vect().Unit())
-
         self.boosttocom(self.higgs())
         normal1 = leptons[1, 1].Vect().Cross(leptons[1, -1].Vect()).Unit()
         normal2 = leptons[2, 1].Vect().Cross(leptons[2, -1].Vect()).Unit()
         self.tree["Phi_ZZ4l"] = copysign(acos(-normal1.Dot(normal2)),Zs[1].Vect().Dot(normal1.Cross(normal2)))
 
-        self.gotoframe(self.frames["lab"])
+        self.gotoframe(self.labframe)
         self.anythingtofill = True
 
 ###################
