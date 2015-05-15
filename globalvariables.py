@@ -59,7 +59,7 @@ class GlobalVariables:
         self.W = particlecategory.ParticleCategory([24])
         self.higgs = particlecategory.ParticleCategory([25, 32, 39])
 
-        self.jets = self.quarks.union(self.gluon)
+        self.jets = self.quarks.difference(self.top).union(self.gluon)
         print "initialized particle categories"
 
         #4l decays by flavor

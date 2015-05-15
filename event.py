@@ -425,19 +425,13 @@ class Event:
 
     def filltree(self):
         if self.anythingtofill:
-            self.tree.Fill()
+            self.tree.Fill(force = True, resetvalues = True)
 
 ###############################
 #       ZZ4l conversion       #
 ###############################
 
     def getZZmasses(self):
-        self.tree.EnsureBranch("mZ1", "D")
-        self.tree.EnsureBranch("mZ2", "D")
-        self.tree.EnsureBranch("mH",  "D")
-        self.tree["mZ1"] = -999
-        self.tree["mZ2"] = -999
-        self.tree["mH"] = -999
         Zs = {1: self.Z(1), 2: self.Z(2)}
         if Zs[1] is None or Zs[2] is None:
             return
@@ -449,6 +443,9 @@ class Event:
         for i in leptons:
             if leptons[i] not in globalvariables.globalvariables.leptons:
                 return
+        self.tree.EnsureBranch("mZ1", "D")
+        self.tree.EnsureBranch("mZ2", "D")
+        self.tree.EnsureBranch("mH",  "D")
         self.tree["mZ1"] = Zs[1].invmass()
         self.tree["mZ2"] = Zs[2].invmass()
         self.tree["mH"] = self.higgs().invmass()
@@ -462,10 +459,9 @@ class Event:
         self.tree["pTH"] = self.higgs().Pt()
         self.tree["YH"] = self.higgs().Rapidity()
         self.tree["etaH"] = self.higgs().Eta()
+        self.anythingtofill = True
 
     def getLeptonMomenta(self):
-        self.tree.EnsureBranch("flavortype", "I")
-        self.tree["flavortype"] = -999
         #consistent with Ian's script
         flavortype = {
             (11, 11): 0,
@@ -478,17 +474,13 @@ class Event:
             (15, 11): 7,
             (15, 13): 8,
         }
-        [self.tree.EnsureBranch("l%(number)s%(charge)s_%(coordinate)s" % {"number": number, "charge": charge, "coordinate": coordinate}, "D") \
-            for number in range(1,3) for charge in ["p", "m"] for coordinate in ["pT", "eta", "phi"]]
-        for number in range(1,3):
-            for charge in ["p", "m"]:
-                for coordinate in ["pT", "eta", "phi"]:
-                    self.tree["l%(number)s%(charge)s_%(coordinate)s" % {"number": number, "charge": charge, "coordinate": coordinate}] = -999
 
         self.gotoframe(self.labframe)
         Zs = {1: self.Z(1), 2: self.Z(2)}
         leptons = {}
         for Z in (1, 2):
+            if Zs[Z] is None:
+                return
             for sign in (1, -1):
                 leptons[(Z, sign)] = [p for p in Zs[Z].kids() if p.id()*sign > 0][0]
         #sign is -charge
@@ -496,24 +488,20 @@ class Event:
             if leptons[i] not in globalvariables.globalvariables.leptons:
                 return
         leptonstring = {(1, 1): "l1m", (1, -1): "l1p", (2, 1): "l2m", (2, -1): "l2p"}
+
         for i in leptons:
+            self.tree.EnsureBranch(leptonstring[i] + "_phi", "D")
+            self.tree.EnsureBranch(leptonstring[i] + "_pT", "D")
+            self.tree.EnsureBranch(leptonstring[i] + "_eta", "D")
             self.tree[leptonstring[i] + "_phi"] = leptons[i].Phi()
             self.tree[leptonstring[i] + "_pT"] = leptons[i].Pt()
             self.tree[leptonstring[i] + "_eta"] = leptons[i].Eta()
-        self.tree["flavortype"] = flavortype[(leptons[(1, 1)].id(), leptons[(2, 1)].id())]
 
+        self.tree.EnsureBranch("flavortype", "I")
+        self.tree["flavortype"] = flavortype[(leptons[(1, 1)].id(), leptons[(2, 1)].id())]
         self.anythingtofill = True
 
     def getZZ4langles(self):
-        self.tree.EnsureBranch("costheta1_ZZ4l", "D")
-        self.tree.EnsureBranch("costheta2_ZZ4l", "D")
-        self.tree.EnsureBranch("Phi_ZZ4l",       "D")
-        self.tree["costheta1_ZZ4l"] = -999
-        self.tree["costheta2_ZZ4l"] = -999
-        self.tree["Phi_ZZ4l"] = -999
-
-        self.gotoframe(self.labframe)
-
         Zs = {1: self.Z(1), 2: self.Z(2)}
         if Zs[1] is None or Zs[2] is None:
             return
@@ -525,6 +513,10 @@ class Event:
         for i in leptons:
             if leptons[i] not in globalvariables.globalvariables.leptons:
                 return
+
+        self.tree.EnsureBranch("costheta1_ZZ4l", "D")
+        self.tree.EnsureBranch("costheta2_ZZ4l", "D")
+        self.tree.EnsureBranch("Phi_ZZ4l",       "D")
 
         self.boosttocom(Zs[1])
         self.tree["costheta1_ZZ4l"] = -leptons[(1, 1)].Vect().Unit().Dot(Zs[2].Vect().Unit())
@@ -564,7 +556,11 @@ class Event:
             return partons[i-1]
         else:
             bkpframe = self.frame()
-            HJJ = self.higgs().momentum() + self.VBFjet(1).momentum() + self.VBFjet(2).momentum()
+            jet1 = self.VBFjet(1)
+            jet2 = self.VBFjet(2)
+            if jet1 is None or jet2 is None:
+                return None
+            HJJ = self.higgs().momentum() + jet1.momentum() + jet2.momentum()
             HJJ_T = momentum.Momentum(self, HJJ.Px(), HJJ.Py(), 0, HJJ.E())
             self.boosttocom(HJJ_T)
             self.boosttocom(HJJ)     #sequential boosts to preserve the z direction
@@ -574,7 +570,10 @@ class Event:
             return parton
 
     def VBFV(self, i, uselhepartons = False):
-        return self.VBFjet(i).momentum() - self.incomingparton(i, uselhepartons).momentum()
+        try:
+            return self.VBFjet(i).momentum() - self.incomingparton(i, uselhepartons).momentum()
+        except AttributeError:   #jet or parton (actually should be both or neither) is None
+            return None
 
     def getq2VBF(self, uselhepartons = False):
         if uselhepartons:
@@ -583,25 +582,33 @@ class Event:
             appendstring = ""
         q2V1 = "q2V1" + appendstring
         q2V2 = "q2V2" + appendstring
+
+        V1 = self.VBFV(1, uselhepartons)
+        V2 = self.VBFV(2, uselhepartons)
+        if V1 is None or V2 is None:
+            return
+
         self.tree.EnsureBranch(q2V1, "D")
         self.tree.EnsureBranch(q2V2, "D")
-        self.tree[q2V1] = self.VBFV(1, uselhepartons).M2()
-        self.tree[q2V2] = self.VBFV(2, uselhepartons).M2()
+        self.tree[q2V1] = V1.M2()
+        self.tree[q2V2] = V2.M2()
 
     def getVBFangles(self, uselhepartons = True):
         self.boosttocom(self.higgs())
+
+        try:
+            jet1 = self.VBFjet(1).momentum()
+            jet2 = self.VBFjet(2).momentum()
+            V1 = self.VBFV(1, uselhepartons).momentum()
+            V2 = self.VBFV(2, uselhepartons).momentum()
+            P1 = self.incomingparton(1, uselhepartons).momentum()
+            P2 = self.incomingparton(2, uselhepartons).momentum()
+        except AttributeError:
+            return
+
         self.tree.EnsureBranch("costheta1_VBF", "D")
         self.tree.EnsureBranch("costheta2_VBF", "D")
         self.tree.EnsureBranch("Phi_VBF",       "D")
-
-        jet1 = self.VBFjet(1).momentum()
-        jet2 = self.VBFjet(2).momentum()
-        V1 = self.VBFV(1, uselhepartons).momentum()
-        V2 = self.VBFV(2, uselhepartons).momentum()
-        P1 = self.incomingparton(1, uselhepartons).momentum()
-        P2 = self.incomingparton(2, uselhepartons).momentum()
-
-        self.rotatetozx(self.Z(1), V1)
 
         self.tree["costheta1_VBF"] = -V1.Vect().Dot(jet1.Vect())/jet1.Vect().Mag()/V1.Vect().Mag()
         self.tree["costheta2_VBF"] = -V2.Vect().Dot(jet2.Vect())/jet2.Vect().Mag()/V2.Vect().Mag()

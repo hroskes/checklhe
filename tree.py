@@ -36,13 +36,20 @@ class tree(ROOT.TTree):
             self.branches[name] = array.array(typemap[type], [0])
             self.types[name] = type
             self.setyet[name] = False
-            super(tree, self).Branch(name, self.branches[name], name + "/" + typemap[type])
+            return super(tree, self).Branch(name, self.branches[name], name + "/" + type)
         else:
-            super(tree, self).Branch(*args, **kwargs)
+            return super(tree, self).Branch(*args, **kwargs)
     def EnsureBranch(self, name, type):
         if name not in self:
-            self.Branch(name, type)
-        if type != self.types[name]:
+            newbranch = self.Branch(name, type)
+
+            #Put -999 for all previous events
+            self[name] = -999
+            for i in range(self.GetEntries()):
+                newbranch.Fill()
+            self.setyet[name] = False
+
+        elif type != self.types[name]:
             raise TypeError("Branch " + name + " already has type " + self.types[name] + " and you are trying to ensure it with type " + type + "!")
 
     def __setitem__(self, name, value):
@@ -59,7 +66,7 @@ class tree(ROOT.TTree):
     def __contains__(self, branch):
         return branch in self.branches
 
-    def Fill(self, force = False):
+    def Fill(self, force = False, resetvalues = False):
         if not force:
             for name in self.setyet:
                 if not self.setyet[name]:
@@ -68,3 +75,6 @@ class tree(ROOT.TTree):
         super(tree, self).Fill()
         for name in self.setyet:
             self.setyet[name] = False
+        if resetvalues:
+            for name in self.branches:
+                self[name] = -999
