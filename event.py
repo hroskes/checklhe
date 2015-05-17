@@ -514,18 +514,53 @@ class Event:
             if leptons[i] not in globalvariables.globalvariables.leptons:
                 return
 
-        self.tree.EnsureBranch("costheta1_ZZ4l", "D")
-        self.tree.EnsureBranch("costheta2_ZZ4l", "D")
-        self.tree.EnsureBranch("Phi_ZZ4l",       "D")
+        self.tree.EnsureBranch("costhetastar_ZZ4l", "D")
+        self.tree.EnsureBranch("costheta1_ZZ4l",    "D")
+        self.tree.EnsureBranch("costheta2_ZZ4l",    "D")
+        self.tree.EnsureBranch("Phi_ZZ4l",          "D")
+        self.tree.EnsureBranch("Phi1_ZZ4l",         "D")
+        self.tree.EnsureBranch("costhetastar_ZZ4l_zhat", "D")
+        self.tree.EnsureBranch("Phi1_ZZ4l_zhat",         "D")
+        self.tree.EnsureBranch("costhetastar_ZZ4l_parton", "D")
+        self.tree.EnsureBranch("Phi1_ZZ4l_parton",         "D")
 
         self.boosttocom(Zs[1])
         self.tree["costheta1_ZZ4l"] = -leptons[(1, 1)].Vect().Unit().Dot(Zs[2].Vect().Unit())
         self.boosttocom(Zs[2])
         self.tree["costheta2_ZZ4l"] = -leptons[(2, 1)].Vect().Unit().Dot(Zs[1].Vect().Unit())
+
+        self.gotoframe(self.labframe)
         self.boosttocom(self.higgs())
         normal1 = leptons[1, 1].Vect().Cross(leptons[1, -1].Vect()).Unit()
         normal2 = leptons[2, 1].Vect().Cross(leptons[2, -1].Vect()).Unit()
-        self.tree["Phi_ZZ4l"] = copysign(acos(-normal1.Dot(normal2)),Zs[1].Vect().Dot(normal1.Cross(normal2)))
+        self.tree["Phi_ZZ4l"] = copysign(acos(-normal1.Dot(normal2)), Zs[1].Vect().Dot(normal1.Cross(normal2)))
+
+        #I don't fully understand this beam axis definition, since we're boosted to the Higgs frame
+        #in a way that doesn't preserve the z direction.  I would have done it using 2 successive boosts,
+        #first to boost away the pT of the Higgs and then the pz.  This way the z direction is preserved.
+        #(or, equivalently, use self.labframe.z.Vect().Unit(), since the labframe's unit vectors get boosted
+        # in the same way as the other vectors).
+        #Alternatively, use the momentum of the partons (which is (0,0,1,1) in the lab frame
+        # since we only care about the direction, not the magnitude)
+
+        #However, this way is compatible with all the older scripts that I see.
+        #For ggH with no jets it's irrelevant, since the Higgs has pT=0 anyway.  However, for VBF, HJJ, VH, ...
+        #it would make a difference.
+        beamaxis = ROOT.TVector3(0,0,1)
+        self.tree["costhetastar_ZZ4l"] = Zs[1].Vect().Unit().Dot(beamaxis)
+        normal3 = beamaxis.Cross(Zs[1].Vect()).Unit()
+        self.tree["Phi1_ZZ4l"] = copysign(acos(normal1.Dot(normal3)), Zs[1].Vect().Dot(normal1.Cross(normal3)))
+
+        beamaxis = self.labframe.z.Vect().Unit()
+        self.tree["costhetastar_ZZ4l_zhat"] = Zs[1].Vect().Unit().Dot(beamaxis)
+        normal3 = beamaxis.Cross(Zs[1].Vect()).Unit()
+        self.tree["Phi1_ZZ4l_zhat"] = copysign(acos(normal1.Dot(normal3)), Zs[1].Vect().Dot(normal1.Cross(normal3)))
+
+        beamaxis = (self.labframe.z + self.labframe.t).Vect().Unit()
+        self.tree["costhetastar_ZZ4l_parton"] = Zs[1].Vect().Unit().Dot(beamaxis)
+        normal3 = beamaxis.Cross(Zs[1].Vect()).Unit()
+        self.tree["Phi1_ZZ4l_parton"] = copysign(acos(normal1.Dot(normal3)), Zs[1].Vect().Dot(normal1.Cross(normal3)))
+
 
         self.gotoframe(self.labframe)
         self.anythingtofill = True

@@ -101,6 +101,8 @@ class Particle(particletype.ParticleType):
         return self.__momentum.Pt()
     def Eta(self):
         return self.__momentum.Eta()
+    def CosTheta(self):
+        return self.__momentum.CosTheta()
     def Phi(self):
         return self.__momentum.Phi()
     def Rapidity(self):
