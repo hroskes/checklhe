@@ -27,16 +27,19 @@ raiseerror = False            #if this is true, raise an IOError when something 
                               #otherwise just print it
 
 #Make tree
-makeZZmassestree       = True    #For ZZ events, makes a tree of the Z1, Z2, Higgs masses
-getHiggsMomentum       = True    #Makes a tree of the Higgs momentum
-getLeptonMomenta       = True    #For ZZ->4l events, makes a tree of the lepton momenta
-makeZZ4langlestree     = True    #For ZZ->4l events, makes a tree of costheta1, costheta2, and Phi
+makeZZmassestree        = True    #For ZZ events, makes a tree of the Z1, Z2, Higgs masses
+getHiggsMomentum        = True    #Makes a tree of the Higgs momentum
+getLeptonMomenta        = True    #For ZZ->4l events, makes a tree of the lepton momenta
+makeZZ4langlestree      = True    #For ZZ->4l events, makes a tree of costheta1, costheta2, and Phi
 
-makeq2VBFtree          = True    #For VBF, makes a tree of q^2 for the Vs
-makeVBFanglestree      = True    #For VBF, makes a tree of the angles
-makeVBFdecayanglestree = True    # Also include the angles relating production to decay (costhetastar and Phi1)
+makeq2VBFtree           = True    #For VBF, makes a tree of q^2 for the Vs
+makeVBFanglestree       = True    #For VBF, makes a tree of the angles
+makeVBFdecayanglestree  = True    # Also include the angles relating production to decay (costhetastar and Phi1)
+makeVBFjetvariablestree = True    #For VBF, make a tree of the jet variables - dR, dEta, dPhi, and mJJ
 
-tree = any([makeZZ4langlestree, makeZZmassestree])
+tree = any([makeZZmassestree, getHiggsMomentum, getLeptonMomenta, makeZZ4langlestree,
+            makeq2VBFtree, makeVBFanglestree, makeVBFdecayanglestree, makeVBFjetvariablestree,
+       ])
 
 
 #tolerances

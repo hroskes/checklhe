@@ -90,6 +90,8 @@ class Event:
             self.processfunctions.append(self.getq2VBF)
         if config.makeVBFanglestree:
             self.processfunctions.append(self.getVBFangles)
+        if config.makeVBFjetvariablestree:
+            self.processfunctions.append(self.getVBFjetvariables)
 
         if config.count4levents:
             self.processfunctions.append(self.count4l)
@@ -573,13 +575,18 @@ class Event:
         return [p for p in self.particlelist if all(parent in self.incoming for parent in p.mothers()) \
                     and p in globalvariables.globalvariables.jets]
 
-    def VBFjet(self, i):
+    def VBFjet(self, i, usepzorpT):
         jets = self.getproductionjets()
         if len(jets) > 2:
             raise NotImplementedError("VBF not implemented with >2 jets")
         if len(jets) < 2:
             return None
-        jets.sort(key = lambda j: j.Pz(), reverse = True)
+        if usepzorpT == "pz":
+            jets.sort(key = lambda j: j.Pz(), reverse = True)
+        elif usepzorpT == "pT":
+            jets.sort(key = lambda j: j.Pt(), reverse = True)
+        else:
+            raise ValueError('You need to indicate whether jets should be sorted by pz or pT')
         return jets[i-1]
 
     def incomingparton(self, i, uselhepartons = False):
@@ -591,8 +598,8 @@ class Event:
             return partons[i-1]
         else:
             bkpframe = self.frame()
-            jet1 = self.VBFjet(1)
-            jet2 = self.VBFjet(2)
+            jet1 = self.VBFjet(1, "pz")
+            jet2 = self.VBFjet(2, "pz")
             if jet1 is None or jet2 is None:
                 return None
             HJJ = self.higgs().momentum() + jet1.momentum() + jet2.momentum()
@@ -606,7 +613,7 @@ class Event:
 
     def VBFV(self, i, uselhepartons = False):
         try:
-            return self.VBFjet(i).momentum() - self.incomingparton(i, uselhepartons).momentum()
+            return self.VBFjet(i, "pz").momentum() - self.incomingparton(i, uselhepartons).momentum()
         except AttributeError:   #jet or parton (actually should be both or neither) is None
             return None
 
@@ -632,8 +639,8 @@ class Event:
         self.boosttocom(self.higgs())
 
         try:
-            jet1 = self.VBFjet(1).momentum()
-            jet2 = self.VBFjet(2).momentum()
+            jet1 = self.VBFjet(1, "pz").momentum()
+            jet2 = self.VBFjet(2, "pz").momentum()
             V1 = self.VBFV(1, uselhepartons).momentum()
             V2 = self.VBFV(2, uselhepartons).momentum()
             P1 = self.incomingparton(1, uselhepartons).momentum()
@@ -662,3 +669,19 @@ class Event:
             cosPhi1 = -tmp1.Dot(tmp3)
             sgnPhi1 = tmp1.Dot(Z1.Vect())
             self.tree["Phi1_VBF"] = copysign(acos(cosPhi1), sgnPhi1)
+
+    def getVBFjetvariables(self):
+        self.gotoframe(self.labframe)
+        try:
+            jet1 = self.VBFjet(1, "pT").momentum()
+            jet2 = self.VBFjet(2, "pT").momentum()
+        except AttributeError:
+            return
+        self.tree.EnsureBranch("mJJ_VBF",  "D")
+        self.tree.EnsureBranch("dEta_VBF", "D")
+        self.tree.EnsureBranch("dPhi_VBF", "D")
+        self.tree.EnsureBranch("dR_VBF",   "D")
+        self.tree["mJJ_VBF"] = (jet1+jet2).M()
+        self.tree["dEta_VBF"] = jet1.Eta() - jet2.Eta()
+        self.tree["dPhi_VBF"] = jet1.DeltaPhi(jet2)
+        self.tree["dR_VBF"] = jet1.DeltaR(jet2)
