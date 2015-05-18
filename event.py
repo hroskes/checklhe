@@ -253,65 +253,82 @@ class Event:
 #     Higgs decay     #
 #######################
 
-    def higgs(self):
+    def higgs(self, getmomentumifimplicit = False):
         higgslist = [p for p in self.particlelist if str(p) == "H" or str(p) == "Z'" or str(p) == "G"]
         if len(higgslist) == 0:
+            if getmomentumifimplicit and self.higgsdecay():
+                return sum((p.momentum() for p in self.higgsdecay()), momentum.Momentum(None, 0, 0, 0, 0))
             return None
         if len(higgslist) > 1:
             raise IOError("Multiple higgs in event! " + str(self.linenumber))
         return higgslist[0]
 
     def higgsdecay(self, level = None):
-        return particle.DecayType(self.higgs(), level).particles
+        decaytype = self.higgsdecaytype(level)
+        if decaytype:
+            return decaytype.particles
+        return None
 
     def higgsdecaytype(self, level = None):
-        return particle.DecayType(self.higgs(), level)
+        if self.higgs():
+            return particle.DecayType(self.higgs(), level)
+        if config.allowimplicithiggs:
+            if level is None:
+                newlevel = None
+            else:
+                newlevel = level - 1
+            return particle.DecayType([p for p in self.particlelist if (p in globalvariables.globalvariables.weakbosons
+                                                                     or p in globalvariables.globalvariables.photon)
+                                                                    and all(pp in self.incoming for pp in p.mothers())], newlevel)
+        return None
 
     def checkhiggsdecay(self):
-        if not self.higgs() or not self.higgs().kids():
+        if not self.higgsdecay():
             return ""
         for family in globalvariables.globalvariables.decayfamiliestoplevel:
-            if self.higgs() in family:
-                family.increment(self.higgs(), self.eventcounter)
+            if self.higgsdecay(1) in family:
+                family.increment(self.higgsdecay(1), self.eventcounter)
                 return ""
         return ("unknown decay type! " + str(self.linenumber) + "\n" +
-                "H -> " + str(self.higgsdecay()))
+                "H --> " + str(self.higgsdecay()))
 
     def ishiggs(self):
         return len([p for p in self.particlelist if str(p) == "H" or str(p) == "Z'" or str(p) == "G"]) == 1
 
     def isZZ(self):
-        if self.higgs():
-            return len(self.higgs().kids()) == 2 and all(kid in globalvariables.globalvariables.Z for kid in self.higgs().kids())
+        if self.higgsdecay():
+            return len(self.higgsdecay(1)) == 2 and all(kid in globalvariables.globalvariables.Z for kid in self.higgsdecay(1))
         return False
 
     def Z(self, which):
         if not self.isZZ():
             return None
-        Zs = self.higgs().kids()
+        Zs = self.higgsdecay(1)
         assert(all(Z in globalvariables.globalvariables.Z for Z in Zs))
         Zs.sort(key = lambda Z: abs(Z.invmass() - Z.PDGmass()))
         return Zs[which - 1]
 
     def isWW(self):
-        return len(self.higgs().kids()) == 2 and all(kid in globalvariables.globalvariables.W for kid in self.higgs().kids())
+        if self.higgsdecay():
+            return len(self.higgsdecay(1)) == 2 and all(kid in globalvariables.globalvariables.W for kid in self.higgsdecay(1))
+        return False
 
     def W(self, which):
         if not self.isWW():
             return None
-        Ws = self.higgs().kids()
+        Ws = self.higgsdecay(1)
         assert(all(W in globalvariables.globalvariables.W for W in Ws))
         Ws.sort(key = lambda W: abs(W.invmass() - W.PDGmass()))
         return Ws[which - 1]
 
     def checkZZorWWassignment(self):
-        if (self.higgs() not in globalvariables.globalvariables.decayZZ4l
-        and self.higgs() not in globalvariables.globalvariables.decayZZ4q
-        and self.higgs() not in globalvariables.globalvariables.decayZZ4nu
-        and self.higgs() not in globalvariables.globalvariables.decayWW4q
-        and self.higgs() not in globalvariables.globalvariables.decayWW2l2nu):
+        if (self.higgsdecay() not in globalvariables.globalvariables.decayZZ4l
+        and self.higgsdecay() not in globalvariables.globalvariables.decayZZ4q
+        and self.higgsdecay() not in globalvariables.globalvariables.decayZZ4nu
+        and self.higgsdecay() not in globalvariables.globalvariables.decayWW4q
+        and self.higgsdecay() not in globalvariables.globalvariables.decayWW2l2nu):
             return ""
-        assert(len(self.higgs().kids()) == 2)
+        assert(len(self.higgsdecay(1)) == 2)
         ZorW1 = self.Z(1)
         ZorW2 = self.Z(2)
         if ZorW1 is None and ZorW2 is None:
@@ -450,22 +467,23 @@ class Event:
                 return
         self.tree.EnsureBranch("mZ1", "D")
         self.tree.EnsureBranch("mZ2", "D")
-        self.tree.EnsureBranch("mH",  "D")
         self.tree["mZ1"] = Zs[1].invmass()
         self.tree["mZ2"] = Zs[2].invmass()
-        self.tree["mH"] = self.higgs().invmass()
+        if self.higgs(True):
+            self.tree.EnsureBranch("mH",  "D")
+            self.tree["mH"] = self.higgs(True).invmass()
         self.anythingtofill = True
 
     def getHiggsMomentum(self):
-        if not self.higgs():
+        if not self.higgs(True):
             return
         self.gotoframe(self.labframe)
         self.tree.EnsureBranch("pTH", "D")
         self.tree.EnsureBranch("YH", "D")
         self.tree.EnsureBranch("etaH", "D")
-        self.tree["pTH"] = self.higgs().Pt()
-        self.tree["YH"] = self.higgs().Rapidity()
-        self.tree["etaH"] = self.higgs().Eta()
+        self.tree["pTH"] = self.higgs(True).Pt()
+        self.tree["YH"] = self.higgs(True).Rapidity()
+        self.tree["etaH"] = self.higgs(True).Eta()
         self.anythingtofill = True
 
     def getLeptonMomenta(self):
@@ -537,7 +555,7 @@ class Event:
         self.tree["costheta2_ZZ4l"] = -leptons[(2, 1)].Vect().Unit().Dot(Zs[1].Vect().Unit())
 
         self.gotoframe(self.labframe)
-        self.boosttocom(self.higgs())
+        self.boosttocom(self.higgs(True))
         normal1 = leptons[1, 1].Vect().Cross(leptons[1, -1].Vect()).Unit()
         normal2 = leptons[2, 1].Vect().Cross(leptons[2, -1].Vect()).Unit()
         self.tree["Phi_ZZ4l"] = copysign(acos(-normal1.Dot(normal2)), Zs[1].Vect().Dot(normal1.Cross(normal2)))
@@ -607,7 +625,7 @@ class Event:
             jet2 = self.VBFjet(2, "pz")
             if jet1 is None or jet2 is None:
                 return None
-            HJJ = self.higgs().momentum() + jet1.momentum() + jet2.momentum()
+            HJJ = self.higgs(True).momentum() + jet1.momentum() + jet2.momentum()
             HJJ_T = momentum.Momentum(self, HJJ.Px(), HJJ.Py(), 0, HJJ.E())
             self.boosttocom(HJJ_T)
             self.boosttocom(HJJ)     #sequential boosts to preserve the z direction
@@ -651,7 +669,7 @@ class Event:
         except AttributeError:
             return
 
-        self.boosttocom(self.higgs())
+        self.boosttocom(self.higgs(True))
 
         self.tree.EnsureBranch("costheta1_VBF", "D")
         self.tree.EnsureBranch("costheta2_VBF", "D")

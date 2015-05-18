@@ -11,6 +11,8 @@ class Momentum(ROOT.TLorentzVector):
             event.momenta.append(self)
     def momentum(self):
         return self        #so that particle and momentum can be used symmetrically
+    def invmass(self):
+        return self.M()
     def __neg__(self):
         return Momentum(self.event, -self.Px(), -self.Py(), -self.Pz(), -self.E())
     def __add__(self, other):

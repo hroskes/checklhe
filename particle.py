@@ -164,7 +164,10 @@ class DecayType(ParticleCounter):
         try:
             decayparticles = particle.particles   #see if it's itself a decaytype
         except AttributeError:
-            decayparticles = [particle]
+            try:
+                decayparticles = [p for p in particle if p is not None]
+            except TypeError:
+                decayparticles = [particle]
         done = False
         i = 0
         while not done and (level is None or i < level):
@@ -263,7 +266,7 @@ class DecayFamily(EventCount, set):
             newother = DecayType(other, 1)
         except AttributeError:
             return False
-        if newother != other:
+        if newother != ParticleCounter(other):
             return self.__contains__(newother)
         else:
             return False

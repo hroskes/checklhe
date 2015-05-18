@@ -1,4 +1,5 @@
 import globalvariables
+import ROOT
 
 #syntax checks
 checkfirstline = True         #check that the first line in each event has the right syntax, and that the number of particles is correct
@@ -23,8 +24,7 @@ countallleptonnumbers = False #count events with 1 lepton, 2 leptons, ...
 countVHdecaytype = True       #prints the breakup of VH decay types
 checklnu2qcharge = False      #for H->WW->lnu2q, check the charge on the leptons instead of the lepton flavor
 
-raiseerror = False            #if this is true, raise an IOError when something is wrong
-                              #otherwise just print it
+
 
 #Make tree
 makeZZmassestree        = True    #For ZZ events, makes a tree of the Z1, Z2, Higgs masses
@@ -36,6 +36,13 @@ makeq2VBFtree           = True    #For VBF, makes a tree of q^2 for the Vs
 makeVBFanglestree       = True    #For VBF, makes a tree of the angles
 makeVBFdecayanglestree  = True    # Also include the angles relating production to decay (costhetastar and Phi1)
 makeVBFjetvariablestree = True    #For VBF, make a tree of the jet variables - dR, dEta, dPhi, and mJJ
+
+#Other options
+raiseerror = False                #if this is true, raise an IOError when something is wrong
+                                  # otherwise just print it
+allowimplicithiggs = True         #Count ZZ or WW produced by the initial particles as a Higgs
+                                  # Useful for MCFM background
+ROOT.gErrorIgnoreLevel=ROOT.kError#Supress ROOT warnings, the main bad one is when eta = infinity
 
 tree = any([makeZZmassestree, getHiggsMomentum, getLeptonMomenta, makeZZ4langlestree,
             makeq2VBFtree, makeVBFanglestree, makeVBFdecayanglestree, makeVBFjetvariablestree,
