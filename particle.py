@@ -10,15 +10,20 @@ import config
 import vertex
 import color
 
+class BadParticleLineError(Exception):
+    pass
+
 class Particle(particletype.ParticleType):
     def __init__(self, line, ev):
         self.__line = line
+        self.ev = ev
         self.miscellaneouschecks = []
         data = line.split()
         if len(data) < 13:
-            raise IndexError("This line is not a valid particle line.  Not enough entries.")
+            raise BadParticleLineError("This line is not a valid particle line.  Not enough entries.")
         super(Particle, self).__init__(int(data[0]))
         self.__status = int(data[1])
+
         try:
             self.__color = int(data[4])
         except ValueError:
@@ -29,8 +34,10 @@ class Particle(particletype.ParticleType):
         except ValueError:
             self.miscellaneouschecks.append("Anticolor for " + str(self) + " is " + data[5] + " instead of a number!")
             self.__color = 0
+
         self.__momentum = momentum.Momentum(ev, float(data[6]), float(data[7]), float(data[8]), float(data[9]))
         self.__lhemass = float(data[10])
+
         try:
             self.__lifetime = float(data[11])
         except ValueError:
@@ -41,14 +48,23 @@ class Particle(particletype.ParticleType):
         except ValueError:
             self.miscellaneouschecks.append("Spin for " + str(self) + " is " + data[12] + " instead of a number!")
             self.__spin = 9
-        self.__mothers = usefulstuff.printablefrozenset([ev.particlelist[int(data[2])], ev.particlelist[int(data[3])]])
+
+        self.__mothers = usefulstuff.printablefrozenset([int(data[2]), int(data[3])])
+        self.__mothersset = False
         self.__kids = usefulstuff.printablelist([])
-        for particle in ev.particlelist[1:]:
-            if particle in self.mothers():
-                particle.kids().append(self)
+
         ev.particlelist.append(self)
 
-        self.startvertex = ev.vertices[self.mothers()]
+    def setmothers(self):
+        if self.__mothersset:
+            return
+        self.__mothersset = True
+        self.__mothers = usefulstuff.printablefrozenset([self.ev.particlelist[m] for m in self.__mothers])
+        self.__mothers.setmothers()
+        for particle in self.ev.particlelist[1:]:
+            if particle in self.mothers():
+                particle.kids().append(self)
+        self.startvertex = self.ev.vertices[self.mothers()]
         self.endvertex = None
         for mother in self.mothers():
             if mother is None:
@@ -61,9 +77,9 @@ class Particle(particletype.ParticleType):
             self.startvertex.addkid(self)
 
         if self.color() != 0:
-            ev.colors[self.color()].addparticle(self)
+            self.ev.colors[self.color()].addparticle(self)
         if self.anticolor() != 0:
-            ev.colors[self.anticolor()].addparticle(self)
+            self.ev.colors[self.anticolor()].addparticle(self)
 
     def __eq__(self, other):
        return self is other
@@ -239,6 +255,8 @@ class DecayFamily(EventCount, set):
         return incremented
 
     def __contains__(self, other):
+        if other is None:
+            return False
         if super(DecayFamily, self).__contains__(ParticleCounter(other)):
             return True
         try:

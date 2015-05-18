@@ -44,6 +44,7 @@ class Event:
     def finished(self):
         if self.firstline is None:
             raise ValueError("The first line for this event has not been set yet!")
+        self.particlelist.setmothers()
         self.particlelist.remove(None)
         self.particlecounter = particle.ParticleCounter(self.particlelist)
 
@@ -255,7 +256,7 @@ class Event:
     def higgs(self):
         higgslist = [p for p in self.particlelist if str(p) == "H" or str(p) == "Z'" or str(p) == "G"]
         if len(higgslist) == 0:
-            raise IOError("No higgs in event! " + str(self.linenumber))
+            return None
         if len(higgslist) > 1:
             raise IOError("Multiple higgs in event! " + str(self.linenumber))
         return higgslist[0]
@@ -267,7 +268,7 @@ class Event:
         return particle.DecayType(self.higgs(), level)
 
     def checkhiggsdecay(self):
-        if not self.higgs().kids():
+        if not self.higgs() or not self.higgs().kids():
             return ""
         for family in globalvariables.globalvariables.decayfamiliestoplevel:
             if self.higgs() in family:
@@ -280,7 +281,9 @@ class Event:
         return len([p for p in self.particlelist if str(p) == "H" or str(p) == "Z'" or str(p) == "G"]) == 1
 
     def isZZ(self):
-        return len(self.higgs().kids()) == 2 and all(kid in globalvariables.globalvariables.Z for kid in self.higgs().kids())
+        if self.higgs():
+            return len(self.higgs().kids()) == 2 and all(kid in globalvariables.globalvariables.Z for kid in self.higgs().kids())
+        return False
 
     def Z(self, which):
         if not self.isZZ():
@@ -454,6 +457,8 @@ class Event:
         self.anythingtofill = True
 
     def getHiggsMomentum(self):
+        if not self.higgs():
+            return
         self.gotoframe(self.labframe)
         self.tree.EnsureBranch("pTH", "D")
         self.tree.EnsureBranch("YH", "D")
@@ -636,8 +641,6 @@ class Event:
         self.tree[q2V2] = V2.M2()
 
     def getVBFangles(self, uselhepartons = True):
-        self.boosttocom(self.higgs())
-
         try:
             jet1 = self.VBFjet(1, "pz").momentum()
             jet2 = self.VBFjet(2, "pz").momentum()
@@ -647,6 +650,8 @@ class Event:
             P2 = self.incomingparton(2, uselhepartons).momentum()
         except AttributeError:
             return
+
+        self.boosttocom(self.higgs())
 
         self.tree.EnsureBranch("costheta1_VBF", "D")
         self.tree.EnsureBranch("costheta2_VBF", "D")

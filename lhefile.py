@@ -4,6 +4,7 @@ import config
 import tree
 import globalvariables
 import event
+import particle
 
 class LHEFile:
     def __init__(self, filename):
@@ -17,6 +18,9 @@ class LHEFile:
         if config.tree:
             self.rootfile = ROOT.TFile(filename.replace(".lhe","",1) + '.root', 'recreate')
             self.tree = tree.tree("tree", "tree")
+        else:
+            self.rootfile = None
+            self.tree = None
 
     def __enter__(self):
         return self
@@ -49,7 +53,7 @@ class LHEFile:
                 raiseerror("Extra </event>! " + str(linenumber))
             try:
                 ev.addparticle(self.line)
-            except IndexError:
+            except particle.BadParticleLineError:
                 continue
         ev.finished()
         return ev
