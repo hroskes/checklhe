@@ -2,3 +2,4 @@
 *.lhe
 *.root
 globalvariables.pkl
+*_C.*
