@@ -12,6 +12,8 @@ ParticleType::ParticleType(int id)
 {
     _id = id;
 }
+ParticleType::~ParticleType()
+{}
 void ParticleType::init(int id)
 {
     if (_id == 0)

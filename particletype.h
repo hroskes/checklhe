@@ -7,6 +7,7 @@ class ParticleType
         int _id;
     public:
         ParticleType();
+        virtual ~ParticleType();
         ParticleType(int id);
         void init(int id);
         ParticleType operator-();
@@ -15,5 +16,6 @@ class ParticleType
         bool ishiggs();
         bool isquark();
         bool isjet();
+        ClassDef(ParticleType, 1);
 };
 #endif
