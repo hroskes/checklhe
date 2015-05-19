@@ -6,7 +6,7 @@
 
 TString nPart(int part, TString string, TString delimit, bool multipleasone, bool removerest)
 {
-    if (part <= 0) return "";
+    if (part < 0) return "";
     for (int i = 0; i < part; i++)    //part-1 times
     {
         if (multipleasone && string.BeginsWith(delimit))
