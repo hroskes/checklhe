@@ -17,7 +17,7 @@ class Event
         void addparticle(Particle *particle);
         Particle *particle(TString line);
         Particle *particle(int id, int mother1, int mother2, double px, double py, double pz, double e);
-        Particle *getparticle(int position)
+        Particle *getparticle(int position);
         void addmomentum(Momentum *momentum);
         Momentum *momentum(double px, double py, double pz, double e);
         void addframe(Frame *frame);

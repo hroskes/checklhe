@@ -2,32 +2,21 @@
 #define particle_C
 
 #include <vector>
+#include <stdexcept>
 #include "particle.h"
 #include "particletype.C"
 #include "momentum.C"
 #include "event.C"
-
-class BadParticleLineException: public runtime_error {
-    public:
-        BadParticleLineException(TString particleline)
-            : line(particleline), runtime_error(particleline)
-        {}
-
-    virtual const char* what() const throw()
-    {
-        return line + "\nis an invalid particle line!";
-    }
-
-    private:
-        TString line;
-};
+#include "helperfunctions.C"
 
 Particle::Particle(int id, int mother1, int mother2, double px, double py, double pz, double e, Event *ev) :
-    Momentum(ev, px, py, pz, e), ParticleType(id), _ev(ev)
-{}
+    ParticleType(id), Momentum(px, py, pz, e, ev), _ev(ev)
+{
+    _motherindices = std::make_pair(mother1, mother2);
+}
 
 Particle::Particle(TString line, Event *ev) :
-    Momentum(ev, 0, 0, 0, 0), ParticleType(), _ev(ev)
+    ParticleType(), Momentum(0, 0, 0, 0, ev), _ev(ev)
 {
     std::vector<int> intdata;
     std::vector<double> doubledata;
@@ -35,22 +24,22 @@ Particle::Particle(TString line, Event *ev) :
     {
         TString part = nPart(i, line);
         if (! part.IsDigit())
-            throw BadParticleLineException(line);
+            throw std::runtime_error((line + "\nis a bad particle line!").Data());
         intdata.push_back(part.Atoi());
     }
     for (int i = 6; i < 13; i++)
     {
         TString part = nPart(i, line);
         if (! part.IsFloat())
-            throw BadParticleLineException(line);
+            throw std::runtime_error((line + "\nis a bad particle line!").Data());
         doubledata.push_back(part.Atof());
     }
 
     _id = intdata[0];
     init(_id);
     _status = intdata[1];
-    _motherindices = make_pair(intdata[2], intdata[3]);
-    _mothers = make_pair((Particle*)0, (Particle*)0);
+    _motherindices = std::make_pair(intdata[2], intdata[3]);
+    _mothers = std::make_pair((Particle*)0, (Particle*)0);
     SetPxPyPzE(doubledata[0], doubledata[1], doubledata[2], doubledata[3]);
 
     ev->addparticle(this);
@@ -58,13 +47,19 @@ Particle::Particle(TString line, Event *ev) :
 
 void Particle::setmothers()
 {
-    if ((mothers.first || ! motherindices.first) && (mothers.last || ! motherindices.last))
-        continue;
-    _mothers = make_pair(_ev->particlelist[_motherindices.first], _ev->particlelist[_motherindices.last]);
-    _mothers.first->setmothers();
-    _mothers.last->setmothers();
-    _mothers.first->addkid(this);
-    _mothers.last->addkid(this);
+    if ((_mothers.first || ! _motherindices.first) && (_mothers.second || ! _motherindices.second))
+        return;
+    _mothers = std::make_pair(_ev->getparticle(_motherindices.first), _ev->getparticle(_motherindices.second));
+    if (_mothers.first)
+    {
+        _mothers.first->setmothers();
+        _mothers.first->addkid(this);
+    }
+    if (_mothers.second && _mothers.second != _mothers.first)
+    {
+        _mothers.second->setmothers();
+        _mothers.second->addkid(this);
+    }
 }
 
 bool Particle::iskidof(Particle *potentialmother)
@@ -77,10 +72,10 @@ bool Particle::ismotherof(Particle *potentialkid)
 }
 void Particle::addkid(Particle *kid)
 {
-    for(std::vector<Particle*>::iterator it = _kids.begin(); it != _kids.end(); ++it)
-        if ((*it) == kid)
+    for (unsigned int i = 0; i < _kids.size(); i++)
+        if (_kids[i] == kid)
             return;
-    _kids->push_back(kid);
+    _kids.push_back(kid);
 }
 
 ParticleType Particle::particletype()

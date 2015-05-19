@@ -4,6 +4,9 @@
 #include "momentum.h"
 #include "event.C"
 
+Momentum::Momentum() : Momentum(0, 0, 0, 0, 0)
+{}
+
 Momentum::Momentum(double px, double py, double pz, double e, Event *ev)
  : TLorentzVector(px, py, pz, e), _ev(ev)
 {
@@ -11,9 +14,21 @@ Momentum::Momentum(double px, double py, double pz, double e, Event *ev)
         _ev->addmomentum(this);
 }
 
+Momentum::~Momentum()
+{}
+
+Frame::Frame(Event *ev) : _ev(ev)
+{
+    _x = new Momentum(1, 0, 0, 0, ev);
+    _y = new Momentum(0, 1, 0, 0, ev);
+    _z = new Momentum(0, 0, 1, 0, ev);
+    _t = new Momentum(0, 0, 0, 1, ev);
+   ev->addframe(this);
+}
+
 Frame::~Frame()
 {
-    if (ev == 0)
+    if (_ev == 0)
     {
         delete _x;
         delete _y;
@@ -26,28 +41,19 @@ Frame::~Frame()
     }
 }
 
-Frame::Frame(Event *ev)
-{
-    _x = new Momentum(ev, 1, 0, 0, 0);
-    _y = new Momentum(ev, 0, 1, 0, 0);
-    _z = new Momentum(ev, 0, 0, 1, 0);
-    _t = new Momentum(ev, 0, 0, 0, 1);
-   ev->addframe(this);
-}
-
-TLorentzVector Frame::x()
+TLorentzVector *Frame::x()
 {
     return _x;
 }
-TLorentzVector Frame::y()
+TLorentzVector *Frame::y()
 {
     return _y;
 }
-TLorentzVector Frame::z()
+TLorentzVector *Frame::z()
 {
     return _z;
 }
-TLorentzVector Frame::t()
+TLorentzVector *Frame::t()
 {
     return _t;
 }

@@ -11,10 +11,12 @@ Event::Event()
 
 Event::~Event()
 {
-    for(std::vector<Particle*>::iterator it = _momenta.begin(); it != _momenta.end(); ++it)
-        delete *it;
+    for (unsigned int i = 0; i < _momenta.size(); i++)
+        delete _momenta[i];
     //Do NOT do this for _particlelist.  Particle is a subclass of Momentum,
     // so the particles are deleted in the momentum loop.
+    for (unsigned int i = 0; i < _frames.size(); i++)
+        delete _frames[i];
 }
 
 void Event::addparticle(Particle *p)

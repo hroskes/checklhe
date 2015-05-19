@@ -2,6 +2,7 @@
 #define particletype_C
 
 #include "particletype.h"
+#include <assert.h>
 
 ParticleType::ParticleType()
 {

@@ -11,18 +11,22 @@ class Momentum : public TLorentzVector
         Event *_ev;
     public:
         Momentum(double px, double py, double pz, double e, Event *ev);
+        Momentum();
+        ~Momentum();
         ClassDef(Momentum, 1); //name
 };
 
 class Frame
 {
     private:
+        Event *_ev;
         TLorentzVector *_x;
         TLorentzVector *_y;
         TLorentzVector *_z;
         TLorentzVector *_t;
     public:
         Frame(Event *ev);
+        ~Frame();
         TLorentzVector *x();
         TLorentzVector *y();
         TLorentzVector *z();
