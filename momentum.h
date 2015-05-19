@@ -2,30 +2,30 @@
 #define momentum_h
 
 #include "TLorentzVector.h"
-class Event;
-#include "event.h"
+//class Event;
+//#include "event.h"
 
 class Momentum : public TLorentzVector
 {
     private:
-        Event *_ev;
+        int _ev;
     public:
-        Momentum(double px, double py, double pz, double e, Event *ev);
+        Momentum(double px, double py, double pz, double e, int ev);
         Momentum();
-        ~Momentum();
+        virtual ~Momentum();
         ClassDef(Momentum, 1); //name
 };
 
 class Frame
 {
     private:
-        Event *_ev;
+        int _ev;
         TLorentzVector *_x;
         TLorentzVector *_y;
         TLorentzVector *_z;
         TLorentzVector *_t;
     public:
-        Frame(Event *ev);
+        Frame(int ev);
         ~Frame();
         TLorentzVector *x();
         TLorentzVector *y();

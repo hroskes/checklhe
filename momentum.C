@@ -2,28 +2,28 @@
 #define momentum_C
 
 #include "momentum.h"
-#include "event.C"
+//#include "event.C"
 
 Momentum::Momentum() : Momentum(0, 0, 0, 0, 0)
 {}
 
-Momentum::Momentum(double px, double py, double pz, double e, Event *ev)
+Momentum::Momentum(double px, double py, double pz, double e, int ev)
  : TLorentzVector(px, py, pz, e), _ev(ev)
 {
-    if (_ev != 0)
-        _ev->addmomentum(this);
+    //if (_ev != 0)
+        //_ev->addmomentum(this);
 }
 
 Momentum::~Momentum()
 {}
 
-Frame::Frame(Event *ev) : _ev(ev)
+Frame::Frame(int ev) : _ev(ev)
 {
     _x = new Momentum(1, 0, 0, 0, ev);
     _y = new Momentum(0, 1, 0, 0, ev);
     _z = new Momentum(0, 0, 1, 0, ev);
     _t = new Momentum(0, 0, 0, 1, ev);
-   ev->addframe(this);
+   //ev->addframe(this);
 }
 
 Frame::~Frame()
