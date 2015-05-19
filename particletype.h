@@ -1,3 +1,6 @@
+#ifndef particletype_h
+#define particletype_h
+
 class ParticleType
 {
     protected:
@@ -6,6 +9,11 @@ class ParticleType
         ParticleType();
         ParticleType(int id);
         void init(int id);
-        TString str();
         ParticleType operator-();
+        bool islepton();
+        bool isZ();
+        bool ishiggs();
+        bool isquark();
+        bool isjet();
 };
+#endif

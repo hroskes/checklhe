@@ -1,4 +1,8 @@
+#ifndef helperfunctions_C
+#define helperfunctions_C
+
 #include "helperfunctions.h"
+#include "TString.h"
 
 TString nPart(int part, TString string, TString delimit, bool multipleasone, bool removerest)
 {
@@ -17,3 +21,4 @@ TString nPart(int part, TString string, TString delimit, bool multipleasone, boo
         string.Remove(string.Index(delimit));
     return string;
 }
+#endif

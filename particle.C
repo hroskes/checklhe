@@ -1,3 +1,12 @@
+#ifndef particle_C
+#define particle_C
+
+#include <vector>
+#include "particle.h"
+#include "particletype.C"
+#include "momentum.C"
+#include "event.C"
+
 class BadParticleLineException: public runtime_error {
     public:
         BadParticleLineException(TString particleline)
@@ -13,13 +22,15 @@ class BadParticleLineException: public runtime_error {
         TString line;
 };
 
+Particle::Particle(int id, int mother1, int mother2, double px, double py, double pz, double e, Event *ev) :
+    Momentum(ev, px, py, pz, e), ParticleType(id), _ev(ev)
+{}
+
 Particle::Particle(TString line, Event *ev) :
-    Momentum(_ev, 0, 0, 0, 0), ParticleType()
+    Momentum(ev, 0, 0, 0, 0), ParticleType(), _ev(ev)
 {
-    _line = line;
-    _ev = ev;
-    vector<int> intdata;
-    vector<float> floatdata;
+    std::vector<int> intdata;
+    std::vector<double> doubledata;
     for (int i = 0; i < 6; i++)
     {
         TString part = nPart(i, line);
@@ -32,7 +43,7 @@ Particle::Particle(TString line, Event *ev) :
         TString part = nPart(i, line);
         if (! part.IsFloat())
             throw BadParticleLineException(line);
-        floatdata.push_back(part.Atof());
+        doubledata.push_back(part.Atof());
     }
 
     _id = intdata[0];
@@ -40,18 +51,12 @@ Particle::Particle(TString line, Event *ev) :
     _status = intdata[1];
     _motherindices = make_pair(intdata[2], intdata[3]);
     _mothers = make_pair((Particle*)0, (Particle*)0);
-    _kids = vector<Particle*>;
-    _color = intdata[4];
-    _anticolor = intdata[5];
-    SetPxPyPzE(floatdata[0], floatdata[1], floatdata[2], floatdata[3]);
-    _lhemass = floatdata[4];
-    _lifetime = floatdata[5];
-    _spin = floatdata[6];
+    SetPxPyPzE(doubledata[0], doubledata[1], doubledata[2], doubledata[3]);
 
-    _ev->particlelist.push_back(this);
+    ev->addparticle(this);
 }
 
-void setmothers()
+void Particle::setmothers()
 {
     if ((mothers.first || ! motherindices.first) && (mothers.last || ! motherindices.last))
         continue;
@@ -60,37 +65,17 @@ void setmothers()
     _mothers.last->setmothers();
     _mothers.first->addkid(this);
     _mothers.last->addkid(this);
-
-    _startvertex = _ev->getvertex(_mothers);
-    _endvertex = 0;
-    if (_mothers.first != 0)
-    {
-        if (_mothers.first->getendvertex() == 0)
-            _mothers.first->setendvertex(_startvertex);
-        else if (_mothers.first->getendvertex() != _startvertex)
-            _miscellaneouschecks.push_back(_mothers.first->str() + "decays in multiple vertices!");
-    }
-    if (_mothers.last != 0 && _mothers.last != _mothers.first)
-    {
-        if (_mothers.last->getendvertex() == 0)
-            _mothers.last->setendvertex(_startvertex);
-        else if (_mothers.last->getendvertex() != _startvertex)
-            _miscellaneouschecks.push_back(_mothers.last->str() + "decays in multiple vertices!");
-    }
-    if (_startvertex != 0)
-        _startvertex->addkid(this);
-
-    if (_color != 0)
-        _ev->getcolor(_color)->addparticle(this);
-    if (_anticolor != 0)
-        _ev->getcolor(_anticolor)->addparticle(this);
 }
 
-bool iskidof(Particle *potentialmother)
+bool Particle::iskidof(Particle *potentialmother)
 {
-    return (self._mothers.first == potentialmother || self._mothers.second == potentialmother);
+    return (_mothers.first == potentialmother || _mothers.second == potentialmother);
 }
-void addkid(Particle *kid)
+bool Particle::ismotherof(Particle *potentialkid)
+{
+    return potentialkid->iskidof(this);
+}
+void Particle::addkid(Particle *kid)
 {
     for(std::vector<Particle*>::iterator it = _kids.begin(); it != _kids.end(); ++it)
         if ((*it) == kid)
@@ -98,16 +83,8 @@ void addkid(Particle *kid)
     _kids->push_back(kid);
 }
 
-Vertex *getendvertex()
+ParticleType Particle::particletype()
 {
-    return _endvertex;
+    return ParticleType(_id);
 }
-void setendvertex(Vertex *vertex)
-{
-    _endvertex = vertex;
-}
-
-float lhemass()
-{
-    return _lhemass;
-}
+#endif

@@ -1,3 +1,6 @@
+#ifndef tree_h
+#define tree_h
+
 #include "TTree.h"
 #include <vector>
 #include <map>
@@ -15,3 +18,4 @@ class Tree : public TTree
         TBranch *EnsureBranch(TString name, char type);
         
 }
+#endif

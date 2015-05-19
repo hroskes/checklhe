@@ -1,4 +1,7 @@
-#include "tree.C"
+#ifndef tree_C
+#define tree_C
+
+#include "tree.h"
 #include <assert.h>
 
 TBranch *Tree::Branch(TString name, char type)
@@ -35,3 +38,4 @@ TBranch *Tree::Branch(TString name, char type)
             return 0;
     }
 }
+#endif
