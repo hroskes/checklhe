@@ -271,7 +271,9 @@ class Event:
 
     def higgsdecaytype(self, level = None):
         if self.higgs():
-            return particle.DecayType(self.higgs(), level)
+            if self.higgs().kids():
+                return particle.DecayType(self.higgs(), level)
+            return None
         if config.allowimplicithiggs:
             if level is None:
                 newlevel = None
