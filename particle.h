@@ -1,5 +1,7 @@
 #ifndef particle_h
 #define particle_h
+class Momentum;
+class ParticleType;
 #include "momentum.h"
 #include "particletype.h"
 class Particle : public ParticleType, public Momentum
@@ -19,5 +21,6 @@ class Particle : public ParticleType, public Momentum
         bool ismotherof(Particle *potentialkid);
         void addkid(Particle *kid);
         ParticleType particletype();
+        ClassDef(Particle, 1);
 };
 #endif

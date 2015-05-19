@@ -1,6 +1,9 @@
 #ifndef event_h
 #define event_h
 #include <vector>
+class Particle;
+class Momentum;
+class Frame;
 #include "particle.h"
 #include "momentum.h"
 
