@@ -182,9 +182,11 @@ class DecayType(ParticleCounter):
         super(DecayType, self).__init__(decayparticles)
 
 class EventCount(object):
-    def __init__(self, name = "", subcategories = None):
+    def __init__(self, name = "", subcategories = None, dontprintifnonew = False, dontprintifparentisnt = False):
         self.name = name
         self.__active = True
+        self.dontprintifnonew = dontprintifnonew
+        self.dontprintifparentisnt = dontprintifparentisnt
         self.subcategories = []
         if subcategories is not None:
             self.subcategories = subcategories
@@ -192,18 +194,37 @@ class EventCount(object):
     def __hash__(self):
         return hash(self.name)
 
+    def getcount(self, eventcounter):
+        return eventcounter[self]
+
     def printcount(self, eventcounter):
-        count = eventcounter[self]
-        total = eventcounter[globalvariables.globalvariables.anyevent]
-        if count > 0:
+        count = self.getcount(eventcounter)
+        total = globalvariables.globalvariables.anyevent.getcount(eventcounter)
+        toreactivate = []
+        if self.dontprintifnonew:
+            for subcategory in self.subcategories:
+                if self.getcount(eventcounter) == subcategory.getcount(eventcounter):
+                    toreactivate.append(self)
+                    self.deactivate()
+                    break
+        if self.__active and count > 0:
             joiner = "\n    "
             result = "%s %s events (%s%%)" % (count, self.name, 100.0*count/total)
             result += joiner
         else:
             result = ""
             joiner = "\n"
+            for subcategory in self.subcategories:
+                if subcategory.dontprintifparentisnt and subcategory.isactive():
+                    toreactivate.append(subcategory)
+                    subcategory.deactivate()
+
         for subcategory in self.subcategories:
             result += joiner.join([line for line in subcategory.printcount(eventcounter).split("\n")])
+
+        for category in toreactivate:
+            category.activate()
+
         return result.rstrip(" ")
 
     def increment(self, eventcounter):

@@ -38,7 +38,8 @@ class GlobalVariables:
         self.electrons = particlecategory.ParticleCategory([11])
         self.muons = particlecategory.ParticleCategory([13])
         self.taus = particlecategory.ParticleCategory([15])
-        self.leptons = self.electrons.union(self.muons).union(self.taus)
+        self.emu = self.electrons.union(self.muons)
+        self.leptons = self.emu.union(self.taus)
 
         self.neutrinos = particlecategory.ParticleCategory([12, 14, 16])
 
@@ -194,21 +195,21 @@ class GlobalVariables:
         print "initialized VH decay"
 
         #big categories
+        self.any2l2l = particle.EventCount("2l2l", [])
         self.leptoncount = {}
-        for i in range(10):
-            self.leptoncount[i] = particle.EventCount("exactly" + str(i) + "l", [])
+        self.emucount = {}
+        subcategories = []
+        for i in reversed(range(1,10)):
+            self.emucount[i] = particle.EventCount(str(i) + "(e/mu)", [], dontprintifparentisnt = True)
+            subcategories.insert(0, self.emucount[i])
+            if i == 4:
+                subcategories.append(self.any2l2l)
+            self.leptoncount[i] = particle.EventCount(str(i) + "l", subcategories, dontprintifnonew = True)
+            subcategories = [self.leptoncount[i]]
 
-        self.any2l2lsubcats = []
-        if config.counthiggsdecaytype:
-            self.any2l2lsubcats.append(self.decayZZ4l)
-        self.any2l2l = particle.EventCount("2l2l", self.any2l2lsubcats)
-        self.any4l = particle.EventCount("4l", [self.any2l2l, self.leptoncount[4]])
-
-        self.anyeventsubcats = [(self.leptoncount[i] if i != 4 else self.any4l) for i in self.leptoncount]
-        if config.counthiggsdecaytype:
-            self.anyeventsubcats += [self.HZZ, self.HWW]
-        if config.countVHdecaytype:
-            self.anyeventsubcats += [self.VH]
+        self.anyeventsubcats = [self.leptoncount[1]]
+        self.anyeventsubcats += [self.HZZ, self.HWW]
+        self.anyeventsubcats += [self.VH]
         self.anyevent = particle.EventCount("total", self.anyeventsubcats)
 
         config.init()

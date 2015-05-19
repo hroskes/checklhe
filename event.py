@@ -95,11 +95,9 @@ class Event:
             self.processfunctions.append(self.getVBFjetvariables)
 
         if config.count4levents:
-            self.processfunctions.append(self.count4l)
+            self.processfunctions.append(self.countallleptonnumbers)
         if config.count2l2levents:
             self.processfunctions.append(self.count2l2l)
-        if config.countallleptonnumbers:
-            self.processfunctions.append(self.countallleptonnumbers)
         if config.tree:
             self.anythingtofill = False
             self.processfunctions.append(self.filltree)
@@ -231,23 +229,22 @@ class Event:
 #     Event counts     #
 ########################
 
-    def count4l(self):
-        if self.count(globalvariables.globalvariables.leptons) >= 4:
-            globalvariables.globalvariables.any4l.increment(self.eventcounter)
-
     def count2l2l(self):
         leptons = [p for p in self.particlelist if p in globalvariables.globalvariables.leptons]
         if checkdebugoutput.count2l2l(leptons):
             globalvariables.globalvariables.any2l2l.increment(self.eventcounter)
 
     def countallleptonnumbers(self):
-        for i in globalvariables.globalvariables.leptoncount:
-            if self.count(globalvariables.globalvariables.leptons) == i:
-                globalvariables.globalvariables.leptoncount[i].increment(self.eventcounter)
-                return
-        else:
-            raise RuntimeError(str(self.count(globalvariables.globalvariables.leptons)) + "leptons in event! " + str(self.linenumber) + "\n" +
+        if self.count(globalvariables.globalvariables.leptons) > max(globalvariables.globalvariables.leptoncount):
+            raise RuntimeError(str(self.count(globalvariables.globalvariables.leptons)) + " leptons in event! " + str(self.linenumber) + "\n" +
                                "increase the range of globalvariables.globalvariables.leptoncount")
+        for i in globalvariables.globalvariables.leptoncount:
+            if not config.countallleptonnumbers and not (config.count4levents and i == 4):
+                continue
+            if self.count(globalvariables.globalvariables.leptons) >= i:
+                globalvariables.globalvariables.leptoncount[i].increment(self.eventcounter)
+                if self.count(globalvariables.globalvariables.emu) >= i:
+                    globalvariables.globalvariables.emucount[i].increment(self.eventcounter)
 
 #######################
 #     Higgs decay     #
