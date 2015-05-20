@@ -22,7 +22,8 @@ Frame::Frame(TList *list) : _list(list)
     _y = new Momentum(0, 1, 0, 0, list);
     _z = new Momentum(0, 0, 1, 0, list);
     _t = new Momentum(0, 0, 0, 1, list);
-   list->Add(this);
+   if (list != 0)
+      list->Add(this);
 }
 
 Frame::~Frame()
@@ -36,7 +37,7 @@ Frame::~Frame()
     }
     else
     {
-        //they are in list->_momenta, and so they are deleted by list's destructor
+        //they are in list, and so they are deleted by the event
     }
 }
 

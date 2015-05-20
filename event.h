@@ -1,6 +1,5 @@
 #ifndef event_h
 #define event_h
-#include <vector>
 class Particle;
 class Momentum;
 class Frame;
@@ -10,10 +9,11 @@ class Frame;
 class Event
 {
     private:
-        std::vector<Momentum*> _momenta;
-        std::vector<Particle*> _particlelist;
-        std::vector<Frame*> _frames;
-        Frame *labframe;
+        TList *_momenta;
+        TList *_particlelist;
+        TList *_frames;
+        Frame *_labframe;
+        bool _finished;
     public:
         Event();
         ~Event();
@@ -21,6 +21,7 @@ class Event
         Particle *particle(TString line);
         Particle *particle(int id, int mother1, int mother2, double px, double py, double pz, double e);
         Particle *getparticle(int position);
+        void finished();
         void addmomentum(Momentum *momentum);
         Momentum *momentum(double px, double py, double pz, double e);
         void addframe(Frame *frame);
