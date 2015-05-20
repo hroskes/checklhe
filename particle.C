@@ -6,17 +6,16 @@
 #include "particle.h"
 #include "particletype.C"
 #include "momentum.C"
-//#include "event.C"
 #include "helperfunctions.C"
 
-Particle::Particle(int id, int mother1, int mother2, double px, double py, double pz, double e, int ev) :
-    ParticleType(id), Momentum(px, py, pz, e, ev), _ev(ev)
+Particle::Particle(int id, int mother1, int mother2, double px, double py, double pz, double e, TList *list) :
+    ParticleType(id), Momentum(px, py, pz, e, list), _list(list)
 {
     _motherindices = std::make_pair(mother1, mother2);
 }
 
-Particle::Particle(TString line, int ev) :
-    ParticleType(), Momentum(0, 0, 0, 0, ev), _ev(ev)
+Particle::Particle(TString line, TList *list) :
+    ParticleType(), Momentum(0, 0, 0, 0, list), _list(list)
 {
     std::vector<int> intdata;
     std::vector<double> doubledata;
@@ -42,14 +41,14 @@ Particle::Particle(TString line, int ev) :
     _mothers = std::make_pair((Particle*)0, (Particle*)0);
     SetPxPyPzE(doubledata[0], doubledata[1], doubledata[2], doubledata[3]);
 
-    //ev->addparticle(this);
+    list->Add(this);
 }
 
 void Particle::setmothers()
 {
     if ((_mothers.first || ! _motherindices.first) && (_mothers.second || ! _motherindices.second))
         return;
-    _mothers = std::make_pair(/*_ev->getparticle(_motherindices.first), _ev->getparticle(_motherindices.second)*/this, this);
+    _mothers = std::make_pair((Particle*)_list->At(_motherindices.first), (Particle*)_list->At(_motherindices.second));
     if (_mothers.first)
     {
         _mothers.first->setmothers();

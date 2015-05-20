@@ -2,33 +2,32 @@
 #define momentum_C
 
 #include "momentum.h"
-//#include "event.C"
 
 Momentum::Momentum() : Momentum(0, 0, 0, 0, 0)
 {}
 
-Momentum::Momentum(double px, double py, double pz, double e, int ev)
- : TLorentzVector(px, py, pz, e), _ev(ev)
+Momentum::Momentum(double px, double py, double pz, double e, TList *list)
+ : TLorentzVector(px, py, pz, e), _list(list)
 {
-    //if (_ev != 0)
-        //_ev->addmomentum(this);
+    if (_list != 0)
+        _list->Add(this);
 }
 
 Momentum::~Momentum()
 {}
 
-Frame::Frame(int ev) : _ev(ev)
+Frame::Frame(TList *list) : _list(list)
 {
-    _x = new Momentum(1, 0, 0, 0, ev);
-    _y = new Momentum(0, 1, 0, 0, ev);
-    _z = new Momentum(0, 0, 1, 0, ev);
-    _t = new Momentum(0, 0, 0, 1, ev);
-   //ev->addframe(this);
+    _x = new Momentum(1, 0, 0, 0, list);
+    _y = new Momentum(0, 1, 0, 0, list);
+    _z = new Momentum(0, 0, 1, 0, list);
+    _t = new Momentum(0, 0, 0, 1, list);
+   list->Add(this);
 }
 
 Frame::~Frame()
 {
-    if (_ev == 0)
+    if (_list == 0)
     {
         delete _x;
         delete _y;
@@ -37,7 +36,7 @@ Frame::~Frame()
     }
     else
     {
-        //they are in ev->_momenta, and so they are deleted by ev's destructor
+        //they are in list->_momenta, and so they are deleted by list's destructor
     }
 }
 
