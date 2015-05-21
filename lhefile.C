@@ -1,7 +1,7 @@
 #include "lhefile.h"
 #include "event.C"
 
-LHEFile::LHEFile(TString filename) : _filename(filename), _f(filename), _linenumber(0), _line(""), _ev(0)
+LHEFile::LHEFile(TString filename) : _filename(filename), _f(filename), _linenumber(0), _line(""), _ev(0), _eof(false)
 {}
 
 TString LHEFile::nextline()
@@ -10,7 +10,10 @@ TString LHEFile::nextline()
     if (std::getline(_f, line))
         _line = line;
     else
+    {
         _line = "";
+        _eof = true;
+    }
     _linenumber++;
     return _line;
 }
@@ -20,7 +23,7 @@ Event *LHEFile::readevent()
     delete _ev;
     while (! nextline().Contains("<event>"))
     {
-        if (!_line)
+        if (_eof)
             return 0;
         if (_line.Contains("</event>"))
             throw std::runtime_error((TString("Extra </event>! ") += _linenumber).Data());
@@ -36,7 +39,7 @@ Event *LHEFile::readevent()
 
     for (int i = 0; i < nparticles && ! nextline().Contains("</event>"); i++)
     {
-        if (!_line)
+        if (_eof)
             throw std::runtime_error("File ends in the middle of an event!");
         if (_line.Contains("<event>"))
             throw std::runtime_error((TString("Extra </event>! ") += _linenumber).Data());
@@ -44,7 +47,8 @@ Event *LHEFile::readevent()
     }
 
     while (! nextline().Contains("</event>"))
-    {}
+        if (_eof)
+            throw std::runtime_error("File ends in the middle of an event!");
 
     _ev->finished();
     return _ev;

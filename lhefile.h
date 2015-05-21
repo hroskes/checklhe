@@ -10,6 +10,7 @@ class LHEFile
         int _linenumber;
         TString _line;
         Event *_ev;
+        bool _eof;
     public:
         LHEFile(TString filename);
         TString nextline();
