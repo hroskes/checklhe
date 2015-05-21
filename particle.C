@@ -47,7 +47,6 @@ Particle::Particle(TString line, TList *particlelist, TList *momentumlist) :
 
     if (particlelist != 0)
         particlelist->Add(this);
-    std::cout << str() << std::endl;
 }
 
 Particle::Particle(TList *particlelist) :
@@ -62,10 +61,17 @@ Particle::Particle(TList *particlelist) :
 
 TString Particle::str()
 {
+    return str(false);
+}
+
+TString Particle::str(bool shortversion)
+{
     TString result = ParticleType::str();
+    if (shortversion)
+        return result;
     result += "    (";
     if (_mothers.first && _mothers.second)
-        ((result += _mothers.first->str()) += ",") += _mothers.second->str();
+        ((result += _mothers.first->str(true)) += ",") += _mothers.second->str(true);
     else
         ((result += _motherindices.first) += ",") += _motherindices.second;
     ((((((((result += ")    (") += Px()) += ",") += Py()) += ",") += Pz()) += ",") += E()) += ")";

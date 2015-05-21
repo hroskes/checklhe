@@ -34,11 +34,13 @@ Event *LHEFile::readevent()
         throw std::runtime_error((TString("First line of the event does not start with an integer! ") += _linenumber).Data());
 
     for (int i = 0; i < nparticles && ! nextline().Contains("</event>"); i++)
+    {
         if (!_line)
             throw std::runtime_error("File ends in the middle of an event!");
         if (_line.Contains("<event>"))
             throw std::runtime_error((TString("Extra </event>! ") += _linenumber).Data());
         _ev->particle(_line);
+    }
 
     while (! nextline().Contains("</event>"))
     {}
