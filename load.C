@@ -12,10 +12,9 @@ void load()
         Event *ev;
         while (ev = f->readevent())
         {
-            ev->boosttocom(ev->higgs());
-            ev->rotatetozx(ev->getparticle(6), ev->getparticle(8));
-            ev->print();
-            //return;
+            cout << ev->getZ(1)->M() << " " << ev->getZ(2)->M() << " ";
+            ev->boosttocom(ev->getZ(1));
+            cout << ev->getZ(1)->M() << " " << ev->getZ(2)->M() << endl;
         }
     }
 }

@@ -118,7 +118,7 @@ void Event::rotatetozx(TLorentzVector *toz, TLorentzVector *tozx)
 //   conversion   //
 ////////////////////
 
-Particle *Event::higgs()
+Particle *Event::gethiggs()
 {
     Particle *h = 0;
     for (int i = 1; i < _particlelist->GetSize(); i++)
@@ -130,6 +130,29 @@ Particle *Event::higgs()
                 h = (Particle*)_particlelist->At(i);
         }
     return h;
+}
+
+bool Event::isZZ()
+{
+    Particle *h = gethiggs();
+    if (!h || h->nkids() != 2)
+        return false;
+    return (h->getkid(0)->isZ() && h->getkid(1)->isZ());
+}
+
+Particle *Event::getZ(int i)
+//i should be 1 or 2
+//1: the Z with mass closer to mZ
+//2: the Z with mass further from mZ
+{
+    if (!isZZ() || (i != 1 && i != 2)) return 0;
+    Particle *h = gethiggs();
+    Particle *Za = h->getkid(0);
+    Particle *Zb = h->getkid(1);
+    if ((fabs(Za->M() - Za->PDGmass()) < fabs(Zb->M() - Zb->PDGmass())) ^ (i-1))
+        return Za;
+    else
+        return Zb;
 }
 
 #endif

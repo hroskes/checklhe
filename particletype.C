@@ -60,6 +60,33 @@ TString ParticleType::str()
     }
 }
 
+double ParticleType::PDGmass()
+{
+    if (_id < 0)
+        return (-(*this)).PDGmass();
+    switch(_id)
+    {
+        case 1: return 0.0023;
+        case 2: return 0.0048;
+        case 3: return 0.095;
+        case 4: return 1.275;
+        case 5: return 4.18;
+        case 6: return 173.21;
+        case 11: return 0.000510998928;
+        case 12: return 0;
+        case 13: return 0.1056583715;
+        case 14: return 0;
+        case 15: return 1.77682;
+        case 16: return 0;
+        case 21: return 0;
+        case 22: return 0;
+        case 23: return 91.1876;
+        case 24: return 80.385;
+        case 25: return 125.7;
+        default: assert(0); return 0;
+    }
+}
+
 ParticleType ParticleType::operator-()
 {
     return ParticleType(-_id);

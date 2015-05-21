@@ -26,6 +26,8 @@ class Particle : public ParticleType, public Momentum
         bool iskidof(Particle *potentialmother);
         bool ismotherof(Particle *potentialkid);
         void addkid(Particle *kid);
+        unsigned int nkids();
+        Particle *getkid(unsigned int i);
         ParticleType particletype();
         ClassDef(Particle, 1);
 };

@@ -118,6 +118,16 @@ void Particle::addkid(Particle *kid)
             return;
     _kids.push_back(kid);
 }
+unsigned int Particle::nkids()
+{
+    return _kids.size();
+}
+Particle *Particle::getkid(unsigned int i)
+{
+    if (i > _kids.size())
+        return 0;
+    return _kids[i];
+}
 
 ParticleType Particle::particletype()
 {
