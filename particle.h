@@ -8,15 +8,19 @@ class ParticleType;
 class Particle : public ParticleType, public Momentum
 {
     private:
-        TList *_list;
+        TList *_particlelist;
+        TList *_momentumlist;
         int _id;
         int _status;
+        int _mothersset;
         std::pair<int, int> _motherindices;
         std::pair<Particle*, Particle*> _mothers;
         std::vector<Particle*> _kids;
     public:
-        Particle(int id, int mother1, int mother2, double px, double py, double pz, double e, TList *list);
-        Particle(TString line, TList *list);
+        Particle(int id, int status, int mother1, int mother2, double px, double py, double pz, double e, TList *particlelist = 0, TList *momentumlist = 0);
+        Particle(TString line, TList *particlelist = 0, TList *momentumlist = 0);
+        Particle(TList *particlelist = 0);   //This one is for "particle 0", which is just a placeholder that is the "mother" of the incoming partons
+        TString str();
         void setmothers();
         bool iskidof(Particle *potentialmother);
         bool ismotherof(Particle *potentialkid);

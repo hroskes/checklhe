@@ -22,6 +22,44 @@ void ParticleType::init(int id)
         assert(0);
 }
 
+TString ParticleType::str()
+{
+    if (_id < 0)
+    {
+        TString result = (-(*this)).str();
+        result.ReplaceAll("-","temp")
+              .ReplaceAll("+","-")
+              .ReplaceAll("temp","+")
+              .ReplaceAll("nu","nubar");
+        if (isquark())
+            result += "bar";
+        return result;
+    }
+    switch(_id)
+    {
+        case 1:  return "d";
+        case 2:  return "u";
+        case 3:  return "s";
+        case 4:  return "c";
+        case 5:  return "b";
+        case 6:  return "t";
+        case 11: return "e-";
+        case 12: return "nue";
+        case 13: return "mu-";
+        case 14: return "numu";
+        case 15: return "tau-";
+        case 16: return "nutau";
+        case 21: return "g";
+        case 22: return "gamma";
+        case 23: return "Z";
+        case 24: return "W+";
+        case 25: return "H";
+        case 32: return "Z'";
+        case 39: return "G";
+        default: return TString("unknown particle id") += _id;
+    }
+}
+
 ParticleType ParticleType::operator-()
 {
     return ParticleType(-_id);

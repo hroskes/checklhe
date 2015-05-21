@@ -6,29 +6,29 @@
 Momentum::Momentum() : Momentum(0, 0, 0, 0, 0)
 {}
 
-Momentum::Momentum(double px, double py, double pz, double e, TList *list)
- : TLorentzVector(px, py, pz, e), _list(list)
+Momentum::Momentum(double px, double py, double pz, double e, TList *momentumlist)
+ : TLorentzVector(px, py, pz, e), _momentumlist(momentumlist)
 {
-    if (_list != 0)
-        _list->Add(this);
+    if (_momentumlist != 0)
+        _momentumlist->Add(this);
 }
 
 Momentum::~Momentum()
 {}
 
-Frame::Frame(TList *list) : _list(list)
+Frame::Frame(TList *framelist, TList *momentumlist) : _framelist(framelist), _momentumlist(momentumlist)
 {
-    _x = new Momentum(1, 0, 0, 0, list);
-    _y = new Momentum(0, 1, 0, 0, list);
-    _z = new Momentum(0, 0, 1, 0, list);
-    _t = new Momentum(0, 0, 0, 1, list);
-   if (list != 0)
-      list->Add(this);
+    _x = new Momentum(1, 0, 0, 0, momentumlist);
+    _y = new Momentum(0, 1, 0, 0, momentumlist);
+    _z = new Momentum(0, 0, 1, 0, momentumlist);
+    _t = new Momentum(0, 0, 0, 1, momentumlist);
+   if (framelist != 0)
+      framelist->Add(this);
 }
 
 Frame::~Frame()
 {
-    if (_list == 0)
+    if (_momentumlist == 0)
     {
         delete _x;
         delete _y;
@@ -37,7 +37,7 @@ Frame::~Frame()
     }
     else
     {
-        //they are in list, and so they are deleted by the event
+        //they are in momentumlist, and so they are deleted by the event
     }
 }
 

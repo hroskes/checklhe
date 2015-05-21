@@ -7,9 +7,9 @@
 class Momentum : public TLorentzVector
 {
     private:
-        TList *_list;
+        TList *_momentumlist;
     public:
-        Momentum(double px, double py, double pz, double e, TList *list);
+        Momentum(double px, double py, double pz, double e, TList *momentumlist);
         Momentum();
         virtual ~Momentum();
         ClassDef(Momentum, 1); //momentum
@@ -18,13 +18,14 @@ class Momentum : public TLorentzVector
 class Frame : public TObject
 {
     private:
-        TList *_list;
+        TList *_framelist;
+        TList *_momentumlist;
         TLorentzVector *_x;
         TLorentzVector *_y;
         TLorentzVector *_z;
         TLorentzVector *_t;
     public:
-        Frame(TList *list);
+        Frame(TList *framelist, TList *momentumlist);
         ~Frame();
         TLorentzVector *x();
         TLorentzVector *y();

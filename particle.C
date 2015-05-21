@@ -3,19 +3,23 @@
 
 #include <vector>
 #include <stdexcept>
+#include <iostream>
 #include "particle.h"
 #include "particletype.C"
 #include "momentum.C"
 #include "helperfunctions.C"
 
-Particle::Particle(int id, int mother1, int mother2, double px, double py, double pz, double e, TList *list) :
-    ParticleType(id), Momentum(px, py, pz, e, list), _list(list)
+Particle::Particle(int id, int status, int mother1, int mother2, double px, double py, double pz, double e, TList *particlelist, TList *momentumlist) :
+    ParticleType(id), Momentum(px, py, pz, e, momentumlist), _particlelist(particlelist), _id(id), _status(status), _mothersset(false),
+                                                             _motherindices(mother1,mother2), _mothers(0,0)
 {
     _motherindices = std::make_pair(mother1, mother2);
+    if (particlelist != 0)
+        particlelist->Add(this);
 }
 
-Particle::Particle(TString line, TList *list) :
-    ParticleType(), Momentum(0, 0, 0, 0, list), _list(list)
+Particle::Particle(TString line, TList *particlelist, TList *momentumlist) :
+    ParticleType(), Momentum(0, 0, 0, 0, momentumlist), _particlelist(particlelist), _mothers(0,0)
 {
     std::vector<int> intdata;
     std::vector<double> doubledata;
@@ -41,14 +45,38 @@ Particle::Particle(TString line, TList *list) :
     _mothers = std::make_pair((Particle*)0, (Particle*)0);
     SetPxPyPzE(doubledata[0], doubledata[1], doubledata[2], doubledata[3]);
 
-    list->Add(this);
+    if (particlelist != 0)
+        particlelist->Add(this);
+    std::cout << str() << std::endl;
+}
+
+Particle::Particle(TList *particlelist) :
+    ParticleType(0), Momentum(0, 0, 0, 0, 0), _particlelist(particlelist), _id(0), _status(-1), _mothersset(true),
+                                              _motherindices(0,0), _mothers(this,this)
+//This one is for "particle 0", which is just a placeholder that is the "mother" of the incoming partons
+//Unlike in the python version, we're not checking momentum conservation, so a momentum of 0 is ok
+{
+    if (particlelist != 0)
+        particlelist->Add(this);
+}
+
+TString Particle::str()
+{
+    TString result = ParticleType::str();
+    result += "    (";
+    if (_mothers.first && _mothers.second)
+        ((result += _mothers.first->str()) += ",") += _mothers.second->str();
+    else
+        ((result += _motherindices.first) += ",") += _motherindices.second;
+    ((((((((result += ")    (") += Px()) += ",") += Py()) += ",") += Pz()) += ",") += E()) += ")";
+    return result;
 }
 
 void Particle::setmothers()
 {
     if ((_mothers.first || ! _motherindices.first) && (_mothers.second || ! _motherindices.second))
         return;
-    _mothers = std::make_pair((Particle*)_list->At(_motherindices.first), (Particle*)_list->At(_motherindices.second));
+    _mothers = std::make_pair((Particle*)_particlelist->At(_motherindices.first), (Particle*)_particlelist->At(_motherindices.second));
     if (_mothers.first)
     {
         _mothers.first->setmothers();

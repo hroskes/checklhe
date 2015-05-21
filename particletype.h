@@ -1,5 +1,6 @@
 #ifndef particletype_h
 #define particletype_h
+#include "TString.h"
 
 class ParticleType
 {
@@ -10,6 +11,7 @@ class ParticleType
         virtual ~ParticleType();
         ParticleType(int id);
         void init(int id);
+        virtual TString str();
         ParticleType operator-();
         bool islepton();
         bool isZ();

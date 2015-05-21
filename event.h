@@ -3,6 +3,7 @@
 class Particle;
 class Momentum;
 class Frame;
+#include <iostream>
 #include "particle.h"
 #include "momentum.h"
 
@@ -17,14 +18,12 @@ class Event
     public:
         Event();
         ~Event();
-        void addparticle(Particle *particle);
         Particle *particle(TString line);
-        Particle *particle(int id, int mother1, int mother2, double px, double py, double pz, double e);
+        Particle *particle(int id, int status, int mother1, int mother2, double px, double py, double pz, double e);
         Particle *getparticle(int position);
         void finished();
-        void addmomentum(Momentum *momentum);
+        void print();
         Momentum *momentum(double px, double py, double pz, double e);
-        void addframe(Frame *frame);
         Frame *frame();
 };
 #endif
