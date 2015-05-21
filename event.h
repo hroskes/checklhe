@@ -30,6 +30,8 @@ class Event
         void boost(double x, double y, double z);
         void boost(const TVector3& b);
         void boosttocom(TLorentzVector *tocom);
+        void rotate(double a, const TVector3& v);
+        void rotatetozx(TLorentzVector *toz, TLorentzVector *tozx = 0);
         Particle *higgs();
 };
 #endif

@@ -13,7 +13,9 @@ void load()
         while (ev = f->readevent())
         {
             ev->boosttocom(ev->higgs());
+            ev->rotatetozx(ev->getparticle(6), ev->getparticle(8));
             ev->print();
+            //return;
         }
     }
 }

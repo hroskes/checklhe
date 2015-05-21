@@ -88,6 +88,32 @@ void Event::boosttocom(TLorentzVector *tocom)
     boost(b);
 }
 
+void Event::rotate(double a, const TVector3& v)
+{
+    for (int i = 0; i < _momenta->GetSize(); i++)
+        ((Momentum*)(_momenta->At(i)))->Rotate(a, v);
+}
+
+void Event::rotatetozx(TLorentzVector *toz, TLorentzVector *tozx)
+{
+    TVector3 toz3 = toz->Vect();
+    TVector3 tozx3(0, 0, 0);
+    if (tozx)
+        tozx3 = tozx->Vect();
+    double angle = acos(toz3.Unit().Z());
+    TVector3 axis = toz3.Unit().Cross(TVector3(0, 0, 1));
+    if (axis == TVector3(0, 0, 0))  //if thisOneGoesToZ cross z = 0, it's in the -z direction and angle = pi, so rotate around y
+        axis = TVector3(0, 1, 0);   //                               or it's in the +z direction and angle = 0, so it doesn't matter.
+    rotate(angle, axis);
+    if (tozx)
+    {
+        tozx3.Rotate(angle, axis);  //Since tozx3 was decoupled from tozx before the first rotation, this is ok whether or not tozx is in momenta
+        angle = -tozx3.Phi();
+        axis = TVector3(0,0,1);
+        rotate(angle,axis);
+    }
+}
+
 ////////////////////
 //   conversion   //
 ////////////////////
