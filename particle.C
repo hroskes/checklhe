@@ -71,9 +71,17 @@ TString Particle::str(bool shortversion)
         return result;
     result += "    (";
     if (_mothers.first && _mothers.second)
-        ((result += _mothers.first->str(true)) += ",") += _mothers.second->str(true);
+    {
+        result += _mothers.first->str(true);
+        if (_mothers.first != _mothers.second)
+            (result += ",") += _mothers.second->str(true);
+    }
     else
-        ((result += _motherindices.first) += ",") += _motherindices.second;
+    {
+        result += _motherindices.first;
+        if (_motherindices.first != _motherindices.second)
+            (result += ",") += _motherindices.second;
+    }
     ((((((((result += ")    (") += Px()) += ",") += Py()) += ",") += Pz()) += ",") += E()) += ")";
     return result;
 }
