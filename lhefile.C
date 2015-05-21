@@ -11,6 +11,7 @@ TString LHEFile::nextline()
         _line = line;
     else
         _line = "";
+    _linenumber++;
     return _line;
 }
 
@@ -24,7 +25,7 @@ Event *LHEFile::readevent()
         if (_line.Contains("</event>"))
             throw std::runtime_error((TString("Extra </event>! ") += _linenumber).Data());
     }
-    _ev = new Event();
+    _ev = new Event(_linenumber);
 
     TString firstline = nextline();
     int nparticles = 0;

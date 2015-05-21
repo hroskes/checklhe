@@ -6,7 +6,7 @@
 #include "particle.C"
 #include "momentum.C"
 
-Event::Event() : _momenta(new TList()), _particlelist(new TList()), _frames(new TList()), _labframe(frame()), _finished(false)
+Event::Event(int linenumber) : _momenta(new TList()), _particlelist(new TList()), _frames(new TList()), _labframe(frame()), _finished(false), _linenumber(linenumber)
 {
     new Particle(_particlelist); //placeholder so that the indices line up with the LHE mother indices
     _frames->SetOwner();
@@ -64,6 +64,46 @@ Momentum *Event::momentum(double px, double py, double pz, double e)
 Frame *Event::frame()
 {
     return new Frame(_frames, _momenta);
+}
+
+///////////////////////////////////
+//    Lorentz transformations    //
+///////////////////////////////////
+
+void Event::boost(double x, double y, double z)
+{
+    for (int i = 0; i < _momenta->GetSize(); i++)
+        ((Momentum*)(_momenta->At(i)))->Boost(x, y, z);
+}
+
+void Event::boost(const TVector3 &b)
+{
+    for (int i = 0; i < _momenta->GetSize(); i++)
+        ((Momentum*)(_momenta->At(i)))->Boost(b);
+}
+
+void Event::boosttocom(TLorentzVector *tocom)
+{
+    TVector3 b = -tocom->BoostVector();
+    boost(b);
+}
+
+////////////////////
+//   conversion   //
+////////////////////
+
+Particle *Event::higgs()
+{
+    Particle *h = 0;
+    for (int i = 1; i < _particlelist->GetSize(); i++)
+        if (((Particle*)_particlelist->At(i))->ishiggs())
+        {
+            if (h)
+                throw std::runtime_error((TString("Multiple higgs in event! ") += _linenumber).Data());
+            else
+                h = (Particle*)_particlelist->At(i);
+        }
+    return h;
 }
 
 #endif

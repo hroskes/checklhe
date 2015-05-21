@@ -9,6 +9,11 @@ void load()
     )
     {
         LHEFile *f = new LHEFile("VBFscalar33_decayed.lhe");
-        f->readevent()->print();
+        Event *ev;
+        while (ev = f->readevent())
+        {
+            ev->boosttocom(ev->higgs());
+            ev->print();
+        }
     }
 }
