@@ -251,4 +251,22 @@ void Event::getZZ4langles(double& costheta1, double& costheta2, double& Phi, dou
 
 }
 
+void Event::getjetmomenta(vector<double>& jetpt, vector<double>& jeteta, vector<double>& jetphi, vector<double>&jetmass)
+{
+    jetpt.clear();
+    jeteta.clear();
+    jetphi.clear();
+    jetmass.clear();
+    for (int i = 1; i < _particlelist->GetSize(); i++)
+    {
+        Particle *p = (Particle*)_particlelist->At(i);
+        if (!p->isjet())
+            continue;
+        jetpt.push_back(p->Pt());
+        jeteta.push_back(p->Eta());
+        jetphi.push_back(p->Phi());
+        jetmass.push_back(p->M());
+    }
+}
+
 #endif

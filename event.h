@@ -39,5 +39,6 @@ class Event
         void getZZmasses(double& mZZ, double& mZ1, double& mZ2);
         bool isZZ4l();
         void getZZ4langles(double& costheta1, double& costheta2, double& Phi, double& costhetastar, double& Phi1);
+        void getjetmomenta(vector<double>& jetpt, vector<double>& jeteta, vector<double>& jetphi, vector<double>&jetmass);
 };
 #endif

@@ -85,6 +85,11 @@ TString Particle::str(bool shortversion)
     return result;
 }
 
+bool Particle::isjet()
+{
+    return ParticleType::isjet() && _status == 1;
+}
+
 void Particle::setmothers()
 {
     if ((_mothers.first || ! _motherindices.first) && (_mothers.second || ! _motherindices.second))

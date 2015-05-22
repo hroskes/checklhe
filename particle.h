@@ -22,6 +22,7 @@ class Particle : public ParticleType, public Momentum
         Particle(TList *particlelist = 0);   //This one is for "particle 0", which is just a placeholder that is the "mother" of the incoming partons
         TString str();
         TString str(bool shortversion);
+        bool isjet();
         void setmothers();
         bool iskidof(Particle *potentialmother);
         bool ismotherof(Particle *potentialkid);

@@ -19,7 +19,7 @@ class ParticleType
         bool isZ();
         bool ishiggs();
         bool isquark();
-        bool isjet();
+        virtual bool isjet();
         ClassDef(ParticleType, 1);
 };
 #endif
