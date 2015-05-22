@@ -179,6 +179,23 @@ bool Event::isZZ4l()
     return true;
 }
 
+void Event::getZZmasses(double& mZZ, double& mZ1, double& mZ2)
+{
+    mZZ = -999;
+    mZ1 = -999;
+    mZ2 = -999;
+    Particle *h = gethiggs();
+    if (h)
+        mZZ = h->M();
+    if (isZZ())
+    {
+        Particle *Z1 = getZ(1);
+        Particle *Z2 = getZ(2);
+        mZ1 = Z1->M();
+        mZ2 = Z2->M();
+    }
+}
+
 void Event::getZZ4langles(double& costheta1, double& costheta2, double& Phi, double& costhetastar, double& Phi1)
 {
     costheta1 = -999;

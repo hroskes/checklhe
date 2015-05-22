@@ -36,6 +36,7 @@ class Event
         Particle *gethiggs();
         bool isZZ();
         Particle *getZ(int i);
+        void getZZmasses(double& mZZ, double& mZ1, double& mZ2);
         bool isZZ4l();
         void getZZ4langles(double& costheta1, double& costheta2, double& Phi, double& costhetastar, double& Phi1);
 };

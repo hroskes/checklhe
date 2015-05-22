@@ -10,7 +10,10 @@ void readOutAngles_HZZ4l(TString filename)
     TFile *fout = TFile::Open(filename.ReplaceAll(".lhe",".root"), "recreate");
     TTree *t = new TTree("SelectedTree", "SelectedTree");
 
-    double costheta1, costheta2, Phi, costhetastar, Phi1;
+    double mZZ, mZ1, mZ2, costheta1, costheta2, Phi, costhetastar, Phi1;
+    t->Branch("ZZMass", &mZZ, "ZZMass/D");
+    t->Branch("Z1Mass", &mZ1, "Z1Mass/D");
+    t->Branch("Z2Mass", &mZ2, "Z2Mass/D");
     t->Branch("costheta1",&costheta1,"costheta1/D");
     t->Branch("costheta2",&costheta2,"costheta2/D");
     t->Branch("Phi",&Phi,"Phi/D");
@@ -22,6 +25,7 @@ void readOutAngles_HZZ4l(TString filename)
     while (ev = fin->readevent())
     {
         i++;
+        ev->getZZmasses(mZZ, mZ1, mZ2);
         ev->getZZ4langles(costheta1, costheta2, Phi, costhetastar, Phi1);
         t->Fill();
         if (i % 10000 == 0)
