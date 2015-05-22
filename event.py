@@ -453,24 +453,17 @@ class Event:
 ###############################
 
     def getZZmasses(self):
+        if self.higgs(True):
+            self.tree.EnsureBranch("mH",  "D")
+            self.tree["mH"] = self.higgs(True).invmass()
+            self.anythingtofill = True
         Zs = {1: self.Z(1), 2: self.Z(2)}
         if Zs[1] is None or Zs[2] is None:
             return
-        leptons = {}
-        for Z in (1, 2):
-            for sign in (1, -1):
-                leptons[(Z, sign)] = [p for p in Zs[Z].kids() if p.id()*sign > 0][0]
-        #sign is -charge
-        for i in leptons:
-            if leptons[i] not in globalvariables.globalvariables.leptons:
-                return
         self.tree.EnsureBranch("mZ1", "D")
         self.tree.EnsureBranch("mZ2", "D")
         self.tree["mZ1"] = Zs[1].invmass()
         self.tree["mZ2"] = Zs[2].invmass()
-        if self.higgs(True):
-            self.tree.EnsureBranch("mH",  "D")
-            self.tree["mH"] = self.higgs(True).invmass()
         self.anythingtofill = True
 
     def getHiggsMomentum(self):
