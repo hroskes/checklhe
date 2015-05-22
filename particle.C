@@ -9,8 +9,8 @@
 #include "momentum.C"
 #include "helperfunctions.C"
 
-Particle::Particle(int id, int status, int mother1, int mother2, double px, double py, double pz, double e, TList *particlelist, TList *momentumlist) :
-    ParticleType(id), Momentum(px, py, pz, e, momentumlist), _particlelist(particlelist), _id(id), _status(status), _mothersset(false),
+Particle::Particle(int PDGid, int status, int mother1, int mother2, double px, double py, double pz, double e, TList *particlelist, TList *momentumlist) :
+    ParticleType(PDGid), Momentum(px, py, pz, e, momentumlist), _particlelist(particlelist), _status(status), _mothersset(false),
                                                              _motherindices(mother1,mother2), _mothers(0,0)
 {
     _motherindices = std::make_pair(mother1, mother2);
@@ -38,8 +38,7 @@ Particle::Particle(TString line, TList *particlelist, TList *momentumlist) :
         doubledata.push_back(part.Atof());
     }
 
-    _id = intdata[0];
-    init(_id);
+    init(intdata[0]);
     _status = intdata[1];
     _motherindices = std::make_pair(intdata[2], intdata[3]);
     _mothers = std::make_pair((Particle*)0, (Particle*)0);
@@ -50,7 +49,7 @@ Particle::Particle(TString line, TList *particlelist, TList *momentumlist) :
 }
 
 Particle::Particle(TList *particlelist) :
-    ParticleType(0), Momentum(0, 0, 0, 0, 0), _particlelist(particlelist), _id(0), _status(-1), _mothersset(true),
+    ParticleType(0), Momentum(0, 0, 0, 0, 0), _particlelist(particlelist), _status(-1), _mothersset(true),
                                               _motherindices(0,0), _mothers(this,this)
 //This one is for "particle 0", which is just a placeholder that is the "mother" of the incoming partons
 //Unlike in the python version, we're not checking momentum conservation, so a momentum of 0 is ok
@@ -124,7 +123,7 @@ unsigned int Particle::nkids()
 }
 Particle *Particle::getkid(unsigned int i)
 {
-    if (i > _kids.size())
+    if (i >= _kids.size())
         return 0;
     return _kids[i];
 }

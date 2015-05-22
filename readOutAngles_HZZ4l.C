@@ -7,7 +7,7 @@ void readOutAngles_HZZ4l(TString filename)
     gROOT->LoadMacro("lhefile.C+");
 
     LHEFile *fin = new LHEFile(filename);
-    TFile *fout = TFile::Open(filename.ReplaceAll(".lhe",".root"));
+    TFile *fout = TFile::Open(filename.ReplaceAll(".lhe",".root"), "recreate");
     TTree *t = new TTree("SelectedTree", "SelectedTree");
 
     double costheta1, costheta2, Phi, costhetastar, Phi1;
@@ -18,12 +18,17 @@ void readOutAngles_HZZ4l(TString filename)
     t->Branch("Phi1",&Phi1,"Phi1/D");
 
     Event *ev;
+    int i = 0;
     while (ev = fin->readevent())
     {
+        i++;
         ev->getZZ4langles(costheta1, costheta2, Phi, costhetastar, Phi1);
         t->Fill();
+        if (i % 10000 == 0)
+            cout << "Converted " << i << " events" << endl;
     }
-    delete fin;
+    cout << "Total events converted: " << i << endl;
+    //delete fin;
     t->Write();
     delete fout;
 }

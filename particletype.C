@@ -3,6 +3,7 @@
 
 #include "particletype.h"
 #include <assert.h>
+#include <iostream>
 
 ParticleType::ParticleType()
 {

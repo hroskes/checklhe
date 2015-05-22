@@ -189,16 +189,31 @@ void Event::getZZ4langles(double& costheta1, double& costheta2, double& Phi, dou
     if (!isZZ4l()) return;
     Particle *Z1 = getZ(1);
     Particle *Z2 = getZ(2);
-    Particle *l1m = getZ(1)->getkid(1);
-    Particle *l1p = getZ(1)->getkid(2);
-    Particle *l2m = getZ(2)->getkid(1);
-    Particle *l2p = getZ(2)->getkid(2);
+    Particle *l1m = getZ(1)->getkid(0);
+    Particle *l1p = getZ(1)->getkid(1);
+    Particle *l2m = getZ(2)->getkid(0);
+    Particle *l2p = getZ(2)->getkid(1);
+    if (!l1m || !l1p || !l2m || !l2p) assert(0);
     if (l1m->charge() > 0)
-        swap(l1m, l1p);
+    {
+        Particle *temp = l1m;
+        l1m = l1p;
+        l1p = temp;
+    }
     if (l2m->charge() > 0)
-        swap(l2m, l2p);
+    {
+        Particle *temp = l2m;
+        l2m = l2p;
+        l2p = temp;
+    }
+    if (l1m->charge() > 0)
+    {
+        Particle *temp = l1m;
+        l1m = l1p;
+        l1p = temp;
+    }
     if (!(l1m->charge() == -1 && l1p->charge() == 1 && l2m->charge() == -1 && l2p->charge() == 1))
-        return;
+        assert(0); //return;
 
     boosttocom(Z1);
     costheta1 = -l1m->Vect().Unit().Dot(Z2->Vect().Unit());
