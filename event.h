@@ -32,8 +32,11 @@ class Event
         void boosttocom(TLorentzVector *tocom);
         void rotate(double a, const TVector3& v);
         void rotatetozx(TLorentzVector *toz, TLorentzVector *tozx = 0);
+        void gotoframe(Frame *f);
         Particle *gethiggs();
         bool isZZ();
         Particle *getZ(int i);
+        bool isZZ4l();
+        void getZZ4langles(double& costheta1, double& costheta2, double& Phi, double& costhetastar, double& Phi1);
 };
 #endif

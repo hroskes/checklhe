@@ -13,6 +13,7 @@ class LHEFile
         bool _eof;
     public:
         LHEFile(TString filename);
+        ~LHEFile();
         TString nextline();
         Event *readevent();
 };

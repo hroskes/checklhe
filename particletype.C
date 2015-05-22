@@ -86,6 +86,34 @@ double ParticleType::PDGmass()
         default: assert(0); return 0;
     }
 }
+double ParticleType::charge()
+{
+    if (_id < 0)
+        return -((-(*this)).charge());
+    switch(_id)
+    {
+        case 1:  return -1/3.;
+        case 2:  return 2/3.;
+        case 3:  return -1/3;
+        case 4:  return 2/3;
+        case 5:  return -1/3;
+        case 6:  return 2/3;
+        case 11: return -1;
+        case 12: return 0;
+        case 13: return -1;
+        case 14: return 0;
+        case 15: return -1;
+        case 16: return 0;
+        case 21: return 0;
+        case 22: return 0;
+        case 23: return 0;
+        case 24: return 1;
+        case 25: return 0;
+        case 32: return 0;
+        case 39: return 0;
+        default: assert(0); return 0;
+    }
+}
 
 ParticleType ParticleType::operator-()
 {

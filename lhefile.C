@@ -4,6 +4,11 @@
 LHEFile::LHEFile(TString filename) : _filename(filename), _f(filename), _linenumber(0), _line(""), _ev(0), _eof(false)
 {}
 
+LHEFile::~LHEFile()
+{
+    delete _ev;
+}
+
 TString LHEFile::nextline()
 {
     std::string line;

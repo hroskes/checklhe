@@ -114,6 +114,14 @@ void Event::rotatetozx(TLorentzVector *toz, TLorentzVector *tozx)
     }
 }
 
+void Event::gotoframe(Frame *f)
+//f should have been created through frame() so that its unit vectors are in _momenta
+//or bad things will happen
+{
+    boosttocom(f->t());
+    rotatetozx(f->z(), f->x());
+}
+
 ////////////////////
 //   conversion   //
 ////////////////////
@@ -153,6 +161,62 @@ Particle *Event::getZ(int i)
         return Za;
     else
         return Zb;
+}
+
+bool Event::isZZ4l()
+{
+    if (!isZZ())
+        return false;
+    for (int i = 1; i <= 2; i++)
+    {
+        Particle *Z = getZ(i);
+        if (Z->nkids() != 2)
+            return false;
+        for (int j = 0; j <= 1; j++)
+            if (!Z->getkid(j)->islepton())
+                return false;
+    }
+    return true;
+}
+
+void Event::getZZ4langles(double& costheta1, double& costheta2, double& Phi, double& costhetastar, double& Phi1)
+{
+    costheta1 = -999;
+    costheta2 = -999;
+    Phi = -999;
+    costhetastar = -999;
+    Phi1 = -999;
+    if (!isZZ4l()) return;
+    Particle *Z1 = getZ(1);
+    Particle *Z2 = getZ(2);
+    Particle *l1m = getZ(1)->getkid(1);
+    Particle *l1p = getZ(1)->getkid(2);
+    Particle *l2m = getZ(2)->getkid(1);
+    Particle *l2p = getZ(2)->getkid(2);
+    if (l1m->charge() > 0)
+        swap(l1m, l1p);
+    if (l2m->charge() > 0)
+        swap(l2m, l2p);
+    if (!(l1m->charge() == -1 && l1p->charge() == 1 && l2m->charge() == -1 && l2p->charge() == 1))
+        return;
+
+    boosttocom(Z1);
+    costheta1 = -l1m->Vect().Unit().Dot(Z2->Vect().Unit());
+
+    boosttocom(Z2);
+    costheta2 = -l2m->Vect().Unit().Dot(Z1->Vect().Unit());
+
+    gotoframe(_labframe);
+    boosttocom(gethiggs());
+    TVector3 normal1 = l1m->Vect().Cross(l1p->Vect()).Unit();
+    TVector3 normal2 = l2m->Vect().Cross(l2p->Vect()).Unit();
+    Phi = std::copysign(acos(-normal1.Dot(normal2)), Z1->Vect().Dot(normal1.Cross(normal2)));
+
+    TVector3 beamaxis(0, 0, 1);
+    costhetastar = Z1->Vect().Unit().Dot(beamaxis);
+    TVector3 normal3 = beamaxis.Cross(Z1->Vect()).Unit();
+    Phi1 = std::copysign(acos(normal1.Dot(normal3)), Z1->Vect().Dot(normal1.Cross(normal3)));
+
 }
 
 #endif

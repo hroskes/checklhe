@@ -13,6 +13,7 @@ class ParticleType
         void init(int id);
         virtual TString str();
         double PDGmass();
+        double charge();
         ParticleType operator-();
         bool islepton();
         bool isZ();
