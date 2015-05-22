@@ -179,6 +179,30 @@ bool Event::isZZ4l()
     return true;
 }
 
+int Event::getZZ4lflavor()
+{
+    //consistent with older readOutAngles scripts
+    if (!isZZ4l())
+        return -999;
+    Particle *Z1 = getZ(1);
+    Particle *Z2 = getZ(2);
+    int flavor1 = fabs(Z1->getkid(0)->id());
+    int flavor2 = fabs(Z2->getkid(0)->id());
+    switch (flavor1+3*flavor2)
+    {
+        case 44: return 0; //4e
+        case 50: return 3; //2e2mu
+        case 56: return 4; //2e2tau
+        case 46: return 6; //2mu2e
+        case 52: return 1; //4mu
+        case 58: return 5; //2mu2tau
+        case 48: return 7; //2tau2e
+        case 54: return 8; //2tau2mu
+        case 60: return 2; //4tau
+        default: assert(0); return -999;
+    }
+}
+
 void Event::getZZmasses(double& mZZ, double& mZ1, double& mZ2)
 {
     mZZ = -999;
