@@ -257,6 +257,7 @@ void Event::getjetmomenta(vector<double>& jetpt, vector<double>& jeteta, vector<
     jeteta.clear();
     jetphi.clear();
     jetmass.clear();
+    gotoframe(_labframe);
     for (int i = 1; i < _particlelist->GetSize(); i++)
     {
         Particle *p = (Particle*)_particlelist->At(i);
