@@ -11,7 +11,6 @@ void readOutAngles_VBFHZZ4l_splitflavors(TString filename)
     TTree *t[3] = {0, 0, 0};
     fout[0] = TFile::Open(TString(filename).ReplaceAll(".lhe", "_4e.root"), "recreate");
     t[0] = new TTree("SelectedTree", "SelectedTree");
-    cout << TString(filename).ReplaceAll(".lhe", "_4mu.root") << endl;
     fout[1] = TFile::Open(TString(filename).ReplaceAll(".lhe", "_4mu.root"), "recreate");
     t[1] = new TTree("SelectedTree", "SelectedTree");
     fout[2] = TFile::Open(TString(filename).ReplaceAll(".lhe", "_2e2mu.root"), "recreate");
@@ -40,6 +39,8 @@ void readOutAngles_VBFHZZ4l_splitflavors(TString filename)
     while (ev = fin->readevent())
     {
         i++;
+        if (i % 10000 == 0)
+            cout << "Converting event " << i << endl;
         int j = -999;
         switch (ev->getZZ4lflavor())
         {
@@ -52,8 +53,6 @@ void readOutAngles_VBFHZZ4l_splitflavors(TString filename)
         ev->getZZ4langles(costheta1, costheta2, Phi, costhetastar, Phi1);
         ev->getjetmomenta(jetpt, jeteta, jetphi, jetmass);
         t[j]->Fill();
-        if (i % 10000 == 0)
-            cout << "Converted " << i << " events" << endl;
     }
     cout << "Total events converted: " << i << endl;
     //delete fin;
