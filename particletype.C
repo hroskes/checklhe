@@ -9,18 +9,23 @@ ParticleType::ParticleType()
 {
     _id = 0;
 }
-ParticleType::ParticleType(int id)
+ParticleType::ParticleType(int PDGid)
 {
-    _id = id;
+    _id = PDGid;
 }
 ParticleType::~ParticleType()
 {}
-void ParticleType::init(int id)
+void ParticleType::init(int PDGid)
 {
     if (_id == 0)
-        _id = id;
+        _id = PDGid;
     else
         assert(0);
+}
+
+int ParticleType::id()
+{
+    return _id;
 }
 
 TString ParticleType::str()

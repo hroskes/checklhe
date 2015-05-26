@@ -9,8 +9,9 @@ class ParticleType
     public:
         ParticleType();
         virtual ~ParticleType();
-        ParticleType(int id);
-        void init(int id);
+        ParticleType(int PDGid);
+        void init(int PDGid);
+        int id();
         virtual TString str();
         double PDGmass();
         double charge();
