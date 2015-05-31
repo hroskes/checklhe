@@ -6,12 +6,16 @@
 Momentum::Momentum() : Momentum(0, 0, 0, 0, 0)
 {}
 
-Momentum::Momentum(double px, double py, double pz, double e, TList *momentumlist)
- : TLorentzVector(px, py, pz, e), _momentumlist(momentumlist)
+Momentum::Momentum(const TLorentzVector &v, TList *momentumlist)
+ : TLorentzVector(v), _momentumlist(momentumlist)
 {
     if (_momentumlist != 0)
         _momentumlist->Add(this);
 }
+
+Momentum::Momentum(double px, double py, double pz, double e, TList *momentumlist)
+ : Momentum(TLorentzVector(px, py, pz, e), momentumlist)
+{}
 
 Momentum::~Momentum()
 {}

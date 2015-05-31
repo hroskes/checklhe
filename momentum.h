@@ -9,6 +9,7 @@ class Momentum : public TLorentzVector
     private:
         TList *_momentumlist;
     public:
+        Momentum(const TLorentzVector &v, TList *momentumlist);
         Momentum(double px, double py, double pz, double e, TList *momentumlist);
         Momentum();
         virtual ~Momentum();

@@ -20,6 +20,7 @@ class Particle : public ParticleType, public Momentum
         Particle(int id, int status, int mother1, int mother2, double px, double py, double pz, double e, TList *particlelist = 0, TList *momentumlist = 0);
         Particle(TString line, TList *particlelist = 0, TList *momentumlist = 0);
         Particle(TList *particlelist = 0);   //This one is for "particle 0", which is just a placeholder that is the "mother" of the incoming partons
+        int status();
         TString str();
         TString str(bool shortversion);
         bool isjet();

@@ -16,6 +16,7 @@ class Event
         Frame *_labframe;
         bool _finished;
         int _linenumber;
+        Momentum *_partonVBF1, *_partonVBF2;
     public:
         Event(int linenumber);
         ~Event();
@@ -24,6 +25,7 @@ class Event
         Particle *getparticle(int position);
         void finished();
         void print();
+        Momentum *momentum(const TLorentzVector& v);
         Momentum *momentum(double px, double py, double pz, double e);
         Frame *frame();
         //Lorentz transformations
@@ -40,6 +42,10 @@ class Event
         bool isZZ4l();
         int getZZ4lflavor();
         void getZZ4langles(double& costheta1, double& costheta2, double& Phi, double& costhetastar, double& Phi1);
+        int njets();
+        vector<Particle*> getjets();
         void getjetmomenta(vector<double>& jetpt, vector<double>& jeteta, vector<double>& jetphi, vector<double>&jetmass);
+        Particle *getjet(int i, TString sortbypzorpt);
+        Momentum *getpartonVBF(int i, bool uselhepartons = false);
 };
 #endif

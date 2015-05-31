@@ -56,6 +56,11 @@ void Event::print()
         std::cout << ((Particle*)(_particlelist->At(i)))->str() << std::endl;
 }
 
+Momentum *Event::momentum(const TLorentzVector& v)
+{
+    return new Momentum(v, _momenta);  //added to _momenta by the momentum's constructor
+}
+
 Momentum *Event::momentum(double px, double py, double pz, double e)
 {
     return new Momentum(px, py, pz, e, _momenta);  //added to _momenta by the momentum's constructor
@@ -275,6 +280,31 @@ void Event::getZZ4langles(double& costheta1, double& costheta2, double& Phi, dou
 
 }
 
+int Event::njets()
+{
+    int n = 0;
+    for (int i = 1; i < _particlelist->GetSize(); i++)
+    {
+        Particle *p = (Particle*)_particlelist->At(i);
+        if (p->isjet())
+            n++;
+    }
+    return n;
+}
+
+vector<Particle*> Event::getjets()
+{
+    vector<Particle*> jets;
+    for (int i = 1; i < _particlelist->GetSize(); i++)
+    {
+        Particle *p = (Particle*)_particlelist->At(i);
+        if (!p->isjet())
+            continue;
+        jets.push_back(p);
+    }
+    return jets;
+}
+
 void Event::getjetmomenta(vector<double>& jetpt, vector<double>& jeteta, vector<double>& jetphi, vector<double>&jetmass)
 {
     jetpt.clear();
@@ -292,6 +322,101 @@ void Event::getjetmomenta(vector<double>& jetpt, vector<double>& jeteta, vector<
         jetphi.push_back(p->Phi());
         jetmass.push_back(p->M());
     }
+}
+
+Particle *Event::getjet(int i, TString sortbypzorpt)
+{
+    sortbypzorpt.ToLower();
+    if ((i != 1 && i != 2) || njets() == 0)
+        return 0;
+    if (njets() == 1)
+    {
+        if (i == 1)
+            return getjets()[0];
+        else
+            return 0;
+    }
+    vector<Particle*> jets = getjets();
+    Particle *jet1 = jets[0];
+    Particle *jet2 = jets[1];
+    double pzorpt, pzorpt1, pzorpt2;
+    for (unsigned int j = 1; j < jets.size(); i++)
+    {
+        if (sortbypzorpt == "pt")
+        {
+            pzorpt = jets[j]->Pt();
+            pzorpt1 = jet1->Pt();
+            pzorpt2 = jet2->Pt();
+        }
+        else if (sortbypzorpt == "pz")
+        {
+            pzorpt = jets[j]->Pz();
+            pzorpt1 = jet1->Pz();
+            pzorpt2 = jet2->Pz();
+        }
+        else
+            throw std::invalid_argument((TString("getjet's second argument needs to be either pz or pt, not ") += sortbypzorpt).Data());
+        if (pzorpt > pzorpt1)
+        {
+            jet2 = jet1;
+            jet1 = jets[j];
+        }
+        else if (pzorpt > pzorpt2 && jets[i] != jet1)
+            jet2 = jets[j];
+    }
+    if (i == 1)
+        return jet1;
+    else if (i == 2)
+        return jet2;
+    else
+        return 0;
+}
+
+Momentum *Event::getpartonVBF(int i, bool uselhepartons)
+{
+    if (njets() < 2 || !gethiggs() || (i != 1 && i != 2)) return 0;
+    if (uselhepartons)
+    {
+        Particle *p1 = 0;
+        Particle *p2 = 0;
+        for (int j = 1; j < _particlelist->GetSize(); j++)
+        {
+            Particle *p = (Particle*)_particlelist->At(j);
+            if (p->status() != -1)
+                continue;
+            if (p1 == 0 || p->Pz() > p1->Pz())
+            {
+                p2 = p1;
+                p1 = p;
+            }
+            else if (p2 == 0)
+                p2 = p;
+            else
+                throw std::runtime_error((TString("Too many incoming particles in event! ") += _linenumber).Data());
+        }
+        if (i == 1)
+            return p1;
+        else if (i == 2)
+            return p2;
+    }
+    if (!_partonVBF1 || !_partonVBF2)
+    {
+        Frame *bkpframe = frame();
+        Particle *jet1 = getjet(1, "pz");
+        Particle *jet2 = getjet(2, "pz");
+        Momentum *HJJ = momentum(*(gethiggs()) + *jet1 + *jet2);
+        Momentum *HJJ_T = momentum(HJJ->Px(), HJJ->Py(), 0, HJJ->E());
+        boosttocom(HJJ_T);
+        boosttocom(HJJ);     //sequential boosts to preserve the z direction
+        _partonVBF1 = momentum(0, 0,  HJJ->E()/2, HJJ->E()/2);
+        _partonVBF2 = momentum(0, 0, -HJJ->E()/2, HJJ->E()/2);
+        gotoframe(bkpframe);
+    }
+    if (i == 1)
+        return _partonVBF1;
+    else if (i == 2)
+        return _partonVBF2;
+    return 0;
 }
 
 #endif

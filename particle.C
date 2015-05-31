@@ -9,8 +9,8 @@
 #include "momentum.C"
 #include "helperfunctions.C"
 
-Particle::Particle(int PDGid, int status, int mother1, int mother2, double px, double py, double pz, double e, TList *particlelist, TList *momentumlist) :
-    ParticleType(PDGid), Momentum(px, py, pz, e, momentumlist), _particlelist(particlelist), _status(status), _mothersset(false),
+Particle::Particle(int PDGid, int particlestatus, int mother1, int mother2, double px, double py, double pz, double e, TList *particlelist, TList *momentumlist) :
+    ParticleType(PDGid), Momentum(px, py, pz, e, momentumlist), _particlelist(particlelist), _status(particlestatus), _mothersset(false),
                                                              _motherindices(mother1,mother2), _mothers(0,0)
 {
     _motherindices = std::make_pair(mother1, mother2);
@@ -56,6 +56,11 @@ Particle::Particle(TList *particlelist) :
 {
     if (particlelist != 0)
         particlelist->Add(this);
+}
+
+int Particle::status()
+{
+    return _status;
 }
 
 TString Particle::str()
