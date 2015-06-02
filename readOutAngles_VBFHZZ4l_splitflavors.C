@@ -75,7 +75,7 @@ void readOutAngles_VBFHZZ4l_splitflavors(TString filename)
         t[j]->Fill();
     }
     cout << "Total events converted: " << i << endl;
-    //delete fin;
+    delete fin;
     for (int i = 0; i < 3; i++)
     {
         fout[i]->cd();

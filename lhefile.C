@@ -29,7 +29,10 @@ Event *LHEFile::readevent()
     while (! nextline().Contains("<event>"))
     {
         if (_eof)
+        {
+            _ev = 0;
             return 0;
+        }
         if (_line.Contains("</event>"))
             throw std::runtime_error((TString("Extra </event>! ") += _linenumber).Data());
     }

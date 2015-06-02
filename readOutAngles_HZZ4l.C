@@ -38,7 +38,7 @@ void readOutAngles_HZZ4l(TString filename)
             cout << "Converted " << i << " events" << endl;
     }
     cout << "Total events converted: " << i << endl;
-    //delete fin;
+    delete fin;
     t->Write();
     delete fout;
 }
