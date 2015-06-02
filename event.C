@@ -1,10 +1,11 @@
 #ifndef event_C
 #define event_C
 
-#include <vector>
 #include "event.h"
 #include "particle.C"
 #include "momentum.C"
+#include "TMath.h"
+#include <vector>
 
 Event::Event(int linenumber) : _momenta(new TList()), _particlelist(new TList()), _frames(new TList()), _labframe(frame()), _finished(false), _linenumber(linenumber)
 {
@@ -340,7 +341,7 @@ Particle *Event::getjet(int i, TString sortbypzorpt)
     Particle *jet1 = jets[0];
     Particle *jet2 = jets[1];
     double pzorpt, pzorpt1, pzorpt2;
-    for (unsigned int j = 1; j < jets.size(); i++)
+    for (unsigned int j = 1; j < jets.size(); j++)
     {
         if (sortbypzorpt == "pt")
         {
@@ -417,6 +418,61 @@ Momentum *Event::getpartonVBF(int i, bool uselhepartons)
     else if (i == 2)
         return _partonVBF2;
     return 0;
+}
+
+Momentum *Event::getVVBF(int i, bool uselhepartons)
+{
+    Momentum *parton = getpartonVBF(i, uselhepartons);
+    Momentum *jet = getjet(i, "pz");
+    if (parton == 0)
+        return 0;
+    return momentum(*jet-*parton);
+}
+
+void Event::getVBFangles(double& costheta1, double& costheta2, double& Phi, double& costhetastar, double& Phi1, double& q2v1, double& q2v2, bool uselhepartons)
+{
+    Particle *higgs = gethiggs();
+    Particle *Z1 = getZ(1);
+    Particle *jet1 = getjet(1, "pz");
+    Particle *jet2 = getjet(2, "pz");
+    Momentum *parton1 = getpartonVBF(1, uselhepartons);
+    Momentum *parton2 = getpartonVBF(2, uselhepartons);
+    Momentum *V1 = getVVBF(1, uselhepartons);
+    Momentum *V2 = getVVBF(2, uselhepartons);
+
+    q2v1 = V1->M2();
+    q2v2 = V2->M2();
+
+    boosttocom(higgs);
+    costheta1 = -V1->Vect().Dot(jet1->Vect())/jet1->Vect().Mag()/V1->Vect().Mag();
+    costheta2 = -V2->Vect().Dot(jet2->Vect())/jet2->Vect().Mag()/V2->Vect().Mag();
+    costhetastar = -V1->Vect().Dot(Z1->Vect())/V1->Vect().Mag()/Z1->Vect().Mag();
+
+    TVector3 tmp1 = parton1->Vect().Cross(jet1->Vect()).Unit();
+    TVector3 tmp2 = parton2->Vect().Cross(jet2->Vect()).Unit();
+    TVector3 tmp3 = V1->Vect().Cross(Z1->Vect()).Unit();
+
+    double cosPhi = tmp1.Dot(tmp2);
+    double sgnPhi = tmp1.Cross(tmp2).Dot(V1->Vect());
+    double cosPhi1 = -tmp1.Dot(tmp3);
+    double sgnPhi1 = tmp1.Dot(Z1->Vect());
+    Phi = TMath::Sign(acos(cosPhi),sgnPhi);            //TMath::Sign(a,b) = |a|*(b/|b|)
+    Phi1 = TMath::Sign(acos(cosPhi1),sgnPhi1);
+}
+
+void Event::getVBFangles(double& costheta1, double& costheta2, double& Phi, double& costhetastar, double& phistar, double& Phi1, double& q2v1, double& q2v2, bool uselhepartons)
+{
+    getVBFangles(costheta1, costheta2, Phi, costhetastar, Phi1, q2v1, q2v2, uselhepartons);
+    Particle *higgs = gethiggs();
+    Particle *jet1 = getjet(1, "pz");
+    Particle *jet2 = getjet(2, "pz");
+
+    gotoframe(_labframe);
+    Momentum *hjj = momentum(*higgs+*jet1+*jet2);
+    rotatetozx(_labframe->z(), hjj);
+    TVector3 pTboostvector = -hjj->BoostVector();
+    pTboostvector.SetZ(0);
+    boost(pTboostvector);
 }
 
 #endif

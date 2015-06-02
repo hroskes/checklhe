@@ -47,5 +47,8 @@ class Event
         void getjetmomenta(vector<double>& jetpt, vector<double>& jeteta, vector<double>& jetphi, vector<double>&jetmass);
         Particle *getjet(int i, TString sortbypzorpt);
         Momentum *getpartonVBF(int i, bool uselhepartons = false);
+        Momentum *getVVBF(int i, bool uselhepartons = false);
+        void getVBFangles(double& costheta1, double& costheta2, double& Phi, double& costhetastar, double& Phi1, double& q2v1, double& q2v2, bool uselhepartons = false);
+        void getVBFangles(double& costheta1, double& costheta2, double& Phi, double& costhetastar, double& phistar, double& Phi1, double& q2v1, double& q2v2, bool uselhepartons = false);
 };
 #endif
