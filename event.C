@@ -7,7 +7,7 @@
 #include "TMath.h"
 #include <vector>
 
-Event::Event(int linenumber) : _momenta(new TList()), _particlelist(new TList()), _frames(new TList()), _labframe(frame()), _finished(false), _linenumber(linenumber)
+Event::Event(int linenumber) : _momenta(new TList()), _particlelist(new TList()), _frames(new TList()), _labframe(frame()), _finished(false), _linenumber(linenumber), _partonVBF1(0), _partonVBF2(0)
 {
     new Particle(_particlelist); //placeholder so that the indices line up with the LHE mother indices
     _frames->SetOwner();
@@ -409,14 +409,14 @@ Momentum *Event::getpartonVBF(int i, bool uselhepartons)
         Momentum *HJJ_T = momentum(HJJ->Px(), HJJ->Py(), 0, HJJ->E());
         boosttocom(HJJ_T);
         boosttocom(HJJ);     //sequential boosts to preserve the z direction
-        Momentum *partonVBF1 = momentum(0, 0,  HJJ->E()/2, HJJ->E()/2);
-        Momentum *partonVBF2 = momentum(0, 0, -HJJ->E()/2, HJJ->E()/2);
+        _partonVBF1 = momentum(0, 0,  HJJ->E()/2, HJJ->E()/2);
+        _partonVBF2 = momentum(0, 0, -HJJ->E()/2, HJJ->E()/2);
         gotoframe(bkpframe);
-        if (i == 1)
-            return partonVBF1;
-        else if (i == 2)
-            return partonVBF2;
     }
+    if (i == 1)
+        return _partonVBF1;
+    else if (i == 2)
+        return _partonVBF2;
     return 0;
 }
 
