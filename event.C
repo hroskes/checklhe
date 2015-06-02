@@ -356,7 +356,7 @@ Particle *Event::getjet(int i, TString sortbypzorpt)
             pzorpt2 = jet2->Pz();
         }
         else
-            throw std::invalid_argument((TString("getjet's second argument needs to be either pz or pt, not ") += sortbypzorpt).Data());
+            throw std::invalid_argument((TString("getjet's second argument needs to be either pz or pT, not ") += sortbypzorpt).Data());
         if (pzorpt > pzorpt1)
         {
             jet2 = jet1;
@@ -482,5 +482,16 @@ void Event::getVBFangles(double& costheta1, double& costheta2, double& Phi, doub
     phistar = higgs->Phi();
 }
 */
+
+void Event::getVBFjetvariables(double& mJJ, double& dEta, double& dPhi, double& dR)
+{
+    gotoframe(_labframe);
+    Particle *jet1 = getjet(1, "pT");
+    Particle *jet2 = getjet(2, "pT");
+    mJJ = (*jet1+*jet2).M();
+    dEta = jet1->Eta() - jet2->Eta();
+    dPhi = jet1->DeltaPhi(*jet2);
+    dR = jet1->DeltaR(*jet2);
+}
 
 #endif
