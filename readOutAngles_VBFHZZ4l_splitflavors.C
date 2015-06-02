@@ -32,19 +32,18 @@ void readOutAngles_VBFHZZ4l_splitflavors(TString filename)
         t[i]->Branch("costhetastar_ZZ4l", &costhetastar_ZZ4l, "costhetastar_ZZ4l/D");
         t[i]->Branch("Phi1_ZZ4l", &Phi1_ZZ4l, "Phi1_ZZ4l/D");
 
-        t[i]->Branch("JetPt", &jetpt);
-        t[i]->Branch("JetEta", &jeteta);
-        t[i]->Branch("JetPhi", &jetphi);
-        t[i]->Branch("JetMass", &jetmass);
-
         t[i]->Branch("costheta1_VBF", &costheta1_VBF, "costheta1_VBF/D");
         t[i]->Branch("costheta2_VBF", &costheta2_VBF, "costheta2_VBF/D");
         t[i]->Branch("Phi_VBF", &Phi_VBF, "Phi_VBF/D");
         t[i]->Branch("costhetastar_VBF", &costhetastar_VBF, "costhetastar_VBF/D");
         t[i]->Branch("Phi1_VBF", &Phi1_VBF, "Phi1_VBF/D");
-        t[i]->Branch("phistar_VBF", &phistar_VBF, "phistar_VBF/D");
         t[i]->Branch("q2v1_VBF", &q2v1_VBF, "q2v1_VBF/D");
         t[i]->Branch("q2v2_VBF", &q2v2_VBF, "q2v2_VBF/D");
+
+        t[i]->Branch("JetPt", &jetpt);
+        t[i]->Branch("JetEta", &jeteta);
+        t[i]->Branch("JetPhi", &jetphi);
+        t[i]->Branch("JetMass", &jetmass);
     }
 
     Event *ev;
@@ -54,18 +53,18 @@ void readOutAngles_VBFHZZ4l_splitflavors(TString filename)
         i++;
         if (i % 10000 == 0)
             cout << "Converting event " << i << endl;
-        int j = /*-999;
+        int j = -999;
         switch (ev->getZZ4lflavor())
         {
             case 0: j = 0; break;
             case 1: j = 1; break;
             case 3: case 6: j = 2; break;
             default: continue;
-        }*/2;
+        }
         ev->getZZmasses(mZZ, mZ1, mZ2);
         ev->getZZ4langles(costheta1_ZZ4l, costheta2_ZZ4l, Phi_ZZ4l, costhetastar_ZZ4l, Phi1_ZZ4l);
         ev->getjetmomenta(jetpt, jeteta, jetphi, jetmass);
-        ev->getVBFangles(costheta1_VBF, costheta2_VBF, Phi_VBF, costhetastar_VBF, Phi1_VBF, phistar_VBF, q2v1_VBF, q2v2_VBF, false);
+        ev->getVBFangles(costheta1_VBF, costheta2_VBF, Phi_VBF, costhetastar_VBF, Phi1_VBF, q2v1_VBF, q2v2_VBF, false);
         t[j]->Fill();
     }
     cout << "Total events converted: " << i << endl;

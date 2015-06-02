@@ -409,14 +409,14 @@ Momentum *Event::getpartonVBF(int i, bool uselhepartons)
         Momentum *HJJ_T = momentum(HJJ->Px(), HJJ->Py(), 0, HJJ->E());
         boosttocom(HJJ_T);
         boosttocom(HJJ);     //sequential boosts to preserve the z direction
-        _partonVBF1 = momentum(0, 0,  HJJ->E()/2, HJJ->E()/2);
-        _partonVBF2 = momentum(0, 0, -HJJ->E()/2, HJJ->E()/2);
+        Momentum *partonVBF1 = momentum(0, 0,  HJJ->E()/2, HJJ->E()/2);
+        Momentum *partonVBF2 = momentum(0, 0, -HJJ->E()/2, HJJ->E()/2);
         gotoframe(bkpframe);
+        if (i == 1)
+            return partonVBF1;
+        else if (i == 2)
+            return partonVBF2;
     }
-    if (i == 1)
-        return _partonVBF1;
-    else if (i == 2)
-        return _partonVBF2;
     return 0;
 }
 
@@ -431,6 +431,7 @@ Momentum *Event::getVVBF(int i, bool uselhepartons)
 
 void Event::getVBFangles(double& costheta1, double& costheta2, double& Phi, double& costhetastar, double& Phi1, double& q2v1, double& q2v2, bool uselhepartons)
 {
+    gotoframe(_labframe);
     Particle *higgs = gethiggs();
     Particle *Z1 = getZ(1);
     Particle *jet1 = getjet(1, "pz");
@@ -460,6 +461,8 @@ void Event::getVBFangles(double& costheta1, double& costheta2, double& Phi, doub
     Phi1 = TMath::Sign(acos(cosPhi1),sgnPhi1);
 }
 
+/*
+This gives incorrect values of phistar as compared to my code from earlier this year.  I don't know why yet.
 void Event::getVBFangles(double& costheta1, double& costheta2, double& Phi, double& costhetastar, double& Phi1, double& phistar, double& q2v1, double& q2v2, bool uselhepartons)
 {
     gotoframe(_labframe);
@@ -478,5 +481,6 @@ void Event::getVBFangles(double& costheta1, double& costheta2, double& Phi, doub
 
     phistar = higgs->Phi();
 }
+*/
 
 #endif
