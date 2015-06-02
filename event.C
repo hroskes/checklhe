@@ -460,19 +460,23 @@ void Event::getVBFangles(double& costheta1, double& costheta2, double& Phi, doub
     Phi1 = TMath::Sign(acos(cosPhi1),sgnPhi1);
 }
 
-void Event::getVBFangles(double& costheta1, double& costheta2, double& Phi, double& costhetastar, double& phistar, double& Phi1, double& q2v1, double& q2v2, bool uselhepartons)
+void Event::getVBFangles(double& costheta1, double& costheta2, double& Phi, double& costhetastar, double& Phi1, double& phistar, double& q2v1, double& q2v2, bool uselhepartons)
 {
+    gotoframe(_labframe);
     getVBFangles(costheta1, costheta2, Phi, costhetastar, Phi1, q2v1, q2v2, uselhepartons);
+
+    gotoframe(_labframe);
     Particle *higgs = gethiggs();
     Particle *jet1 = getjet(1, "pz");
     Particle *jet2 = getjet(2, "pz");
 
-    gotoframe(_labframe);
     Momentum *hjj = momentum(*higgs+*jet1+*jet2);
     rotatetozx(_labframe->z(), hjj);
     TVector3 pTboostvector = -hjj->BoostVector();
     pTboostvector.SetZ(0);
     boost(pTboostvector);
+
+    phistar = higgs->Phi();
 }
 
 #endif
