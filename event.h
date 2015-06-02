@@ -35,6 +35,7 @@ class Event
         void rotate(double a, const TVector3& v);
         void rotatetozx(TLorentzVector *toz, TLorentzVector *tozx = 0);
         void gotoframe(Frame *f);
+        //conversion
         Particle *gethiggs();
         bool isZZ();
         Particle *getZ(int i);
@@ -42,6 +43,7 @@ class Event
         bool isZZ4l();
         int getZZ4lflavor();
         void getZZ4langles(double& costheta1, double& costheta2, double& Phi, double& costhetastar, double& Phi1);
+        //VBF
         int njets();
         vector<Particle*> getjets();
         void getjetmomenta(vector<double>& jetpt, vector<double>& jeteta, vector<double>& jetphi, vector<double>&jetmass);

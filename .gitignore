@@ -1,6 +1,6 @@
 *.pyc
 *.lhe
 *.root
-globalvariables.pkl
 *_C.*
 *ACLiC*
+.__afs*

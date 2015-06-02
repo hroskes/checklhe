@@ -281,6 +281,10 @@ void Event::getZZ4langles(double& costheta1, double& costheta2, double& Phi, dou
 
 }
 
+///////////////////////////////////
+//              VBF              //
+///////////////////////////////////
+
 int Event::njets()
 {
     int n = 0;
