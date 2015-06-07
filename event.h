@@ -41,6 +41,9 @@ class Event
         bool isZZ();
         Particle *getZ(int i);
         void getZZmasses(double& mZZ, double& mZ1, double& mZ2);
+        void getleptonmomenta(std::vector<double>& leptonpt, std::vector<double>& leptoneta, std::vector<double>& leptonphi, std::vector<double>&leptonmass);
+        std::vector<Particle*> getleptons();
+        void getleadingleptonmomenta(double& leadingpt, double& leadingeta, double& subleadingpt, double& subleadingeta);
         bool isZZ4f();
         bool isZZ4l();
         int getZZ4lflavor();

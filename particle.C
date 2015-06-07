@@ -6,6 +6,12 @@
 #include <iostream>
 #include "particle.h"
 
+#ifndef CMSSW
+#include "momentum.C"
+#include "particletype.C"
+#include "helperfunctions.C"
+#endif
+
 Particle::Particle(int PDGid, int particlestatus, int mother1, int mother2, double px, double py, double pz, double e, TList *particlelist, TList *momentumlist) :
     ParticleType(PDGid), Momentum(px, py, pz, e, momentumlist), _particlelist(particlelist), _status(particlestatus), _mothersset(false),
                                                              _motherindices(mother1,mother2), _mothers(0,0)

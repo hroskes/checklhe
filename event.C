@@ -2,6 +2,12 @@
 #define event_C
 
 #include "event.h"
+
+#ifndef CMSSW
+#include "particle.C"
+#include "momentum.C"
+#endif
+
 #include "TMath.h"
 #include <vector>
 #include <assert.h>
@@ -168,6 +174,61 @@ Particle *Event::getZ(int i)
         return Za;
     else
         return Zb;
+}
+
+void Event::getleptonmomenta(std::vector<double>& leptonpt, std::vector<double>& leptoneta, std::vector<double>& leptonphi, std::vector<double>&leptonmass)
+{
+    leptonpt.clear();
+    leptoneta.clear();
+    leptonphi.clear();
+    leptonmass.clear();
+    gotoframe(_labframe);
+    for (int i = 1; i < _particlelist->GetSize(); i++)
+    {
+        Particle *p = (Particle*)_particlelist->At(i);
+        if (!p->islepton())
+            continue;
+        leptonpt.push_back(p->Pt());
+        leptoneta.push_back(p->Eta());
+        leptonphi.push_back(p->Phi());
+        leptonmass.push_back(p->M());
+    }
+}
+
+std::vector<Particle*> Event::getleptons()
+{
+    std::vector<Particle*> leptons;
+    for (int i = 1; i < _particlelist->GetSize(); i++)
+    {
+        Particle *p = (Particle*)_particlelist->At(i);
+        if (!p->islepton())
+            continue;
+        leptons.push_back(p);
+    }
+    return leptons;
+}
+
+void Event::getleadingleptonmomenta(double& leadingpt, double& leadingeta, double& subleadingpt, double& subleadingeta)
+{
+    Particle *leading = 0, *subleading = 0;
+    std::vector<Particle*> leptons = getleptons();
+    for (unsigned int i = 0; i < leptons.size(); i++)
+    {
+        Particle *p = leptons[i];
+        if (!leading || p->Pt() >= leading->Pt())
+            leading = p;
+    }
+    for (unsigned int i = 0; i < leptons.size(); i++)
+    {
+        Particle *p = leptons[i];
+        if (p == leading) continue;
+        if (!subleading || p->Pt() >= subleading->Pt())
+            subleading = p;
+    }
+    leadingpt = leading->Pt();
+    leadingeta = leading->Eta();
+    subleadingpt = subleading->Pt();
+    subleadingeta = subleading->Eta();
 }
 
 bool Event::isZZ4f()

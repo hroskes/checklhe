@@ -12,6 +12,7 @@ void readOutAngles_HZZ4l(TString filename)
 
     double mZZ, mZ1, mZ2, costheta1, costheta2, Phi, costhetastar, Phi1;
     vector<double> jetpt, jeteta, jetphi, jetmass;
+    double leadingpt, leadingeta, subleadingpt, subleadingeta;
     t->Branch("ZZMass", &mZZ, "ZZMass/D");
     t->Branch("Z1Mass", &mZ1, "Z1Mass/D");
     t->Branch("Z2Mass", &mZ2, "Z2Mass/D");
@@ -24,6 +25,11 @@ void readOutAngles_HZZ4l(TString filename)
     t->Branch("JetEta", &jeteta);
     t->Branch("JetPhi", &jetphi);
     t->Branch("JetMass", &jetmass);
+    t->Branch("LeadingLeptonPt", &leadingpt);
+    t->Branch("LeadingLeptonEta", &leadingeta);
+    t->Branch("SubleadingLeptonPt", &subleadingpt);
+    t->Branch("SubleadingLeptonEta", &subleadingeta);
+    
 
     Event *ev;
     int i = 0;
@@ -33,6 +39,7 @@ void readOutAngles_HZZ4l(TString filename)
         ev->getZZmasses(mZZ, mZ1, mZ2);
         ev->getZZ4langles(costheta1, costheta2, Phi, costhetastar, Phi1);
         ev->getjetmomenta(jetpt, jeteta, jetphi, jetmass);
+        ev->getleadingleptonmomenta(leadingpt, leadingeta, subleadingpt, subleadingeta);
         t->Fill();
         if (i % 10000 == 0)
             cout << "Converted " << i << " events" << endl;

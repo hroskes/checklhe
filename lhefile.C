@@ -3,6 +3,10 @@
 
 #include "lhefile.h"
 
+#ifndef CMSSW
+#include "event.C"
+#endif
+
 LHEFile::LHEFile(TString filename) : _filename(filename), _f(filename), _linenumber(0), _line(""), _ev(0), _eof(false)
 {}
 
