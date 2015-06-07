@@ -1,5 +1,7 @@
+#ifdef lhefile_C
+#define lhefile_C
+
 #include "lhefile.h"
-#include "event.C"
 
 LHEFile::LHEFile(TString filename) : _filename(filename), _f(filename), _linenumber(0), _line(""), _ev(0), _eof(false)
 {}
@@ -61,3 +63,5 @@ Event *LHEFile::readevent()
     _ev->finished();
     return _ev;
 }
+
+#endif

@@ -3,11 +3,10 @@
 class Particle;
 class Momentum;
 class Frame;
+#include <vector>
 #include <iostream>
 #include "particle.h"
 #include "momentum.h"
-
-bool onlyZZ4l = false;  //calculate angles only for ZZ->4l, not e.g. ZZ->2l2nu
 
 class Event
 {
@@ -48,8 +47,8 @@ class Event
         void getZZ4langles(double& costheta1, double& costheta2, double& Phi, double& costhetastar, double& Phi1);
         //VBF
         int njets();
-        vector<Particle*> getjets();
-        void getjetmomenta(vector<double>& jetpt, vector<double>& jeteta, vector<double>& jetphi, vector<double>&jetmass);
+        std::vector<Particle*> getjets();
+        void getjetmomenta(std::vector<double>& jetpt, std::vector<double>& jeteta, std::vector<double>& jetphi, std::vector<double>&jetmass);
         Particle *getjet(int i, TString sortbypzorpt);
         Momentum *getpartonVBF(int i, bool uselhepartons = false);
         Momentum *getVVBF(int i, bool uselhepartons = false);

@@ -5,9 +5,6 @@
 #include <stdexcept>
 #include <iostream>
 #include "particle.h"
-#include "particletype.C"
-#include "momentum.C"
-#include "helperfunctions.C"
 
 Particle::Particle(int PDGid, int particlestatus, int mother1, int mother2, double px, double py, double pz, double e, TList *particlelist, TList *momentumlist) :
     ParticleType(PDGid), Momentum(px, py, pz, e, momentumlist), _particlelist(particlelist), _status(particlestatus), _mothersset(false),

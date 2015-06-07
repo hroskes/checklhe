@@ -2,10 +2,11 @@
 #define event_C
 
 #include "event.h"
-#include "particle.C"
-#include "momentum.C"
 #include "TMath.h"
 #include <vector>
+#include <assert.h>
+
+static bool onlyZZ4l = false;  //calculate angles only for ZZ->4l, not e.g. ZZ->2l2nu
 
 Event::Event(int linenumber) : _momenta(new TList()), _particlelist(new TList()), _frames(new TList()), _labframe(frame()), _finished(false), _linenumber(linenumber), _partonVBF1(0), _partonVBF2(0)
 {
@@ -304,9 +305,9 @@ int Event::njets()
     return n;
 }
 
-vector<Particle*> Event::getjets()
+std::vector<Particle*> Event::getjets()
 {
-    vector<Particle*> jets;
+    std::vector<Particle*> jets;
     for (int i = 1; i < _particlelist->GetSize(); i++)
     {
         Particle *p = (Particle*)_particlelist->At(i);
@@ -317,7 +318,7 @@ vector<Particle*> Event::getjets()
     return jets;
 }
 
-void Event::getjetmomenta(vector<double>& jetpt, vector<double>& jeteta, vector<double>& jetphi, vector<double>&jetmass)
+void Event::getjetmomenta(std::vector<double>& jetpt, std::vector<double>& jeteta, std::vector<double>& jetphi, std::vector<double>&jetmass)
 {
     jetpt.clear();
     jeteta.clear();
@@ -348,7 +349,7 @@ Particle *Event::getjet(int i, TString sortbypzorpt)
         else
             return 0;
     }
-    vector<Particle*> jets = getjets();
+    std::vector<Particle*> jets = getjets();
     Particle *jet1 = jets[0];
     Particle *jet2 = jets[1];
     double pzorpt, pzorpt1, pzorpt2;
