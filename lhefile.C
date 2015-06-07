@@ -1,7 +1,5 @@
-#ifdef lhefile_C
-#define lhefile_C
-
 #include "lhefile.h"
+#include "event.C"
 
 #ifndef CMSSW
 #include "event.C"
@@ -67,5 +65,3 @@ Event *LHEFile::readevent()
     _ev->finished();
     return _ev;
 }
-
-#endif

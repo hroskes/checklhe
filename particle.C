@@ -5,6 +5,9 @@
 #include <stdexcept>
 #include <iostream>
 #include "particle.h"
+#include "particletype.C"
+#include "momentum.C"
+#include "helperfunctions.C"
 
 #ifndef CMSSW
 #include "momentum.C"

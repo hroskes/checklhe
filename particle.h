@@ -4,7 +4,6 @@ class Momentum;
 class ParticleType;
 #include "momentum.h"
 #include "particletype.h"
-#include "helperfunctions.h"
 #include "TList.h"
 class Particle : public ParticleType, public Momentum
 {
