@@ -7,6 +7,8 @@ class Frame;
 #include "particle.h"
 #include "momentum.h"
 
+bool onlyZZ4l = false;  //calculate angles only for ZZ->4l, not e.g. ZZ->2l2nu
+
 class Event
 {
     private:
@@ -40,6 +42,7 @@ class Event
         bool isZZ();
         Particle *getZ(int i);
         void getZZmasses(double& mZZ, double& mZ1, double& mZ2);
+        bool isZZ4f();
         bool isZZ4l();
         int getZZ4lflavor();
         void getZZ4langles(double& costheta1, double& costheta2, double& Phi, double& costhetastar, double& Phi1);

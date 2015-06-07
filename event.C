@@ -169,6 +169,19 @@ Particle *Event::getZ(int i)
         return Zb;
 }
 
+bool Event::isZZ4f()
+{
+    if (!isZZ())
+        return false;
+    for (int i = 1; i <= 2; i++)
+    {
+        Particle *Z = getZ(i);
+        if (Z->nkids() != 2)
+            return false;
+    }
+    return true;
+}
+
 bool Event::isZZ4l()
 {
     if (!isZZ())
@@ -233,7 +246,7 @@ void Event::getZZ4langles(double& costheta1, double& costheta2, double& Phi, dou
     Phi = -999;
     costhetastar = -999;
     Phi1 = -999;
-    if (!isZZ4l()) return;
+    if ((!isZZ4l() && onlyZZ4l) || !isZZ4f()) return;
     Particle *Z1 = getZ(1);
     Particle *Z2 = getZ(2);
     Particle *l1m = getZ(1)->getkid(0);
@@ -241,26 +254,20 @@ void Event::getZZ4langles(double& costheta1, double& costheta2, double& Phi, dou
     Particle *l2m = getZ(2)->getkid(0);
     Particle *l2p = getZ(2)->getkid(1);
     if (!l1m || !l1p || !l2m || !l2p) assert(0);
-    if (l1m->charge() > 0)
+    if (l1m->id() < 0)
     {
         Particle *temp = l1m;
         l1m = l1p;
         l1p = temp;
     }
-    if (l2m->charge() > 0)
+    if (l2m->id() < 0)
     {
         Particle *temp = l2m;
         l2m = l2p;
         l2p = temp;
     }
-    if (l1m->charge() > 0)
-    {
-        Particle *temp = l1m;
-        l1m = l1p;
-        l1p = temp;
-    }
-    if (!(l1m->charge() == -1 && l1p->charge() == 1 && l2m->charge() == -1 && l2p->charge() == 1))
-        assert(0); //return;
+    if (!(l1m->id() > 0 && l1p->id() < 0 && l2m->id() > 0 && l2p->id() < 0))
+        assert(0);
 
     boosttocom(Z1);
     costheta1 = -l1m->Vect().Unit().Dot(Z2->Vect().Unit());
