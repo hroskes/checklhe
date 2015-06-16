@@ -1,4 +1,4 @@
-void readOutAngles_VBFHZZ4l_splitflavors(TString filename)
+void readOutAngles_VBFHZZ4l(TString filename)
 {
     gROOT->LoadMacro("particletype.C+");
     gROOT->LoadMacro("momentum.C+");
