@@ -17,6 +17,8 @@ void readOutAngles_VBFHZZ4l_splitflavors(TString filename)
     t[2] = new TTree("SelectedTree", "SelectedTree");
 
     double mZZ, mZ1, mZ2;
+    double pTH, etaH, phiH;
+    double pTHJJ, etaHJJ, phiHJJ, mHJJ;
     double costheta1_ZZ4l, costheta2_ZZ4l, Phi_ZZ4l, costhetastar_ZZ4l, Phi1_ZZ4l;
     vector<double> jetpt, jeteta, jetphi, jetmass;
     double costheta1_VBF, costheta2_VBF, Phi_VBF, costhetastar_VBF, Phi1_VBF, phistar_VBF, q2v1_VBF, q2v2_VBF;
@@ -26,6 +28,15 @@ void readOutAngles_VBFHZZ4l_splitflavors(TString filename)
         t[i]->Branch("ZZMass", &mZZ, "ZZMass/D");
         t[i]->Branch("Z1Mass", &mZ1, "Z1Mass/D");
         t[i]->Branch("Z2Mass", &mZ2, "Z2Mass/D");
+
+        t[i]->Branch("pTH", &pTH, "pTH/D");
+        t[i]->Branch("etaH", &etaH, "etaH/D");
+        t[i]->Branch("phiH", &phiH, "phiH/D");
+
+        t[i]->Branch("mHJJ", &mHJJ, "mHJJ/D");
+        t[i]->Branch("pTHJJ", &pTHJJ, "pTHJJ/D");
+        t[i]->Branch("etaHJJ", &etaHJJ, "etaHJJ/D");
+        t[i]->Branch("phiHJJ", &phiHJJ, "phiHJJ/D");
 
         t[i]->Branch("costheta1_ZZ4l", &costheta1_ZZ4l, "costheta1_ZZ4l/D");
         t[i]->Branch("costheta2_ZZ4l", &costheta2_ZZ4l, "costheta2_ZZ4l/D");
@@ -68,6 +79,8 @@ void readOutAngles_VBFHZZ4l_splitflavors(TString filename)
             default: continue;
         }
         ev->getZZmasses(mZZ, mZ1, mZ2);
+        ev->getHmomentum(pTH, etaH, phiH);
+        ev->getHJJmomentum(pTHJJ, etaHJJ, phiHJJ, mHJJ);
         ev->getZZ4langles(costheta1_ZZ4l, costheta2_ZZ4l, Phi_ZZ4l, costhetastar_ZZ4l, Phi1_ZZ4l);
         ev->getjetmomenta(jetpt, jeteta, jetphi, jetmass);
         ev->getVBFangles(costheta1_VBF, costheta2_VBF, Phi_VBF, costhetastar_VBF, Phi1_VBF, q2v1_VBF, q2v2_VBF, false);

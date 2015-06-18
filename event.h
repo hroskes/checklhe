@@ -42,6 +42,7 @@ class Event
         bool isZZ();
         Particle *getZ(int i);
         void getZZmasses(double& mZZ, double& mZ1, double& mZ2);
+        void getHmomentum(double& pTH, double& etaH, double& phiH);
         void getleptonmomenta(std::vector<double>& leptonpt, std::vector<double>& leptoneta, std::vector<double>& leptonphi, std::vector<double>&leptonmass);
         std::vector<Particle*> getleptons();
         void getleadingleptonmomenta(double& leadingpt, double& leadingeta, double& subleadingpt, double& subleadingeta);
@@ -56,6 +57,7 @@ class Event
         Particle *getjet(int i, TString sortbypzorpt);
         Momentum *getpartonVBF(int i, bool uselhepartons = false);
         Momentum *getVVBF(int i, bool uselhepartons = false);
+        void getHJJmomentum(double& pTHJJ, double& etaHJJ, double& phiHJJ, double& mHJJ);
         void getVBFangles(double& costheta1, double& costheta2, double& Phi, double& costhetastar, double& Phi1, double& q2v1, double& q2v2, bool uselhepartons = false);
         //void getVBFangles(double& costheta1, double& costheta2, double& Phi, double& costhetastar, double& Phi1, double& phistar, double& q2v1, double& q2v2, bool uselhepartons = false);
         void getVBFjetvariables(double& mJJ, double& dEta, double& dPhi, double& dR);

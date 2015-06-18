@@ -296,6 +296,24 @@ void Event::getZZmasses(double& mZZ, double& mZ1, double& mZ2)
     }
 }
 
+void Event::getHmomentum(double& pTH, double& etaH, double& phiH)
+{
+    gotoframe(_labframe);
+    Particle *h = gethiggs();
+    if (h)
+    {
+        pTH = h->Pt();
+        etaH = h->Eta();
+        phiH = h->Phi();
+    }
+    else
+    {
+        pTH = -999;
+        etaH = -999;
+        phiH = -999;
+    }
+}
+
 void Event::getZZ4langles(double& costheta1, double& costheta2, double& Phi, double& costhetastar, double& Phi1)
 {
     costheta1 = -999;
@@ -439,6 +457,26 @@ Particle *Event::getjet(int i, TString sortbypzorpt)
         return jet2;
     else
         return 0;
+}
+
+void Event::getHJJmomentum(double& pTHJJ, double& etaHJJ, double& phiHJJ, double& mHJJ)
+{
+    gotoframe(_labframe);
+    pTHJJ = -999;
+    etaHJJ = -999;
+    phiHJJ = -999;
+    mHJJ = -999;
+    Particle *h = gethiggs();
+    Particle *j1 = getjet(1, "pT");
+    Particle *j2 = getjet(2, "pT");
+    if (h && j1 && j2)
+    {
+        TLorentzVector hjj = (*h) + (*j1) + (*j2);
+        pTHJJ = hjj.Pt();
+        etaHJJ = hjj.Eta();
+        phiHJJ = hjj.Phi();
+        mHJJ = hjj.M();
+    }
 }
 
 Momentum *Event::getpartonVBF(int i, bool uselhepartons)
