@@ -35,6 +35,7 @@ void readOutAngles_VBFHZZ4l_splitflavors(TString filename)
 
         t[i]->Branch("mHJJ", &mHJJ, "mHJJ/D");
         t[i]->Branch("pTHJJ", &pTHJJ, "pTHJJ/D");
+        gErrorIgnoreLevel=kError;
         t[i]->Branch("etaHJJ", &etaHJJ, "etaHJJ/D");
         t[i]->Branch("phiHJJ", &phiHJJ, "phiHJJ/D");
 
