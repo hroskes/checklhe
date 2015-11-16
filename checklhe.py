@@ -14,7 +14,6 @@ for file in sys.argv[1:]:
     print file
     with lhefile.LHEFile(file) as f:
         for ev in f:
-            ev.process()
             check = ev.check()
             if check:
                 f.raiseerror(check)

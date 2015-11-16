@@ -1,7 +1,6 @@
 import collections
 import ROOT
 import config
-import tree
 import globalvariables
 import event
 import particle
@@ -13,23 +12,13 @@ class LHEFile:
             raise ValueError(filename + " does not end in .lhe")
         self.filename = filename
         self.f = open(filename)
+        self.nevents = 0
         self.linenumber = 0
-        self.eventcounter = collections.Counter()
-        if config.tree:
-            self.rootfile = ROOT.TFile(filename.replace(".lhe","",1) + '.root', 'recreate')
-            self.tree = tree.tree("tree", "tree")
-        else:
-            self.rootfile = None
-            self.tree = None
 
     def __enter__(self):
         return self
     def __exit__(self, exc_type, exc_value, traceback):
-        print globalvariables.globalvariables.anyevent.printcount(self.eventcounter)
-        if config.tree:
-            self.tree.Write()
-            self.rootfile.Close()
-        self.rootfile.Close()
+        print "   ", self.nevents, "events"
         self.f.close()
 
     def raiseerror(self, msg):
@@ -44,7 +33,7 @@ class LHEFile:
                 return None
             if "</event>" in self.line:
                 raiseerror("Extra </event>! " + str(linenumber))
-        ev = event.Event(self.linenumber, self.eventcounter, self.tree)
+        ev = event.Event(self.linenumber)
         ev.setfirstline(self.nextline())
         while "</event>" not in self.nextline():
             if not self.line:
@@ -56,6 +45,7 @@ class LHEFile:
             except particle.BadParticleLineError:
                 continue
         ev.finished()
+        self.nevents += 1
         return ev
 
     def nextline(self):
