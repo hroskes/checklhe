@@ -106,6 +106,7 @@ class Event:
             scale = float(firstlinedata[5])
         except ValueError:
             results.append("alphaQCD is " + firstlinedata[5] + ", not a number! " + str(self.linenumber))
+        return "\n".join(results)
 
     def checkstatus(self):
         results = []
