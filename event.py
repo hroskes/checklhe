@@ -83,7 +83,7 @@ class Event:
         try:
             Nparticles = int(firstlinedata[0])
             if Nparticles != len(list(self.particlecounter.elements())):
-                results.append(str(len(list(self.particlecounter.elements()))) + " particles in the event, but " + str(Nparticles) + " recorded in the first line!" + str(self.linenumber))
+                results.append(str(len(list(self.particlecounter.elements()))) + " particles in the event, but " + str(Nparticles) + " recorded in the first line! " + str(self.linenumber))
         except ValueError:
             results.append("Number of particles is " + firstlinedata[0] + ", not an integer! " + str(self.linenumber))
         try:
