@@ -27,7 +27,7 @@ ROOT.gErrorIgnoreLevel=ROOT.kError#Supress ROOT warnings, the main bad one is wh
 #tolerances
 momentumtolerance = 1e-4      #GeV
 invmasstolerance = 7e-2       #GeV
-PDGmasstolerance = 0.02       #relative
+PDGmasstolerance = 0.05       #relative
 
 
 #mostly internal, until the row of #####
