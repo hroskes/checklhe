@@ -38,6 +38,7 @@ class LHEFile:
         while "</event>" not in self.nextline():
             if not self.line:
                 self.raiseerror("File ends in the middle of an event!")
+                return None
             if "<event>" in self.line:
                 self.raiseerror("Extra </event>! " + str(linenumber))
             try:
