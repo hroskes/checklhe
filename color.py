@@ -23,7 +23,7 @@ def linemakessense(particles, antiparticles, start = None, end = None):
     particles = particles.copy()
     antiparticles = antiparticles.copy()
     if not particles.isdisjoint(antiparticles):
-        raise NotImplementedError("Color checking is not implemented for color singlets.  Feel free to extend it.")
+        return False
 
     if len(particles) == len(antiparticles) == 0:
         return True
