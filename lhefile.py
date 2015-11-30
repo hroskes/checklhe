@@ -32,14 +32,14 @@ class LHEFile:
             if not self.line:     #eof
                 return None
             if "</event>" in self.line:
-                raiseerror("Extra </event>! " + str(linenumber))
+                self.raiseerror("Extra </event>! " + str(linenumber))
         ev = event.Event(self.linenumber)
         ev.setfirstline(self.nextline())
         while "</event>" not in self.nextline():
             if not self.line:
-                raiseerror("File ends in the middle of an event!")
+                self.raiseerror("File ends in the middle of an event!")
             if "<event>" in self.line:
-                raiseerror("Extra </event>! " + str(linenumber))
+                self.raiseerror("Extra </event>! " + str(linenumber))
             try:
                 ev.addparticle(self.line)
             except particle.BadParticleLineError:
