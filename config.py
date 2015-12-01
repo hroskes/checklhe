@@ -7,7 +7,7 @@ checkstatus = True            #check that the particle status is correct
 
 #kinematic checks
 checkinvmass = True           #check that E^2-\vec{p}^2=m^2, using all the numbers from the LHE
-checkPDGmass = True           #check that the LHE mass = the PDG mass for the particle types in checkPDGmasslist
+checkPDGmass = False          #check that the LHE mass = the PDG mass for the particle types in checkPDGmasslist
                               #   (configured below)
 checkmomentum = True          #check momentum conservation in particle decays
 checkcharge = True            #check charge conservation in particle decays
