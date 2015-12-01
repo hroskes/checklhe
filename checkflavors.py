@@ -1,9 +1,12 @@
 import sys
 import event
 
+maxevents = 99999999999999999999
+
 def checkflavors(file):
-    counter = event.MyCounter()
+    counter = event.PrintableCounter()
     with open(file) as f:
+        nevents = 0
         inevent, sawinitline = False, False
         for line in f:
             if not inevent and "<event>" in line:
@@ -12,13 +15,17 @@ def checkflavors(file):
                 continue
             elif "</event>" in line:
                 ev.freeze()
-                counter[ev] += 1
+                counter[ev] += ev.weight
+                nevents += 1
                 inevent = False
+                if nevents >= maxevents:
+                    break
                 continue
             elif not inevent:
                 continue
             elif not sawinitline:
                 sawinitline = True
+                ev.setweight(line)
                 continue
 
             ev.addparticle(line)

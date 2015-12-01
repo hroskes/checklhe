@@ -1,6 +1,10 @@
 import collections
+import config
 
-class MyCounter(collections.Counter):
+class OrderedCounter(collections.Counter, collections.OrderedDict):
+    pass
+
+class PrintableCounter(collections.Counter):
     def __str__(self):
         result = ''
         for item in self:
@@ -25,8 +29,8 @@ class Parton(int):
 
 class Event(object):
     def __init__(self):
-        self.incoming = collections.Counter()
-        self.outgoing = collections.Counter()
+        self.incoming = OrderedCounter()
+        self.outgoing = OrderedCounter()
         self.frozen = False
 
     def addparticle(self, line):
@@ -49,13 +53,23 @@ class Event(object):
         else:
             raise IndexError("Not enough elements yet! %s %s" % (self.incoming, self.outgoing))
 
+    def setweight(self, initline):
+        if config.weighted:
+            self.weight = float(initline.split()[2])
+        else:
+            self.weight = 1
+
     def __str__(self):
         return "(" + " ".join(str(a) for a in self.incoming.elements()) + ") --> (" + " ".join(str(a) for a in self.outgoing.elements()) + ")"
 
     def __hash__(self):
+        if config.ordermatters:
+            immutabletype = tuple
+        else:
+            immutabletype = frozenset
         if not self.frozen:
             raise RuntimeError("not frozen, can't hash!\n" + line)
-        return hash((frozenset(self.incoming), frozenset(self.outgoing)))
+        return hash((immutabletype(self.incoming), immutabletype(self.outgoing)))
 
     def __eq__(self, other):
         return (self.incoming, self.outgoing, self.frozen) == (other.incoming, other.outgoing, other.frozen)
