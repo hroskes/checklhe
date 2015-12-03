@@ -2,14 +2,31 @@ import collections
 import config
 
 class OrderedCounter(collections.Counter, collections.OrderedDict):
-    pass
+    def __reversed__(self):
+        result = self.__class__()
+        for _ in reversed(self.keys()):
+            result[_] = self[_]
+        return result
+
+    def elements(self):
+        result = []
+        for key in self:
+            for i in range(self[key]):
+                result.append(key)
+        return result
 
 class PrintableCounter(collections.Counter):
     def __str__(self):
         result = ''
         for item in self:
-            result += str(item) + ": " + str(self[item]) + "\n"
+            if config.printreversed and item > item.reversed():
+                continue
+            result += str(item) + ": " + str(self[item])
+            if config.printreversed and item < item.reversed():
+                result += "\t" + str(item.reversed()) + ": " + str(self[item.reversed()]) + "\t" + "Delta = " + str(self[item] - self[item.reversed()])
+            result += "\n"
         return result
+            
 
 class Parton(int):
     def __str__(self):
@@ -43,12 +60,13 @@ class Event(object):
         if status == -1:
             self.incoming[Parton(id)] += 1
         elif status == 1:
-            self.outgoing[Parton(id)] += 1
+            if config.outgoingmatters:
+                self.outgoing[Parton(id)] += 1
         else:
             raise ValueError("Invalid status! " + line)
 
     def freeze(self):
-        if sum(self.incoming.values()) == sum(self.outgoing.values()) == 2:
+        if sum(self.incoming.values()) == 2 and (sum(self.outgoing.values()) == 2 or not config.outgoingmatters):
             self.frozen = True
         else:
             raise IndexError("Not enough elements yet! %s %s" % (self.incoming, self.outgoing))
@@ -60,7 +78,10 @@ class Event(object):
             self.weight = 1
 
     def __str__(self):
-        return "(" + " ".join(str(a) for a in self.incoming.elements()) + ") --> (" + " ".join(str(a) for a in self.outgoing.elements()) + ")"
+        if config.outgoingmatters:
+            return "(" + " ".join(str(a) for a in self.incoming.elements()) + ") --> (" + " ".join(str(a) for a in self.outgoing.elements()) + ")"
+        else:
+            return "(" + " ".join(str(a) for a in self.incoming.elements()) + ") --> *"
 
     def __hash__(self):
         if config.ordermatters:
@@ -73,3 +94,20 @@ class Event(object):
 
     def __eq__(self, other):
         return (self.incoming, self.outgoing, self.frozen) == (other.incoming, other.outgoing, other.frozen)
+
+    def reversed(self):
+        result = self.__class__()
+        result.incoming = reversed(self.incoming)
+        result.outgoing = self.outgoing
+        result.freeze()
+        return result
+
+    def __cmp__(self, other):
+        result = cmp(self.incoming.elements()[0], other.incoming.elements()[0])
+        if not result:
+            result = cmp(self.incoming.elements()[1], other.incoming.elements()[1])
+        print result, self.incoming, other.incoming
+        return result
+
+    def beforereversed(self):
+        return self < reversed(self)
