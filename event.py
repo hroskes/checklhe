@@ -19,11 +19,11 @@ class PrintableCounter(collections.Counter):
     def __str__(self):
         result = ''
         for item in self:
-            if config.printreversed and item > item.reversed():
+            if config.printreversed and item > item.reversed() and item.reversed() in self:
                 continue
-            result += str(item) + ": " + str(self[item])
+            result += "{}: {:>6}".format(item, self[item])
             if config.printreversed and item < item.reversed():
-                result += "\t" + str(item.reversed()) + ": " + str(self[item.reversed()]) + "\t" + "Delta = " + str(self[item] - self[item.reversed()])
+                result += "\t{}: {:>6}\tDelta = {:>4} = {:6.1f}%".format(item.reversed(), self[item.reversed()], self[item] - self[item.reversed()], 100.*(self[item] - self[item.reversed()])/self[item])
             result += "\n"
         return result
             
@@ -106,7 +106,6 @@ class Event(object):
         result = cmp(self.incoming.elements()[0], other.incoming.elements()[0])
         if not result:
             result = cmp(self.incoming.elements()[1], other.incoming.elements()[1])
-        print result, self.incoming, other.incoming
         return result
 
     def beforereversed(self):
