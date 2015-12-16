@@ -21,8 +21,16 @@ class Particle(particletype.ParticleType):
         data = line.split()
         if len(data) < 13:
             raise BadParticleLineError("This line is not a valid particle line.  Not enough entries.")
-        super(Particle, self).__init__(int(data[0]))
-        self.__status = int(data[1])
+
+        try:
+            super(Particle, self).__init__(int(data[0]))
+        except ValueError:
+            raise BadParticleLineError
+        try:
+            self.__status = int(data[1])
+        except ValueError:
+            self.__status = -999
+            self.miscellaneouschecks.append("Status for " + str(self) + " is " + data[1] + " instead of a number!")
 
         try:
             self.__color = int(data[4])

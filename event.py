@@ -111,6 +111,8 @@ class Event:
     def checkstatus(self):
         results = []
         for p in self.particlelist:
+            if p.status() == -999:
+                continue                 #already gave an error
             if p.status() not in [-1, 1, -2, 2, 3, -9]:
                 results.append("Particle " + str(p) + " has unknown status " + str(p.status()) +  "! " + str(self.linenumber))
 
