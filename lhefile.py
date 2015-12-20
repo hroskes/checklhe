@@ -28,19 +28,19 @@ class LHEFile:
             print msg
 
     def readevent(self):
-        while "<event>" not in self.nextline():
+        while "<event" not in self.nextline():
             if not self.line:     #eof
                 return None
             if "</event>" in self.line:
-                self.raiseerror("Extra </event>! " + str(linenumber))
+                self.raiseerror("Extra </event>! " + str(self.linenumber))
         ev = event.Event(self.linenumber)
         ev.setfirstline(self.nextline())
         while "</event>" not in self.nextline():
             if not self.line:
                 self.raiseerror("File ends in the middle of an event!")
                 return None
-            if "<event>" in self.line:
-                self.raiseerror("Extra </event>! " + str(linenumber))
+            if "<event" in self.line:
+                self.raiseerror("Extra <event>! " + str(self.linenumber))
             try:
                 ev.addparticle(self.line)
             except particle.BadParticleLineError:
