@@ -14,6 +14,8 @@ class LHEFile:
         self.f = open(filename)
         self.nevents = 0
         self.linenumber = 0
+        self.sawinitblock = False
+        self.processnumberlist = []
 
     def __enter__(self):
         return self
@@ -33,6 +35,35 @@ class LHEFile:
                 return None
             if "</event>" in self.line:
                 self.raiseerror("Extra </event>! " + str(self.linenumber))
+            if "<init>" in self.line:
+                self.sawinitblock = True
+                data = self.nextline().split()
+                try:
+                    [int(data[i]) for i in (0, 1, 4, 5, 6, 7, 8, 9)]
+                    [float(data[i]) for i in (2, 3)]
+                except (ValueError, IndexError):
+                    self.raiseerror("Bad init line 1!")
+                nprocesses = int(data[9])
+                for p in range(nprocesses):
+                    data = self.nextline().split()
+                    if "</init>" in self.line:
+                        self.raiseerror("Not enough lines in init block!")
+                        break
+                    try:
+                        [float(data[i]) for i in (0, 1, 2)]
+                        int(data[3])
+                        for i in range(3, len(data)):
+                            self.processnumberlist.append(int(i))
+                    except (ValueError, IndexError):
+                        self.raiseerror("Bad init line %i!" % (2+p))
+                while "</init>" not in self.nextline() and "<event>" not in self.line:
+                    if self.line.split():
+                        self.raiseerror("Extra line in init block!")
+                if "<event>" in self.line:
+                    self.raiseerror("No </init>!")
+                    break
+        if not self.sawinitblock:
+            self.raiseerror("No <init>!")
         ev = event.Event(self.linenumber)
         ev.setfirstline(self.nextline())
         while "</event>" not in self.nextline():
