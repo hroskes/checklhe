@@ -17,8 +17,9 @@ class Event:
 #        Event setup        #
 #############################
 
-    def __init__(self, linenumber):
+    def __init__(self, linenumber, processidlist):
         self.linenumber = linenumber
+        self.processidlist = processidlist
         self.firstline = None
         self.particlelist = usefulstuff.printablelist([None])
         self.vertices = vertex.Vertices()
@@ -88,6 +89,8 @@ class Event:
             results.append("Number of particles is " + firstlinedata[0] + ", not an integer! " + str(self.linenumber))
         try:
             processid = int(firstlinedata[1])
+            if processid not in self.processidlist:
+                results.append("Invalid process id %i!" % processid)
         except ValueError:
             results.append("Process id is " + firstlinedata[1] + ", not an integer! " + str(self.linenumber))
         try:

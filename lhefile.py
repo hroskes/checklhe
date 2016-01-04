@@ -15,7 +15,7 @@ class LHEFile:
         self.nevents = 0
         self.linenumber = 0
         self.sawinitblock = False
-        self.processnumberlist = []
+        self.processidlist = []
 
     def __enter__(self):
         return self
@@ -53,7 +53,7 @@ class LHEFile:
                         [float(data[i]) for i in (0, 1, 2)]
                         int(data[3])
                         for i in range(3, len(data)):
-                            self.processnumberlist.append(int(i))
+                            self.processidlist.append(int(data[i]))
                     except (ValueError, IndexError):
                         self.raiseerror("Bad init line %i!" % (2+p))
                 while "</init>" not in self.nextline() and "<event>" not in self.line:
@@ -64,7 +64,7 @@ class LHEFile:
                     break
         if not self.sawinitblock:
             self.raiseerror("No <init>!")
-        ev = event.Event(self.linenumber)
+        ev = event.Event(self.linenumber, self.processidlist)
         ev.setfirstline(self.nextline())
         while "</event>" not in self.nextline():
             if not self.line:
