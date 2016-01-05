@@ -51,6 +51,8 @@ class LHEFile:
                         break
                     try:
                         [float(data[i]) for i in (0, 1, 2)]
+                        if float(data[0]) < 0:
+                            self.raiseerror("Pythia doesn't like negative cross sections!")
                         int(data[3])
                         for i in range(3, len(data)):
                             self.processidlist.append(int(data[i]))
