@@ -91,6 +91,7 @@ class LHEFile:
                 if "-->" in self.line:
                     self.raiseerror("Warning: multiple --> in one line\n"
                                     "(ok in itself, but other problems may not be detected!" + str(self.linenumber))
+                self.incomment = False
             if "--" in self.line and incomment:
                 self.raiseerror("-- in a comment! " + str(self.linenumber))
 
