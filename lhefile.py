@@ -82,7 +82,7 @@ class LHEFile:
                                     "(ok in itself, but other problems may not be detected!" + str(self.linenumber))
                 self.incomment = True
             if "-->" in self.line:
-                if not self.line.strip().endswith("<!--"):
+                if not self.line.strip().endswith("-->"):
                     self.raiseerror("Warning: comment ends in the middle of a line\n"
                                     "(ok in itself, but problems may not be detected)! " + str(self.linenumber))
                 if not self.incomment:
