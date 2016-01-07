@@ -14,6 +14,7 @@ class LHEFile:
         self.f = open(filename)
         self.nevents = 0
         self.linenumber = 0
+        self.incomment = False
         self.sawinitblock = False
         self.processidlist = []
 
@@ -33,9 +34,13 @@ class LHEFile:
         while "<event" not in self.nextline():
             if not self.line:     #eof
                 return None
+
             if "</event>" in self.line:
                 self.raiseerror("Extra </event>! " + str(self.linenumber))
+
             if "<init>" in self.line:
+                if self.sawinitblock:
+                    self.raiseerror("Extra init block! " + str(self.linenumber))
                 self.sawinitblock = True
                 data = self.nextline().split()
                 try:
@@ -64,6 +69,32 @@ class LHEFile:
                 if "<event>" in self.line:
                     self.raiseerror("No </init>!")
                     break
+
+            if "<!--" in self.line:
+                if not self.line.strip().startswith("<!--"):
+                    self.raiseerror("Warning: comment begins in the middle of a line\n"
+                                    "(ok in itself, but other problems may not be detected)! " + str(self.linenumber))
+                if self.incomment:
+                    self.raiseerror("<!-- inside a comment! " + str(self.linenumber))
+                self.line = self.line.replace("<!--", "", 1)
+                if "<!--" in self.line:
+                    self.raiseerror("Warning: multiple <!-- in one line\n"
+                                    "(ok in itself, but other problems may not be detected!" + str(self.linenumber))
+                self.incomment = True
+            if "-->" in self.line:
+                if not self.line.strip().endswith("<!--"):
+                    self.raiseerror("Warning: comment ends in the middle of a line\n"
+                                    "(ok in itself, but problems may not be detected)! " + str(self.linenumber))
+                if not self.incomment:
+                    self.raiseerror("--> not preceded by <!--! " + str(self.linenumber))
+                self.line = self.line.replace("-->", "", 1)
+                if "-->" in self.line:
+                    self.raiseerror("Warning: multiple --> in one line\n"
+                                    "(ok in itself, but other problems may not be detected!" + str(self.linenumber))
+            if "--" in self.line and incomment:
+                self.raiseerror("-- in a comment! " + str(self.linenumber))
+
+
         if not self.sawinitblock:
             self.raiseerror("No <init>!")
         ev = event.Event(self.linenumber, self.processidlist)
