@@ -190,3 +190,10 @@ class Event:
                 results.append("color line " + str(c) + " doesn't make sense! " + str(self.linenumber) + "\n" +
                                "particles involved: " + str(c.particles.union(c.antiparticles)))
         return "\n".join(results)
+
+    def is4e(self):
+        return self.count(globalvariables.globalvariables.electrons) == 4
+    def is4mu(self):
+        return self.count(globalvariables.globalvariables.muons) == 4
+    def is2e2mu(self):
+        return self.count(globalvariables.globalvariables.electrons) == self.count(globalvariables.globalvariables.muons) == 2

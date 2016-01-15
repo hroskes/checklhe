@@ -13,6 +13,9 @@ class LHEFile:
         self.filename = filename
         self.f = open(filename)
         self.nevents = 0
+        self.n4e = 0
+        self.n4mu = 0
+        self.n2e2mu = 0
         self.linenumber = 0
         self.incomment = False
         self.sawinitblock = False
@@ -22,6 +25,9 @@ class LHEFile:
         return self
     def __exit__(self, exc_type, exc_value, traceback):
         print "   ", self.nevents, "events"
+        print "   ", self.n4e, "4e"
+        print "   ", self.n4mu, "4mu"
+        print "   ", self.n2e2mu, "2e2mu"
         self.f.close()
 
     def raiseerror(self, msg):
@@ -112,6 +118,9 @@ class LHEFile:
                 continue
         ev.finished()
         self.nevents += 1
+        if ev.is4e(): self.n4e += 1
+        if ev.is4mu(): self.n4mu += 1
+        if ev.is2e2mu(): self.n2e2mu += 1
         return ev
 
     def nextline(self):
