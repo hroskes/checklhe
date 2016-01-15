@@ -25,9 +25,9 @@ class LHEFile:
         return self
     def __exit__(self, exc_type, exc_value, traceback):
         print "   ", self.nevents, "events"
-        print "   ", self.n4e, "4e"
-        print "   ", self.n4mu, "4mu"
-        print "   ", self.n2e2mu, "2e2mu"
+        print "   ", self.n4e, "4e events"
+        print "   ", self.n4mu, "4mu events"
+        print "   ", self.n2e2mu, "2e2mu events"
         self.f.close()
 
     def raiseerror(self, msg):

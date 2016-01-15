@@ -29,6 +29,6 @@ for file in sys.argv[1:]:
 
 if len(sys.argv) >= 3: #at least 2 files
     print totalevents, "total events"
-    print total4e, "total 4e"
-    print total4mu, "total 4mu"
-    print total2e2mu, "total 2e2mu"
+    print total4e, "total 4e events"
+    print total4mu, "total 4mu events"
+    print total2e2mu, "total 2e2mu events"
