@@ -10,6 +10,11 @@ ROOT.gROOT.SetBatch(True)
 
 import lhefile
 
+totalevents = 0
+total4e = 0
+total4mu = 0
+total2e2mu = 0
+
 for file in sys.argv[1:]:
     print file
     with lhefile.LHEFile(file) as f:
@@ -17,3 +22,13 @@ for file in sys.argv[1:]:
             check = ev.check()
             if check:
                 f.raiseerror(check)
+        totalevents += f.nevents
+        total4e += f.n4e
+        total4mu += f.n4mu
+        total2e2mu += f.n2e2mu
+
+if len(sys.argv) >= 3: #at least 2 files
+    print totalevents, "total events"
+    print total4e, "total 4e"
+    print total4mu, "total 4mu"
+    print total2e2mu, "total 2e2mu"
