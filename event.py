@@ -95,18 +95,22 @@ class Event:
             results.append("Process id is " + firstlinedata[1] + ", not an integer! " + str(self.linenumber))
         try:
             eventweight = float(firstlinedata[2])
+            if not usefulstuff.isfinite(eventweight): raise ValueError
         except ValueError:
             results.append("Event weight is " + firstlinedata[2] + ", not a number! " + str(self.linenumber))
         try:
             scale = float(firstlinedata[3])
+            if not usefulstuff.isfinite(eventweight): raise ValueError
         except ValueError:
             results.append("Scale is " + firstlinedata[3] + ", not a number! " + str(self.linenumber))
         try:
             scale = float(firstlinedata[4])
+            if not usefulstuff.isfinite(eventweight): raise ValueError
         except ValueError:
             results.append("alphaQED is " + firstlinedata[4] + ", not a number! " + str(self.linenumber))
         try:
             scale = float(firstlinedata[5])
+            if not usefulstuff.isfinite(eventweight): raise ValueError
         except ValueError:
             results.append("alphaQCD is " + firstlinedata[5] + ", not a number! " + str(self.linenumber))
         return "\n".join(results)

@@ -6,6 +6,9 @@ from math import acos, atan2, copysign, log, tan
 class Momentum(ROOT.TLorentzVector):
     def __init__(self, event, *args, **kwargs):
         ROOT.TLorentzVector.__init__(self, *args, **kwargs)
+        for component in self.Px(), self.Py(), self.Pz(), self.E():
+            if not usefulstuff.isfinite(component):
+                raise ValueError
         self.event = event
         if event is not None:
             event.momenta.append(self)

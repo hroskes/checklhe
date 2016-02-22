@@ -43,16 +43,27 @@ class Particle(particletype.ParticleType):
             self.miscellaneouschecks.append("Anticolor for " + str(self) + " is " + data[5] + " instead of a number!")
             self.__color = 0
 
-        self.__momentum = momentum.Momentum(ev, float(data[6]), float(data[7]), float(data[8]), float(data[9]))
-        self.__lhemass = float(data[10])
+        try:
+            self.__momentum = momentum.Momentum(ev, float(data[6]), float(data[7]), float(data[8]), float(data[9]))
+        except ValueError:
+            self.miscellaneouschecks.append("Momentum for " + str(self) + " is " + "(" + ", ".join(data[6:10]) + ")!")
+            self.__momentum = momentum.Momentum(ev, 0, 0, 0, 0)
 
         try:
+            self.__lhemass = float(data[10])
+            if not usefulstuff.isfinite(self.__lhemass): raise ValueError
+        except ValueError:
+            self.miscellaneouschecks.append("Mass for " + str(self) + " is " + data[11] + " instead of a number!")
+            self.__lhemass = 0
+        try:
             self.__lifetime = float(data[11])
+            if not usefulstuff.isfinite(self.__lifetime): raise ValueError
         except ValueError:
             self.miscellaneouschecks.append("Lifetime for " + str(self) + " is " + data[11] + " instead of a number!")
             self.__lifetime = 0
         try:
             self.__spin = float(data[12])
+            if not usefulstuff.isfinite(self.__spin): raise ValueError
         except ValueError:
             self.miscellaneouschecks.append("Spin for " + str(self) + " is " + data[12] + " instead of a number!")
             self.__spin = 9

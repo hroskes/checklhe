@@ -1,3 +1,5 @@
+from math import isinf, isnan
+
 class printablelist(list):
     def __str__(self, joiner = ", "):
         return "[" + joiner.join(str(a) for a in self) + "]"
@@ -39,3 +41,6 @@ class printabledict(dict):
         return printabledict({a: (self[a] if self[a] is None else self[a].__getattribute__(name)) for a in self})
     def __call__(self, *args, **kwargs):
         return printabledict({a: (self[a] if self[a] is None else self[a](*args, **kwargs)) for a in self})
+
+def isfinite(number):
+    return not isinf(number) and not isnan(number)
