@@ -100,17 +100,17 @@ class Event:
             results.append("Event weight is " + firstlinedata[2] + ", not a number! " + str(self.linenumber))
         try:
             scale = float(firstlinedata[3])
-            if not usefulstuff.isfinite(eventweight): raise ValueError
+            if not usefulstuff.isfinite(scale): raise ValueError
         except ValueError:
             results.append("Scale is " + firstlinedata[3] + ", not a number! " + str(self.linenumber))
         try:
-            scale = float(firstlinedata[4])
-            if not usefulstuff.isfinite(eventweight): raise ValueError
+            alphaQED = float(firstlinedata[4])
+            if not usefulstuff.isfinite(alphaQED): raise ValueError
         except ValueError:
             results.append("alphaQED is " + firstlinedata[4] + ", not a number! " + str(self.linenumber))
         try:
-            scale = float(firstlinedata[5])
-            if not usefulstuff.isfinite(eventweight): raise ValueError
+            alphaQCD = float(firstlinedata[5])
+            if not usefulstuff.isfinite(alphaQCD): raise ValueError
         except ValueError:
             results.append("alphaQCD is " + firstlinedata[5] + ", not a number! " + str(self.linenumber))
         return "\n".join(results)
