@@ -1,5 +1,6 @@
 from fractions import Fraction
 from collections import Counter
+import re
 import momentum
 import usefulstuff
 import itertools
@@ -73,6 +74,7 @@ class Particle(particletype.ParticleType):
         self.__kids = usefulstuff.printablelist([])
 
         ev.particlelist.append(self)
+        ev.linelist.append(self)
 
     def setmothers(self):
         if self.__mothersset:
@@ -106,6 +108,8 @@ class Particle(particletype.ParticleType):
        return not self == other
     def __hash__(self):
        return hash(self.__line)
+    def line(self):
+       return self.__line
 
     def status(self):
         return self.__status
@@ -151,6 +155,19 @@ class Particle(particletype.ParticleType):
         return self.__momentum.Vect()
     def BoostVector(self):
         return self.__momentum.BoostVector()
+
+    def changecolors(self, newcolor, newanticolor):
+        newcolor = int(newcolor)
+        newanticolor = int(newanticolor)
+        if newcolor == self.__color and newanticolor == self.__anticolor: return
+        regexin = r' {:>3}( *){:>3} '.format(self.__color, self.__anticolor)
+        regexout = r' {:>3}\g<1>{:>3} '.format(newcolor, newanticolor)
+        newline = re.sub(regexin, regexout, self.__line)
+        if newline == self.__line:
+            raise RuntimeError("There is something wrong!  In event on line {}, in particle line:\n{}\ntried to replace colors {},{} with {},{}, but failed!".format(self.ev.linenumber, self.__line, self.__color, self.__anticolor, newcolor, newanticolor))
+        self.__line = newline
+        self.__color = newcolor
+        self.__anticolor = newanticolor
 
 class ParticleCounter(Counter):
     def __init__(self, particles):

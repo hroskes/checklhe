@@ -22,6 +22,7 @@ class Event:
         self.processidlist = processidlist
         self.firstline = None
         self.particlelist = usefulstuff.printablelist([None])
+        self.linelist = usefulstuff.printablelist([])
         self.vertices = vertex.Vertices()
         self.colors = color.Colors()
         self.done = False
@@ -38,6 +39,9 @@ class Event:
         if self.done:
             raise ValueError("finished() has already been called for this event, so no more particles can be added!")
         particle.Particle(particleline, self)
+
+    def addline(self, line):
+        self.linelist.append(line)
 
     def finished(self):
         if self.firstline is None:
@@ -66,6 +70,13 @@ class Event:
             self.checkfunctions.append(self.checkcharge)
         if config.checkcolor:
             self.checkfunctions.append(self.checkcolor)
+
+    def write(self, f):
+        for i, particleorline in enumerate(self.linelist):
+            try:
+                f.write(particleorline.line())
+            except AttributeError:
+                f.write(particleorline)
 
     def count(self, whattocount):
         return self.particlecounter.count(whattocount)
@@ -176,8 +187,22 @@ class Event:
                                "kids charge = " + str(v.chargeout()) + str(v.particlesout()))
         return "\n".join(results)
 
-    def checkcolor(self):
+    def checkcolor(self, recursiondepth=0):
         results = []
+
+        for c in self.colors.values():
+            if recursiondepth == 0 and not c.check():
+                inquarks = [p for p in self.particlelist if 1 <= int(p) <= 5 and p.status() == -1]
+                inantiquarks = [p for p in self.particlelist if -5 <= int(p) <= -1 and p.status() == -1]
+                outquarks = [p for p in self.particlelist if 1 <= int(p) <= 5 and p.status() == 1]
+                outantiquarks = [p for p in self.particlelist if -5 <= int(p) <= -1 and p.status() == 1]
+                if len(inquarks) == len(inantiquarks) == len(outquarks) == len(outantiquarks) == 1:
+                    inquarks[0].changecolors(501, 0)
+                    inantiquarks[0].changecolors(0, 501)
+                    outquarks[0].changecolors(502, 0)
+                    outantiquarks[0].changecolors(0, 502)
+                    return self.checkcolor(1) + "\nnote: colors for event on line " + str(self.linenumber) + " have been changed\n      previous error messages about color may no longer be valid."
+
         for p in self.particlelist:
             if not p.color() and ((p in globalvariables.globalvariables.quarks and p.id() > 0) or p in globalvariables.globalvariables.gluon):
                 results.append(str(p) + " has no color! " + str(self.linenumber))

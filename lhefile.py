@@ -12,6 +12,10 @@ class LHEFile:
             raise ValueError(filename + " does not end in .lhe")
         self.filename = filename
         self.f = open(filename)
+        if "_fixed" not in filename:
+            self.newf = open(filename.replace(".lhe", "_fixed.lhe"), "w")
+        else:
+            self.newf = open("/dev/null", "w")
         self.nevents = 0
         self.n4e = 0
         self.n4mu = 0
@@ -29,6 +33,7 @@ class LHEFile:
         print "   ", self.n4mu, "4mu events"
         print "   ", self.n2e2mu, "2e2mu events"
         self.f.close()
+        self.newf.close()
 
     def raiseerror(self, msg):
         if config.raiseerror:
@@ -37,7 +42,7 @@ class LHEFile:
             print msg
 
     def readevent(self):
-        while "<event" not in self.nextline():
+        while "<event" not in self.nextline(True):
             if not self.line:     #eof
                 return None
 
@@ -48,7 +53,7 @@ class LHEFile:
                 if self.sawinitblock:
                     self.raiseerror("Extra init block! " + str(self.linenumber))
                 self.sawinitblock = True
-                data = self.nextline().split()
+                data = self.nextline(True).split()
                 try:
                     [int(data[i]) for i in (0, 1, 4, 5, 6, 7, 8, 9)]
                     [float(data[i]) for i in (2, 3)]
@@ -56,7 +61,7 @@ class LHEFile:
                     self.raiseerror("Bad init line 1!")
                 nprocesses = int(data[9])
                 for p in range(nprocesses):
-                    data = self.nextline().split()
+                    data = self.nextline(True).split()
                     if "</init>" in self.line:
                         self.raiseerror("Not enough lines in init block!")
                         break
@@ -69,7 +74,7 @@ class LHEFile:
                             self.processidlist.append(int(data[i]))
                     except (ValueError, IndexError):
                         self.raiseerror("Bad init line %i!" % (2+p))
-                while "</init>" not in self.nextline() and "<event>" not in self.line:
+                while "</init>" not in self.nextline(True) and "<event>" not in self.line:
                     if self.line.split():
                         self.raiseerror("Extra line in init block!")
                 if "<event>" in self.line:
@@ -105,8 +110,8 @@ class LHEFile:
         if not self.sawinitblock:
             self.raiseerror("No <init>!")
         ev = event.Event(self.linenumber, self.processidlist)
-        ev.setfirstline(self.nextline())
-        while "</event>" not in self.nextline():
+        ev.setfirstline(self.nextline(True))
+        while "</event>" not in self.nextline(False):
             if not self.line:
                 self.raiseerror("File ends in the middle of an event!")
                 return None
@@ -115,17 +120,24 @@ class LHEFile:
             try:
                 ev.addparticle(self.line)
             except particle.BadParticleLineError:
-                continue
+                ev.addline(self.line)
+        ev.addline(self.line)
         ev.finished()
+        check = ev.check()
+        if check:
+            self.raiseerror(check)
         self.nevents += 1
         if ev.is4e(): self.n4e += 1
         if ev.is4mu(): self.n4mu += 1
         if ev.is2e2mu(): self.n2e2mu += 1
+        ev.write(self.newf)
         return ev
 
-    def nextline(self):
+    def nextline(self, writetonewf):
         self.linenumber += 1
         self.line = self.f.readline()
+        if writetonewf:
+            self.newf.write(self.line)
         return self.line
 
     def __iter__(self):

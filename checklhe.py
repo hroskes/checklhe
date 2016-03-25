@@ -20,9 +20,7 @@ for file in sys.argv[1:]:
     print file
     with lhefile.LHEFile(file) as f:
         for ev in f:
-            check = ev.check()
-            if check:
-                f.raiseerror(check)
+            pass
         totalevents += f.nevents
         total4e += f.n4e
         total4mu += f.n4mu
