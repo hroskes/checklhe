@@ -187,21 +187,8 @@ class Event:
                                "kids charge = " + str(v.chargeout()) + str(v.particlesout()))
         return "\n".join(results)
 
-    def checkcolor(self, recursiondepth=0):
+    def checkcolor(self):
         results = []
-
-        for c in self.colors.values():
-            if recursiondepth == 0 and not c.check():
-                inquarks = [p for p in self.particlelist if 1 <= int(p) <= 5 and p.status() == -1]
-                inantiquarks = [p for p in self.particlelist if -5 <= int(p) <= -1 and p.status() == -1]
-                outquarks = [p for p in self.particlelist if 1 <= int(p) <= 5 and p.status() == 1]
-                outantiquarks = [p for p in self.particlelist if -5 <= int(p) <= -1 and p.status() == 1]
-                if len(inquarks) == len(inantiquarks) == len(outquarks) == len(outantiquarks) == 1:
-                    inquarks[0].changecolors(501, 0)
-                    inantiquarks[0].changecolors(0, 501)
-                    outquarks[0].changecolors(502, 0)
-                    outantiquarks[0].changecolors(0, 502)
-                    return self.checkcolor(1) + "\nnote: colors for event on line " + str(self.linenumber) + " have been changed\n      previous error messages about color may no longer be valid."
 
         for p in self.particlelist:
             if not p.color() and ((p in globalvariables.globalvariables.quarks and p.id() > 0) or p in globalvariables.globalvariables.gluon):
@@ -214,10 +201,25 @@ class Event:
             if p.anticolor() and not ((p in globalvariables.globalvariables.quarks and p.id() < 0) or p in globalvariables.globalvariables.gluon):
                 results.append(str(p) + " has anticolor " + str(p.anticolor()) + "! " + str(self.linenumber))
 
+        anybad = False
         for c in self.colors.values():
             if not c.check():
                 results.append("color line " + str(c) + " doesn't make sense! " + str(self.linenumber) + "\n" +
                                "particles involved: " + str(c.particles.union(c.antiparticles)))
+                anybad = True
+
+        if anybad:
+            inquarks = [p for p in self.particlelist if 1 <= int(p) <= 5 and p.status() == -1]
+            inantiquarks = [p for p in self.particlelist if -5 <= int(p) <= -1 and p.status() == -1]
+            outquarks = [p for p in self.particlelist if 1 <= int(p) <= 5 and p.status() == 1]
+            outantiquarks = [p for p in self.particlelist if -5 <= int(p) <= -1 and p.status() == 1]
+            if len(inquarks) == len(inantiquarks) == len(outquarks) == len(outantiquarks) == 1:
+                inquarks[0].changecolors(501, 0)
+                inantiquarks[0].changecolors(0, 501)
+                outquarks[0].changecolors(502, 0)
+                outantiquarks[0].changecolors(0, 502)
+                results.append("note: colors for event on line " + str(self.linenumber) + " have been changed\n      previous error messages about color may no longer be valid.")
+
         return "\n".join(results)
 
     def is4e(self):
