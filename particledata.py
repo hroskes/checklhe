@@ -1,4 +1,5 @@
-particlename = {1: "d",
+particlename = {
+                1: "d",
                 2: "u",
                 3: "s",
                 4: "c",
@@ -16,10 +17,13 @@ particlename = {1: "d",
                 24: "W+",
                 25: "H",
                 32: "Z'",
-                39: "G"}
+                39: "G",
+                625: "X",
+               }
 
 #PDG, checked March 3, 2015
-PDGmass = {1: 0.0023,        #everything in GeV
+PDGmass = {
+           1: 0.0023,        #everything in GeV
            2: 0.0048,
            3: 0.095,
            4: 1.275,
@@ -35,10 +39,13 @@ PDGmass = {1: 0.0023,        #everything in GeV
            22: 0,
            23: 91.1876,
            24: 80.385,
-           25: 125.7,
+           25: 125,
            32: None,
-           39: None}
-PDGmasserror = {1: 0.0007,   #everything in GeV
+           39: None,
+           625: None,
+          }
+PDGmasserror = {
+                1: 0.0007,   #everything in GeV
                 2: 0.0005,
                 3: 0.005,
                 4: 0.025,
@@ -56,4 +63,6 @@ PDGmasserror = {1: 0.0007,   #everything in GeV
                 24: 0.015,
                 25: 0.4,
                 32: None,
-                39: None}
+                39: None,
+                625: None,
+               }

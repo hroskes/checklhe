@@ -33,7 +33,7 @@ class GlobalVariables:
         self.startedinit = True
 
         #Particle categories
-        self.neutralbosons = particlecategory.ParticleCategory([21, 22, 23, 25, 32, 39], Csymmetric = False)
+        self.neutralbosons = particlecategory.ParticleCategory([21, 22, 23, 25, 32, 39, 625], Csymmetric = False)
 
         self.electrons = particlecategory.ParticleCategory([11])
         self.muons = particlecategory.ParticleCategory([13])
