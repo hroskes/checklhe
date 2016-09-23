@@ -20,6 +20,7 @@ class LHEFile:
         self.incomment = False
         self.sawinitblock = False
         self.processidlist = []
+        self.VegasNc2 = None
 
     def __enter__(self):
         return self
@@ -29,6 +30,8 @@ class LHEFile:
         print "   ", self.n4mu, "4mu events"
         print "   ", self.n2e2mu, "2e2mu events"
         self.f.close()
+        if self.nevents != self.VegasNc2:
+            self.raiseerror("VegasNc2={}, but {} events!".format(self.VegasNc2, self.nevents))
 
     def raiseerror(self, msg):
         if config.raiseerror:
@@ -100,6 +103,11 @@ class LHEFile:
                 self.incomment = False
             if "--" in self.line and self.incomment:
                 self.raiseerror("-- in a comment! " + str(self.linenumber))
+
+            if self.incomment and "VegasNc2=" in self.line:
+                for argument in self.line.split():
+                    if argument.startswith("VegasNc2="):
+                        self.VegasNc2 = int(argument.split("=")[-1])
 
 
         if not self.sawinitblock:
