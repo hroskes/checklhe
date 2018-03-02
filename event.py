@@ -7,7 +7,6 @@ import config
 import momentum
 import vertex
 import color
-import checkdebugoutput
 import ROOT
 from math import copysign, acos
 
